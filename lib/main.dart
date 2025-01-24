@@ -1,6 +1,9 @@
+import 'package:bird_raise_app/login_members/main_page.dart';
+import 'package:bird_raise_app/login_members/nomal_members.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 //import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
-import 'package:test_application/login_members/nomal_members.dart';
 
 void main() {
   //카카오 로그인
@@ -22,6 +25,50 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true; // 비밀번호 숨김 여부를 관리하는 상태 변수
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  Future<void> _login() async {
+    final url = Uri.parse('http://localhost:8080/api/v1/user/login');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': _emailController.text,
+          'password': _passwordController.text,
+        }),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        // 로그인 성공
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MainPage()),
+        );
+      } else {
+        // 로그인 실패
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('로그인에 실패했습니다.')),
+        );
+      }
+    } catch (e) {
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('서버 연결에 실패했습니다.')),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,24 +100,25 @@ class _LoginPageState extends State<LoginPage> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(7),
                       ),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.person,
                               size: 24,
                               color: Colors.grey,
                             ),
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: TextField(
-                                decoration: InputDecoration(
+                                controller: _emailController,
+                                decoration: const InputDecoration(
                                   hintText: '이메일 입력',
                                   hintStyle: TextStyle(color: Colors.grey),
                                   border: InputBorder.none,
                                 ),
-                                style: TextStyle(fontSize: 16),
+                                style: const TextStyle(fontSize: 16),
                               ),
                             ),
                           ],
@@ -97,7 +145,8 @@ class _LoginPageState extends State<LoginPage> {
                             const SizedBox(width: 10),
                             Expanded(
                               child: TextField(
-                                obscureText: _obscurePassword, // 상태 변수로 제어
+                                controller: _passwordController,
+                                obscureText: _obscurePassword,
                                 decoration: InputDecoration(
                                   hintText: '비밀번호 입력',
                                   hintStyle:
@@ -133,13 +182,16 @@ class _LoginPageState extends State<LoginPage> {
                         color: Colors.purple,
                         borderRadius: BorderRadius.circular(7),
                       ),
-                      child: const Center(
-                        child: Text(
-                          '로그인',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                      child: GestureDetector(
+                        onTap: _login,
+                        child: const Center(
+                          child: Text(
+                            '로그인',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),

@@ -40,8 +40,8 @@ class _NomalMembersState extends State<NomalMembers> {
   Future<void> _register() async {
     final url = Uri.parse('http://localhost:8080/api/v1/user');
     final Map<String, dynamic> data = {
-      'nickname': "가나다라마바",
-      'email': "example11@naver.com",
+      'nickname': _nicknameController.text,
+      'email': _emailController.text,
       'password': _passwordController.text,
     };
 
@@ -111,18 +111,19 @@ class _NomalMembersState extends State<NomalMembers> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(7),
               ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
                   children: [
                     Expanded(
                       child: TextField(
-                        decoration: InputDecoration(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
                           hintText: '이메일 입력',
                           hintStyle: TextStyle(color: Colors.grey),
                           border: InputBorder.none,
                         ),
-                        style: TextStyle(fontSize: 16),
+                        style: const TextStyle(fontSize: 16),
                       ),
                     ),
                   ],
@@ -255,18 +256,19 @@ class _NomalMembersState extends State<NomalMembers> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(7),
               ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
                   children: [
                     Expanded(
                       child: TextField(
-                        decoration: InputDecoration(
+                        controller: _nicknameController,
+                        decoration: const InputDecoration(
                           hintText: '닉네임 입력',
                           hintStyle: TextStyle(color: Colors.grey),
                           border: InputBorder.none,
                         ),
-                        style: TextStyle(fontSize: 16),
+                        style: const TextStyle(fontSize: 16),
                       ),
                     ),
                   ],
