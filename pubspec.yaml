@@ -38,6 +38,7 @@ dependencies:
   flame: ^1.21.0
   flame_tiled: ^1.21.0
   http: ^1.2.2
+  gif: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -54,6 +55,10 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
+cached_network_image:
+    git:
+      url: https://github.com/LOCKEDFILE/flutter_cached_network_image.git
+      path: cached_network_image
 flutter:
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -63,12 +68,11 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - images/kakao_login_medium_wide.png
-    #- images/android_neutral_sq_SI@2x.png
-    - images/free-icon-settings-6704985.png
-    - images/free-icon-love-letter-5573177.png
-    - images/free-icon-bird-789479.png
-    - images/white_rug.png
     - images/free-icon-nuts-5663679.png
+    - images/bird_Omoknoonii.gif
+    - images/floor-blue-rug.png
+    - images/post_button.png
+    - images/setting_button.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

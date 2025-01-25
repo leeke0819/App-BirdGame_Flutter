@@ -54,7 +54,7 @@ class _NomalMembersState extends State<NomalMembers> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration successful!')),
+          const SnackBar(content: Text('Registration successful!')),
         );
         // 로그인 페이지로 이동
       } else {

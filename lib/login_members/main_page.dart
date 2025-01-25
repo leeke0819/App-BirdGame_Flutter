@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gif/gif.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -7,10 +8,17 @@ class MainPage extends StatefulWidget {
   _MainPageState createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
+  late final GifController controller;
+
   @override
   void initState() {
     super.initState();
+    controller = GifController(vsync: this);
+
+    // gif 루프
+    controller.repeat(period: Duration(milliseconds: 1300));
+
     Future.delayed(Duration.zero, () {
       const snackBar = SnackBar(content: Text('로그인 성공!'));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -22,11 +30,10 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          // 1) 설정 아이콘 (AppBar 오른쪽 끝, 50x50)
           IconButton(
-            iconSize: 50, // IconButton 자체의 사이즈
+            iconSize: 50,
             icon: Image.asset(
-              'images/free-icon-settings-6704985.png',
+              'images/setting_button.png',
               width: 50,
               height: 50,
             ),
@@ -38,19 +45,16 @@ class _MainPageState extends State<MainPage> {
       ),
       body: Stack(
         children: [
-          // 바디의 주된 내용(원하는 위젯)
           const Center(
             child: Text('이곳은 바디 영역입니다.'),
           ),
-
-          // 2) 편지 아이콘 (AppBar 아래, 설정 아이콘 바로 밑 위치)
           Positioned(
             top: 0,
             right: 8,
             child: IconButton(
               iconSize: 50,
               icon: Image.asset(
-                'images/free-icon-love-letter-5573177.png',
+                'images/post_button.png',
                 width: 50,
                 height: 50,
               ),
@@ -59,34 +63,28 @@ class _MainPageState extends State<MainPage> {
               },
             ),
           ),
-
-          // 3) 흰색 러그 이미지 (새 이미지 뒤에 배치)
           Positioned(
-            top: MediaQuery.of(context).size.height / 2 - 380, // 새 이미지 아래에 배치
-            left: MediaQuery.of(context).size.width / 2 - 250, // 화면 중앙에 배치
+            top: MediaQuery.of(context).size.height / 2 - 380,
+            left: MediaQuery.of(context).size.width / 2 - 250,
             child: Image.asset(
-              'images/white_rug.png',
+              'images/floor-blue-rug.png',
               width: 500,
               height: 500,
             ),
           ),
-          // 4) 새 이미지 (위에 배치될 이미지)
           Positioned(
-            top: MediaQuery.of(context).size.height / 2 -
-                320, // 화면 가운데에서 50픽셀 아래
-            left: MediaQuery.of(context).size.width / 2 - 100, // 화면 가운데에서 수평 중앙
-            child: Image.asset(
-              'images/free-icon-bird-789479.png',
+            top: MediaQuery.of(context).size.height / 2 - 320,
+            left: MediaQuery.of(context).size.width / 2 - 100,
+            child: Gif(
+              controller: controller,
+              image: const AssetImage('images/bird_Omoknoonii.gif'),
               width: 200,
               height: 200,
             ),
           ),
-
-          // 4) 견과류 이미지 (위에 배치될 이미지)
           Positioned(
-            top: MediaQuery.of(context).size.height / 2 -
-                100, // 화면 가운데에서 50픽셀 아래
-            left: MediaQuery.of(context).size.width / 2 - 50, // 화면 가운데에서 수평 중앙
+            top: MediaQuery.of(context).size.height / 2 - 100,
+            left: MediaQuery.of(context).size.width / 2 - 50,
             child: Image.asset(
               'images/free-icon-nuts-5663679.png',
               width: 50,
