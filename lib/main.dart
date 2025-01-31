@@ -1,5 +1,5 @@
 import 'package:bird_raise_app/login_members/main_page.dart';
-import 'package:bird_raise_app/login_members/nomal_members.dart';
+import 'package:bird_raise_app/login_members/normal_members.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';

@@ -1,4 +1,6 @@
+import 'package:bird_raise_app/main.dart';
 import 'package:flutter/material.dart';
+import 'main_page.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -54,9 +56,13 @@ class _NomalMembersState extends State<NomalMembers> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration successful!')),
+          const SnackBar(content: Text('Registration successful!')),
         );
-        // 로그인 페이지로 이동
+        // 로그인 성공 시 메인 페이지로 이동
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Registration failed: ${response.body}')),
