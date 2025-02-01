@@ -39,6 +39,7 @@ dependencies:
   flame_tiled: ^1.21.0
   http: ^1.2.2
   gif: ^2.3.0
+  flutter_secure_storage: ^9.2.4
 
 dev_dependencies:
   flutter_test:
@@ -73,7 +74,7 @@ flutter:
     - images/floor-blue-rug.png
     - images/post_button.png
     - images/setting_button.png
-  #   - images/a_dot_ham.jpeg
+    - images/main_page_Gold_GUI.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
