@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'package:bird_raise_app/token/chrome_token.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gif/gif.dart';
+import 'package:http/http.dart' as http;
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -9,31 +13,161 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
+  final TextEditingController _moneyController = TextEditingController();
+  final TextEditingController _nicknameController = TextEditingController();
   late final GifController controller;
+  int money = 0;
+  String? nickname;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     controller = GifController(vsync: this);
 
+    // 비동기 메서드 실행
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeData();
+    });
+
     // gif 루프
     controller.repeat(period: Duration(milliseconds: 1300));
+  }
 
-    Future.delayed(Duration.zero, () {
-      const snackBar = SnackBar(content: Text('로그인 성공!'));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    });
+  Future<void> _initializeData() async {
+    final url = Uri.parse('http://localhost:8080/api/v1/user');
+
+    String? token = getChromeAccessToken();
+    print("발급된 JWT: $token");
+    String bearerToken = "Bearer $token";
+
+    // 웹인지 모바일인지 검사
+    if (kIsWeb) {
+      print("현재 웹에서 실행 중입니다.");
+    } else {
+      print("현재 모바일(Android)에서 실행 중입니다.");
+    }
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': bearerToken},
+      );
+
+      // 응답이 성공적인지 아닌지 여부를 메시지 보내기
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        print('API 호출 성공 : ${responseData}');
+        setState(() {
+          money = responseData['money'];
+          nickname = responseData['nickname'];
+          isLoading = false;
+        });
+      } else {
+        print('API 호출 실패 : ${response.statusCode}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('API 호출에 실패했습니다.')),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('서버 연결에 실패했습니다.')),
+        );
+      }
+    }
+
+    if (mounted) {
+      Future.delayed(Duration.zero, () {
+        const snackBar = SnackBar(content: Text('로그인 성공!'));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _moneyController.dispose();
+    _nicknameController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         centerTitle: true, // 제목을 중앙에 배치
-        title: Image.asset(
-          'images/main_page_Gold_GUI.png',
-          width: 400,
-          height: 100,
+        title: Row(
+          children: [
+            Container(
+              width: 150,
+              height: 300,
+              color: Colors.grey,
+              child: Column(
+                children: [
+                  Flexible(
+                    flex: 4, // 4:1 비율의 상단부
+                    child: Container(
+                      height: 80,
+                      color: Colors.blue,
+                      child: const Row(
+                        children: [
+                          // Upper content
+                        ],
+                      ),
+                    ),
+                  ),
+                  Flexible(
+                    flex: 1, // 4:1 비율의 하단부
+                    child: Container(
+                      height: 20,
+                      color: Colors.green,
+                      child: const Row(
+                        children: [
+                          // Lower content
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+                width: 150,
+                height: 100,
+                child: Column(
+                  children: [
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Image.asset(
+                          'images/main_page_Gold_GUI.png',
+                          width: 200,
+                          height: 100,
+                        ),
+                        Text(
+                          '$money',
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                )),
+            Container(
+              width: 150,
+              height: 100,
+              color: Colors.pink,
+              child: const Center(child: Text('도감')),
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -95,6 +229,42 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               'images/free-icon-nuts-5663679.png',
               width: 50,
               height: 50,
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 70,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      color: Colors.blue[100],
+                      child: const Center(child: Text('도감')),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      color: Colors.green[100],
+                      child: const Center(child: Text('모험')),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      color: Colors.orange[100],
+                      child: const Center(child: Text('상점')),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      color: Colors.purple[100],
+                      child: const Center(child: Text('가방')),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

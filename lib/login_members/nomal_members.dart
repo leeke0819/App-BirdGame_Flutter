@@ -1,16 +1,15 @@
-import 'package:bird_raise_app/main.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class NormalMembers extends StatefulWidget {
-  const NormalMembers({super.key});
+class NomalMembers extends StatefulWidget {
+  const NomalMembers({super.key});
 
   @override
-  _NormalMembersState createState() => _NormalMembersState();
+  _NomalMembersState createState() => _NomalMembersState();
 }
 
-class _NormalMembersState extends State<NormalMembers> {
+class _NomalMembersState extends State<NomalMembers> {
   bool _obscurePassword = true; // 비밀번호 숨김 상태 변수
   final TextEditingController _passwordController =
       TextEditingController(); // 비밀번호 란 값
@@ -57,11 +56,7 @@ class _NormalMembersState extends State<NormalMembers> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registration successful!')),
         );
-        // 로그인 성공 시 메인 페이지로 이동
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
+        // 로그인 페이지로 이동
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Registration failed: ${response.body}')),
