@@ -40,8 +40,8 @@ class _LoginPageState extends State<LoginPage> {
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'email': _emailController.text,
-          'password': _passwordController.text,
+          'email': 'apple@naver.com',
+          'password': '123Time^^',
         }),
       );
 
@@ -51,17 +51,16 @@ class _LoginPageState extends State<LoginPage> {
       if (response.statusCode == 200) {
         Map<String, dynamic> responseData = json.decode(response.body);
         //환경구분 필요
-        if(kIsWeb){ 
+        if (kIsWeb) {
           print("웹 환경에서 동작하는 코드");
-          saveChromeAccessToken(responseData['accessToken']); 
+          saveChromeAccessToken(responseData['accessToken']);
           print(getChromeAccessToken());
-        }
-        else{
+        } else {
           print("모바일 환경에서 동작하는 코드"); //얘가 먼저 실행
           await saveAccessToken(responseData['accessToken']); //3초정도 걸린다 가정.
-          print(getAccessToken()); //1초짜리 print문
+          //print(getAccessToken()); //1초짜리 print문
         }
-        
+
         // 로그인 성공
         Navigator.push(
           context,

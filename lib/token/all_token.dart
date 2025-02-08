@@ -8,7 +8,7 @@ Future<void> saveAccessToken(String accessToken) async {
 }
 
 // AccessToken 가져와서 읽기
-Future<String?> getAccessToken(List<String> list) async {
+Future<String?> getAccessToken() async {
   return await secureStorage.read(key: 'accessToken');
 }
 
