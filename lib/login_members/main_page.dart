@@ -102,42 +102,48 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         automaticallyImplyLeading: false,
         centerTitle: true, // 제목을 중앙에 배치
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 균등 분배
           children: [
-            Container(
-              width: 150,
-              height: 300,
-              color: Colors.grey,
-              child: Column(
-                children: [
-                  Flexible(
-                    flex: 4, // 4:1 비율의 상단부
-                    child: Container(
-                      height: 80,
-                      color: Colors.blue,
-                      child: const Row(
-                        children: [
-                          // Upper content
-                        ],
+            Expanded(
+              // Expanded로 감싸서 비율 유지
+              flex: 1,
+              child: Container(
+                height: 300,
+                color: Colors.grey,
+                child: Column(
+                  children: [
+                    Flexible(
+                      flex: 4,
+                      child: Container(
+                        height: 80,
+                        color: Colors.blue,
+                        child: const Row(
+                          children: [
+                            // Upper content
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  Flexible(
-                    flex: 1, // 4:1 비율의 하단부
-                    child: Container(
-                      height: 20,
-                      color: Colors.green,
-                      child: const Row(
-                        children: [
-                          // Lower content
-                        ],
+                    Flexible(
+                      flex: 1,
+                      child: Container(
+                        height: 20,
+                        color: Colors.green,
+                        child: const Row(
+                          children: [
+                            // Lower content
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-            Container(
-                width: 150,
+            Expanded(
+              // Expanded로 감싸서 비율 유지
+              flex: 1,
+              child: Container(
                 height: 100,
                 child: Column(
                   children: [
@@ -145,7 +151,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       alignment: Alignment.center,
                       children: [
                         Image.asset(
-                          'images/main_page_Gold_GUI.png',
+                          'images/GUI/gold_GUI.png',
                           width: 200,
                           height: 100,
                         ),
@@ -160,12 +166,21 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       ],
                     ),
                   ],
-                )),
-            Container(
-              width: 150,
-              height: 100,
-              color: Colors.pink,
-              child: const Center(child: Text('도감')),
+                ),
+              ),
+            ),
+            const SizedBox(width: 20), // 8px 간격 추가
+            Expanded(
+              // Expanded로 감싸서 비율 유지
+              flex: 1,
+              child: Container(
+                height: 100,
+                child: Image.asset(
+                  'images/GUI/star_coin_GUI.png',
+                  width: 200,
+                  height: 100,
+                ),
+              ),
             ),
           ],
         ),
@@ -252,15 +267,15 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     ),
                   ),
                   Expanded(
-                    child: Container(
-                      color: Colors.orange[100],
-                      child: const Center(child: Text('상점')),
+                    child: Image.asset(
+                      'images/GUI/shop_GUI.png',
+                      fit: BoxFit.contain,
                     ),
                   ),
                   Expanded(
-                    child: Container(
-                      color: Colors.purple[100],
-                      child: const Center(child: Text('가방')),
+                    child: Image.asset(
+                      'images/GUI/bag_GUI.png',
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ],
