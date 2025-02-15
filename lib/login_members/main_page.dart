@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gif/gif.dart';
 import 'package:http/http.dart' as http;
+import '../gui_click_pages/shop_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -102,88 +103,86 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         automaticallyImplyLeading: false,
         centerTitle: true, // 제목을 중앙에 배치
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 균등 분배
           children: [
-            Transform.translate( // 프로필 창 회색 뒷배경
-              offset: const Offset(-16, 0),
-              child: Stack(
-                children: [
-                  Container(
-                    width: 150,
-                    height: 300,
-                    color: Colors.grey,
-                  ),
-                  Positioned( // 프로필 사진 (원)
-                    left: 8,
-                    top: 127,
-                    child: Container(
-                      width: 45,
-                      height: 45,
-                      decoration: const BoxDecoration(
-                        color: Colors.yellow,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                  const Positioned( // 닉네임 (나중에 if문으로 몇 글자인지에 따라서 위치 조절. 현재는 한글 6글자 기준.)
-                    left: 58, // 중앙(75) + 10px 오른쪽
-                    top: 130, // 중앙(150) - 10px 위쪽
-                    child: Text(
-                      "가나다라마바",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  const Positioned( // 레벨 (나중에 if문으로 몇자리 수의 레벨인지에 따라서 위치 조절. 현재는 3자리 수 기준.)
-                    left: 96,
-                    top: 150, // 닉네임 위치(130) + 20px(텍스트 높이 + 10px 간격)
-                    child: Text(
-                      "Lv. 100",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-                width: 150,
-                height: 100,
+            Expanded(
+              // Expanded로 감싸서 비율 유지
+              flex: 1,
+              child: Container(
+                height: 300,
+                color: Colors.grey,
                 child: Column(
                   children: [
-                    Transform.translate(
-                      offset: const Offset(-8, 0),
-                      child: Stack(
-                        alignment: Alignment.centerRight, // Changed to right alignment
-                        children: [
-                          Image.asset(
-                            'images/main_page_Gold_GUI.png',
-                            width: 200,
-                            height: 100,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 5), // Add padding from right
-                            child: Text(
-                              '$money',
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
+                    Flexible(
+                      flex: 4,
+                      child: Container(
+                        height: 80,
+                        color: Colors.blue,
+                        child: const Row(
+                          children: [
+                            // Upper content
+                          ],
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      flex: 1,
+                      child: Container(
+                        height: 20,
+                        color: Colors.green,
+                        child: const Row(
+                          children: [
+                            // Lower content
+                          ],
+                        ),
                       ),
                     ),
                   ],
-                )),
-            Container(
-              width: 130,
-              height: 100,
-              color: Colors.pink,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              // Expanded로 감싸서 비율 유지
+              flex: 1,
+              child: Container(
+                height: 100,
+                child: Column(
+                  children: [
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Image.asset(
+                          'images/GUI/gold_GUI.png',
+                          width: 200,
+                          height: 100,
+                        ),
+                        Text(
+                          '$money',
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 10), // 8px 간격 추가
+            Expanded(
+              // Expanded로 감싸서 비율 유지
+              flex: 1,
+              child: Container(
+                height: 100,
+                child: Image.asset(
+                  'images/GUI/star_coin_GUI.png',
+                  width: 200,
+                  height: 100,
+                ),
+              ),
             ),
           ],
         ),
@@ -208,28 +207,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           ),
           Positioned(
             top: 0,
-            left: 0,
-            child: Stack(
-              children: [
-                Container( // 경험치 바 회색 뒷배경
-                  width: 150,
-                  height: 15,
-                  color: Colors.grey,
-                ),
-                Container( // 경험치 바 녹색 전경
-                  width: 140,
-                  height: 10,
-                  margin: const EdgeInsets.only(left: 5), // 오른쪽으로 5px 이동
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            top: 0,
             right: 8,
             child: IconButton(
               iconSize: 50,
@@ -244,96 +221,78 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             ),
           ),
           Positioned(
-            top: MediaQuery.of(context).size.height * 0.5 - 400, // 화면 높이를 기준으로 상대적인 위치 지정
-            left: MediaQuery.of(context).size.width * 0.5 - 250, // 화면 너비를 기준으로 상대적인 위치 지정
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.8, // 화면 너비에 대한 비율로 크기 지정
-              height: MediaQuery.of(context).size.height * 0.8, // 화면 높이에 대한 비율로 크기 지정
-              color: const Color.fromRGBO(255, 198, 113, 1),
-              child: Stack(
-                children: [
-                  Positioned(
-                    child: Image.asset(
-                      'images/floor-blue-rug.png',
-                      width: MediaQuery.of(context).size.width * 0.8, // 유동적인 크기
-                      height: MediaQuery.of(context).size.height * 0.8, // 유동적인 크기
-                    ),
-                  ),
-                  Positioned(
-                    top: MediaQuery.of(context).size.height * 0.24, // 비율을 사용한 위치
-                    left: MediaQuery.of(context).size.width * 0.3, // 비율을 사용한 위치
-                    child: Gif(
-                      controller: controller,
-                      image: const AssetImage('images/bird_Omoknoonii.gif'),
-                      width: MediaQuery.of(context).size.width * 0.4, // 유동적인 크기
-                      height: MediaQuery.of(context).size.height * 0.27, // 유동적인 크기
-                    ),
-                  ),
-                ],
-              ),
+            top: MediaQuery.of(context).size.height / 2 - 380,
+            left: MediaQuery.of(context).size.width / 2 - 250,
+            child: Image.asset(
+              'images/floor-blue-rug.png',
+              width: 500,
+              height: 500,
             ),
           ),
-          Positioned( // 보라색 뒷배경
-            bottom: 70, // 하단 GUI 높이만큼 띄움
-            left: 0,
-            right: 0,
-            child: Stack(
-              children: [
-                Container(
-                  height: MediaQuery.of(context).size.height / 2 - 170, // 주황색 배경과 하단 GUI 사이 공간
-                  color: const Color.fromARGB(255, 145, 97, 173),
-                ),
-                Positioned(
-                  top: 2,
-                  left: 2,
-                  child: Container( // 먹이 조합 도움말 ( 다홍색 부분 )
-                    width: 50,
-                    height: 60,
-                    color: const Color.fromARGB(255, 255, 69, 69), // 다홍색
-                  ),
-                ),
-                Positioned(
-                  top: 80,
-                  left: 2,
-                  child: Container( // 도구 ( 연분홍색 부분 )
-                    width: 50,
-                    height: 50,
-                    color: const Color.fromARGB(255, 233, 129, 129), // 연분홍색
-                  ),
-                )
-              ],
+          Positioned(
+            top: MediaQuery.of(context).size.height / 2 - 320,
+            left: MediaQuery.of(context).size.width / 2 - 100,
+            child: Gif(
+              controller: controller,
+              image: const AssetImage('images/bird_Omoknoonii.gif'),
+              width: 200,
+              height: 200,
             ),
           ),
-          Positioned( // 하단 gui 뒷배경
+          Positioned(
+            top: MediaQuery.of(context).size.height / 2 - 100,
+            left: MediaQuery.of(context).size.width / 2 - 50,
+            child: Image.asset(
+              'images/free-icon-nuts-5663679.png',
+              width: 50,
+              height: 50,
+            ),
+          ),
+          Positioned(
             bottom: 0,
             left: 0,
             right: 0,
-            child: SizedBox(
+            child: Container(
               height: 70,
               child: Row(
                 children: [
                   Expanded(
                     child: Container(
-                      color: const Color.fromARGB(255, 130, 199, 255),
+                      color: Colors.blue[100],
                       child: const Center(child: Text('도감')),
                     ),
                   ),
                   Expanded(
                     child: Container(
-                      color: const Color.fromARGB(255, 123, 252, 127),
+                      color: Colors.green[100],
                       child: const Center(child: Text('모험')),
                     ),
                   ),
                   Expanded(
-                    child: Container(
-                      color: Colors.orange[100],
-                      child: const Center(child: Text('상점')),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ShopPage(),
+                          ),
+                        );
+                      },
+                      child: Image.asset(
+                        'images/GUI/shop_GUI.png',
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                   Expanded(
-                    child: Container(
-                      color: Colors.purple[100],
-                      child: const Center(child: Text('가방')),
+                    child: GestureDetector(
+                      onTap: () {
+                        print('가방을 클릭했습니다.');
+                      },
+                      child: Image.asset(
+                        'images/GUI/bag_GUI.png',
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ],
