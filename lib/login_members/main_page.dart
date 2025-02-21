@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gif/gif.dart';
 import 'package:http/http.dart' as http;
+import '../gui_click_pages/shop_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -140,6 +141,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                 ),
               ),
             ),
+            const SizedBox(width: 10),
             Expanded(
               // Expanded로 감싸서 비율 유지
               flex: 1,
@@ -169,7 +171,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            const SizedBox(width: 20), // 8px 간격 추가
+            const SizedBox(width: 10), // 8px 간격 추가
             Expanded(
               // Expanded로 감싸서 비율 유지
               flex: 1,
@@ -267,15 +269,56 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     ),
                   ),
                   Expanded(
-                    child: Image.asset(
-                      'images/GUI/shop_GUI.png',
-                      fit: BoxFit.contain,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ShopPage(),
+                          ),
+                        );
+                      },
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.asset(
+                              'images/GUI/background_GUI.png',
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          Image.asset(
+                            'images/GUI/shop_GUI.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   Expanded(
-                    child: Image.asset(
-                      'images/GUI/bag_GUI.png',
-                      fit: BoxFit.contain,
+                    child: GestureDetector(
+                      onTap: () {
+                        print('가방을 클릭했습니다.');
+                      },
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.asset(
+                              'images/GUI/background_GUI.png',
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          Image.asset(
+                            'images/GUI/bag_GUI.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],

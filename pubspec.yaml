@@ -78,6 +78,7 @@ flutter:
     - images/GUI/shop_GUI.png
     - images/GUI/star_coin_GUI.png
     - images/GUI/bag_GUI.png
+    - images/GUI/background_GUI.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
