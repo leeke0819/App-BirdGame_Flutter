@@ -83,8 +83,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
     if (mounted) {
       Future.delayed(Duration.zero, () {
-        const snackBar = SnackBar(content: Text('로그인 성공!'));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        print('로그인 성공!');
       });
     }
   }
@@ -240,15 +239,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             ),
           ),
           Positioned(
-            top: MediaQuery.of(context).size.height / 2 - 100,
-            left: MediaQuery.of(context).size.width / 2 - 50,
-            child: Image.asset(
-              'images/free-icon-nuts-5663679.png',
-              width: 50,
-              height: 50,
-            ),
-          ),
-          Positioned(
             bottom: 0,
             left: 0,
             right: 0,
@@ -278,9 +268,22 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                           ),
                         );
                       },
-                      child: Image.asset(
-                        'images/GUI/shop_GUI.png',
-                        fit: BoxFit.contain,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.asset(
+                              'images/GUI/background_GUI.png',
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          Image.asset(
+                            'images/GUI/shop_GUI.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -289,9 +292,22 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       onTap: () {
                         print('가방을 클릭했습니다.');
                       },
-                      child: Image.asset(
-                        'images/GUI/bag_GUI.png',
-                        fit: BoxFit.contain,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.asset(
+                              'images/GUI/background_GUI.png',
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          Image.asset(
+                            'images/GUI/bag_GUI.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ],
                       ),
                     ),
                   ),
