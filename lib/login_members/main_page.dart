@@ -83,8 +83,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
     if (mounted) {
       Future.delayed(Duration.zero, () {
-        const snackBar = SnackBar(content: Text('로그인 성공!'));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        print('로그인 성공!');
       });
     }
   }
@@ -237,15 +236,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               image: const AssetImage('images/bird_Omoknoonii.gif'),
               width: 200,
               height: 200,
-            ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).size.height / 2 - 100,
-            left: MediaQuery.of(context).size.width / 2 - 50,
-            child: Image.asset(
-              'images/free-icon-nuts-5663679.png',
-              width: 50,
-              height: 50,
             ),
           ),
           Positioned(

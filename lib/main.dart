@@ -17,6 +17,7 @@ void main() {
   //   javaScriptAppKey: 'd85aa4100c1fd9fe52a7414e8a8493c3',
   // );
   runApp(const MaterialApp(
+    debugShowCheckedModeBanner: false,
     home: LoginPage(),
   ));
 }
