@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
@@ -13,8 +12,14 @@ class ShopPage extends StatefulWidget {
 }
 
 class _ShopPage extends State<ShopPage> {
+  String imagepath = 'images/items/1_apple.png';
   // Add list to store image paths
   List<String> imagePaths = [];
+  List<String> itemNames = [];
+  List<String> itemLore = [];
+  List<String> itemPrice = [];
+  // Selected index for displaying image
+  int selectedIndex = 0;
 
   @override
   void initState() {
@@ -42,14 +47,18 @@ class _ShopPage extends State<ShopPage> {
       );
       print(response.body);
       if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = Map<String, dynamic>.from(jsonDecode(response.body));
+        // 한글 깨짐 발생 시 jsonDecode(response.body)에서 jsonDecode(utf8.decode(response.bodyBytes))으로 변경
+        final Map<String, dynamic> jsonResponse = Map<String, dynamic>.from(jsonDecode(utf8.decode(response.bodyBytes)));
         final List<dynamic> contentList = jsonResponse['content'] as List<dynamic>;
-        
+
         // Update imagePaths list and rebuild UI
         setState(() {
           imagePaths = contentList.map((item) => item['imageRoot'].toString()).toList();
+          itemNames = contentList.map((item) => item['itemName'].toString()).toList();
+          itemLore = contentList.map((item) => item['itemDescription'].toString()).toList();
+          itemPrice = contentList.map((item) => item['price'].toString()).toList();
         });
-      } else {
+        } else {
         print('API 호출 실패: ${response.statusCode}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -136,19 +145,22 @@ class _ShopPage extends State<ShopPage> {
                             Padding(
                               padding: const EdgeInsets.only(bottom: 60),
                               child: Container(
-                                width: MediaQuery.of(context).size.width > 600
-                                    ? min(110, (MediaQuery.of(context).size.width * 0.7) / 5) // 부드러운 전환을 위해 min 사용
-                                    : (MediaQuery.of(context).size.width * 0.7) / 5,
-                                height: MediaQuery.of(context).size.width > 600
-                                    ? min(110, (MediaQuery.of(context).size.width * 0.7) / 5) // 부드러운 전환을 위해 min 사용
-                                    : (MediaQuery.of(context).size.width * 0.7) / 5,
+                                width: MediaQuery.of(context).size.width > 600 
+                                    ? (MediaQuery.of(context).size.width * 0.6 / 5).clamp(50, 90)  // 크기를 50~90 사이로 제한
+                                    : (MediaQuery.of(context).size.width * 0.7 / 5).clamp(40, 70),
+                                height: MediaQuery.of(context).size.width > 600 
+                                    ? (MediaQuery.of(context).size.width * 0.6 / 5).clamp(50, 90)
+                                    : (MediaQuery.of(context).size.width * 0.7 / 5).clamp(40, 70),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   border: Border.all(color: Colors.black),
                                 ),
-                                child: const Center(
-                                  child: Text('아이템 사진'),
-                                ),
+                                child: imagePaths.isNotEmpty
+                                    ? Image.asset(
+                                        'images/items/${imagePaths[selectedIndex]}',
+                                        fit: BoxFit.contain,
+                                      )
+                                    : Container(),
                               ),
                             ),
                           ],
@@ -163,14 +175,16 @@ class _ShopPage extends State<ShopPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 30, vertical: 8),
                             decoration: BoxDecoration(
                               color: Colors.grey[300],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
-                              '아이템 가격',
-                              style: TextStyle(
+                            child: Text(
+                              itemPrice[selectedIndex],
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 14,
                                 fontWeight: FontWeight.normal,
@@ -179,7 +193,8 @@ class _ShopPage extends State<ShopPage> {
                           ),
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 18, vertical: 9),
                             decoration: BoxDecoration(
                               color: Colors.blue,
                               borderRadius: BorderRadius.circular(8),
@@ -195,7 +210,8 @@ class _ShopPage extends State<ShopPage> {
                           ),
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 18, vertical: 9),
                             decoration: BoxDecoration(
                               color: Colors.red,
                               borderRadius: BorderRadius.circular(8),
@@ -221,16 +237,19 @@ class _ShopPage extends State<ShopPage> {
                 decoration: const BoxDecoration(
                   color: Color.fromARGB(255, 64, 62, 201),
                 ),
-                child: const Column(
+                child: Column(
                   children: [
                     Padding(
                       padding: EdgeInsets.only(top: 20.0),
-                      child: Text(
-                        '아이템 이름',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      child: Center(
+                        child: Text(
+                          itemNames[selectedIndex],
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -239,8 +258,9 @@ class _ShopPage extends State<ShopPage> {
                         child: Padding(
                           padding: EdgeInsets.all(8.0),
                           child: Text(
-                            '아이템 클릭 시 나오는 설명',
-                            style: TextStyle(
+                            itemLore[selectedIndex],
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
                               color: Colors.white,
                             ),
                           ),
@@ -264,9 +284,12 @@ class _ShopPage extends State<ShopPage> {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
+                    setState(() {
+                      selectedIndex = index;
+                    });
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('${index + 1}번째 물건입니다.'),
+                        content: Text('${imagePaths[index]}번째 물건입니다.'),
                         duration: const Duration(milliseconds: 250),
                       ),
                     );
@@ -277,20 +300,20 @@ class _ShopPage extends State<ShopPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: imagePaths.isEmpty
-                      ? Container(
-                          decoration: BoxDecoration(
-                            color: Color.fromARGB(
-                              255,
-                              (index * 37) % 255,
-                              (index * 73) % 255,
-                              (index * 127) % 255,
+                        ? Container(
+                            decoration: BoxDecoration(
+                              color: Color.fromARGB(
+                                255,
+                                (index * 37) % 255,
+                                (index * 73) % 255,
+                                (index * 127) % 255,
+                              ),
                             ),
+                          )
+                        : Image.asset(
+                            'images/items/${imagePaths[index]}',
+                            fit: BoxFit.cover,
                           ),
-                        )
-                      : Image.asset(
-                          'images/items/${imagePaths[index]}',
-                          fit: BoxFit.cover,
-                        ),
                   ),
                 );
               },
