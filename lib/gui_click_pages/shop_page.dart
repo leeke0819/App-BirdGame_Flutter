@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:http/http.dart' as http;
+import 'package:bird_raise_app/api/api_shop.dart';
 
 class ShopPage extends StatefulWidget {
   const ShopPage({super.key});
@@ -11,15 +12,18 @@ class ShopPage extends StatefulWidget {
   State<ShopPage> createState() => _ShopPage();
 }
 
-class _ShopPage extends State<ShopPage> {
+class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   String imagepath = 'images/items/1_apple.png';
   // Add list to store image paths
   List<String> imagePaths = [];
   List<String> itemNames = [];
   List<String> itemLore = [];
   List<String> itemPrice = [];
+  List<String> itemCode = [];
   // Selected index for displaying image
   int selectedIndex = 0;
+  int userMoney = 0;
+  bool isDataLoaded = false;
 
   @override
   void initState() {
@@ -28,6 +32,7 @@ class _ShopPage extends State<ShopPage> {
     // 비동기 메서드 실행
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeData();
+      _loadUserMoney();
     });
   }
 
@@ -57,6 +62,7 @@ class _ShopPage extends State<ShopPage> {
           itemNames = contentList.map((item) => item['itemName'].toString()).toList();
           itemLore = contentList.map((item) => item['itemDescription'].toString()).toList();
           itemPrice = contentList.map((item) => item['price'].toString()).toList();
+          itemCode = contentList.map((item)=> item['itemCode'].toString()).toList();
         });
         } else {
         print('API 호출 실패: ${response.statusCode}');
@@ -75,6 +81,35 @@ class _ShopPage extends State<ShopPage> {
       }
     }
   }
+
+  Future<void> _loadUserMoney() async { // 사용자의 돈 가져오는 함수
+  if (isDataLoaded) return; // 이미 데이터가 로드되었다면 API 요청을 하지 않음
+  isDataLoaded = true;
+  String requestUrl = "http://localhost:8080/api/v1/user";
+  final url = Uri.parse(requestUrl);
+
+  String? token = getChromeAccessToken();
+  String bearerToken = "Bearer $token";
+
+  try {
+    final response = await http.get(
+      url,
+      headers: {'Authorization': bearerToken},
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
+      setState(() {
+        userMoney = jsonResponse['money']; // 서버에서 받은 money 값을 저장
+      });
+    } else {
+      print('API 호출 실패: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error: $e');
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -98,9 +133,9 @@ class _ShopPage extends State<ShopPage> {
                           width: 200,
                           height: 100,
                         ),
-                        const Text(
-                          '0',
-                          style: TextStyle(
+                        Text(
+                          '$userMoney',
+                          style: const TextStyle(
                             color: Colors.black,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -192,19 +227,24 @@ class _ShopPage extends State<ShopPage> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 18, vertical: 9),
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text(
-                              '구매',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
+                          GestureDetector(
+                            onTap: () {
+                              buyItem(itemCode[selectedIndex]); 
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18, vertical: 9),
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text(
+                                '구매',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),

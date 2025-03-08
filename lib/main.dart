@@ -1,3 +1,4 @@
+import 'package:bird_raise_app/login_members/social_members.dart';
 import 'package:bird_raise_app/token/all_Token.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 
@@ -6,16 +7,18 @@ import 'package:bird_raise_app/login_members/normal_members.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter/foundation.dart'; //웹 환경구분을 위한 import
+import 'package:flutter/foundation.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart'; //웹 환경구분을 위한 import
 
 //import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 void main() {
   //카카오 로그인
-  // KakaoSdk.init(
-  //   nativeAppKey: '20c7d3f66691c7dc19454411cd6a8751',
-  //   javaScriptAppKey: 'd85aa4100c1fd9fe52a7414e8a8493c3',
-  // );
+  WidgetsFlutterBinding.ensureInitialized();
+  KakaoSdk.init(
+    nativeAppKey: '20c7d3f66691c7dc19454411cd6a8751',
+    javaScriptAppKey: 'd85aa4100c1fd9fe52a7414e8a8493c3',
+  );
   runApp(const MaterialApp(
     debugShowCheckedModeBanner: false,
     home: LoginPage(),
@@ -220,7 +223,11 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            print("SNS 로그인 클릭");
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SocialMembers())
+                              );
                           },
                           child: const Text(
                             'SNS 계정으로 로그인',
