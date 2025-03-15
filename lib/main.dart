@@ -224,10 +224,10 @@ class _LoginPageState extends State<LoginPage> {
                         GestureDetector(
                           onTap: () {
                             Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SocialMembers())
-                              );
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const SocialMembers()));
                           },
                           child: const Text(
                             'SNS 계정으로 로그인',

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:flutter/material.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:http/http.dart' as http;
@@ -14,13 +15,13 @@ class ShopPage extends StatefulWidget {
 
 class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   String imagepath = 'images/items/1_apple.png';
-  // Add list to store image paths
+
   List<String> imagePaths = [];
   List<String> itemNames = [];
   List<String> itemLore = [];
   List<String> itemPrice = [];
   List<String> itemCode = [];
-  // Selected index for displaying image
+
   int selectedIndex = 0;
   int userMoney = 0;
   bool isDataLoaded = false;
@@ -32,7 +33,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
     // 비동기 메서드 실행
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeData();
-      _loadUserMoney();
+      _fetchUserMoney();
     });
   }
 
@@ -51,20 +52,29 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
         headers: {'Authorization': bearerToken},
       );
       print(response.body);
+
       if (response.statusCode == 200) {
         // 한글 깨짐 발생 시 jsonDecode(response.body)에서 jsonDecode(utf8.decode(response.bodyBytes))으로 변경
-        final Map<String, dynamic> jsonResponse = Map<String, dynamic>.from(jsonDecode(utf8.decode(response.bodyBytes)));
-        final List<dynamic> contentList = jsonResponse['content'] as List<dynamic>;
+        final Map<String, dynamic> jsonResponse = Map<String, dynamic>.from(
+            jsonDecode(utf8.decode(response.bodyBytes)));
+        final List<dynamic> contentList =
+            jsonResponse['content'] as List<dynamic>;
 
         // Update imagePaths list and rebuild UI
         setState(() {
-          imagePaths = contentList.map((item) => item['imageRoot'].toString()).toList();
-          itemNames = contentList.map((item) => item['itemName'].toString()).toList();
-          itemLore = contentList.map((item) => item['itemDescription'].toString()).toList();
-          itemPrice = contentList.map((item) => item['price'].toString()).toList();
-          itemCode = contentList.map((item)=> item['itemCode'].toString()).toList();
+          imagePaths =
+              contentList.map((item) => item['imageRoot'].toString()).toList();
+          itemNames =
+              contentList.map((item) => item['itemName'].toString()).toList();
+          itemLore = contentList
+              .map((item) => item['itemDescription'].toString())
+              .toList();
+          itemPrice =
+              contentList.map((item) => item['price'].toString()).toList();
+          itemCode =
+              contentList.map((item) => item['itemCode'].toString()).toList();
         });
-        } else {
+      } else {
         print('API 호출 실패: ${response.statusCode}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -82,34 +92,15 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _loadUserMoney() async { // 사용자의 돈 가져오는 함수
-  if (isDataLoaded) return; // 이미 데이터가 로드되었다면 API 요청을 하지 않음
-  isDataLoaded = true;
-  String requestUrl = "http://localhost:8080/api/v1/user";
-  final url = Uri.parse(requestUrl);
-
-  String? token = getChromeAccessToken();
-  String bearerToken = "Bearer $token";
-
-  try {
-    final response = await http.get(
-      url,
-      headers: {'Authorization': bearerToken},
-    );
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
+  // API에서 사용자 돈 가져오기
+  Future<void> _fetchUserMoney() async {
+    int money = await loadUserMoney();
+    if (money != -1) {
       setState(() {
-        userMoney = jsonResponse['money']; // 서버에서 받은 money 값을 저장
+        userMoney = money;
       });
-    } else {
-      print('API 호출 실패: ${response.statusCode}');
     }
-  } catch (e) {
-    print('Error: $e');
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -180,12 +171,24 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                             Padding(
                               padding: const EdgeInsets.only(bottom: 60),
                               child: Container(
-                                width: MediaQuery.of(context).size.width > 600 
-                                    ? (MediaQuery.of(context).size.width * 0.6 / 5).clamp(50, 90)  // 크기를 50~90 사이로 제한
-                                    : (MediaQuery.of(context).size.width * 0.7 / 5).clamp(40, 70),
-                                height: MediaQuery.of(context).size.width > 600 
-                                    ? (MediaQuery.of(context).size.width * 0.6 / 5).clamp(50, 90)
-                                    : (MediaQuery.of(context).size.width * 0.7 / 5).clamp(40, 70),
+                                width: MediaQuery.of(context).size.width > 600
+                                    ? (MediaQuery.of(context).size.width *
+                                            0.6 /
+                                            5)
+                                        .clamp(50, 90) // 크기를 50~90 사이로 제한
+                                    : (MediaQuery.of(context).size.width *
+                                            0.7 /
+                                            5)
+                                        .clamp(40, 70),
+                                height: MediaQuery.of(context).size.width > 600
+                                    ? (MediaQuery.of(context).size.width *
+                                            0.6 /
+                                            5)
+                                        .clamp(50, 90)
+                                    : (MediaQuery.of(context).size.width *
+                                            0.7 /
+                                            5)
+                                        .clamp(40, 70),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   border: Border.all(color: Colors.black),
@@ -229,7 +232,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                           const SizedBox(width: 8),
                           GestureDetector(
                             onTap: () {
-                              buyItem(itemCode[selectedIndex]); 
+                              buyItem(itemCode[selectedIndex]);
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
@@ -249,19 +252,24 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 18, vertical: 9),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text(
-                              '판매',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
+                          GestureDetector(
+                            onTap: () {
+                              sellItem(itemCode[selectedIndex]);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18, vertical: 9),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text(
+                                '판매',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
@@ -408,8 +416,13 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
-                      print('가방을 클릭했습니다.');
-                    },
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const BagPage(),
+                          ),
+                        );
+                      },
                     child: Stack(
                       alignment: Alignment.center,
                       children: [

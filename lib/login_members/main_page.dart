@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -98,146 +99,153 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true, // 제목을 중앙에 배치
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 균등 분배
-          children: [
-            Expanded(
-              // Expanded로 감싸서 비율 유지
-              flex: 1,
-              child: Container(
-                height: 300,
-                color: Colors.grey,
-                child: Column(
-                  children: [
-                    Flexible(
-                      flex: 4,
-                      child: Container(
-                        height: 80,
-                        color: Colors.blue,
-                        child: const Row(
-                          children: [
-                            // Upper content
-                          ],
-                        ),
-                      ),
-                    ),
-                    Flexible(
-                      flex: 1,
-                      child: Container(
-                        height: 20,
-                        color: Colors.green,
-                        child: const Row(
-                          children: [
-                            // Lower content
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+      body: Stack(
+        children: [
+          // 전체 화면 배경
+          Positioned.fill(
+            child: Image.asset(
+              MediaQuery.of(context).size.width >
+                      MediaQuery.of(context).size.height
+                  ? 'images/background/main_page_length_background.png' // 가로 모드 (가로 길이가 더 클 때)
+                  : 'images/background/main_page_width_background.png', // 세로 모드 (세로 길이가 더 클 때)
+              fit: BoxFit.fill, // 화면 크기에 맞게 이미지 늘림 (세로 압축 가능)
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              // Expanded로 감싸서 비율 유지
-              flex: 1,
-              child: Container(
-                height: 100,
-                child: Column(
-                  children: [
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Image.asset(
-                          'images/GUI/gold_GUI.png',
+          ),
+
+          // AppBar 역할을 하는 커스텀 위젯
+          Positioned(
+            top: -50,
+            left: -8,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      height: 80,
+                      color: Colors.grey,
+                      child: Column(
+                        children: [
+                          Flexible(
+                            flex: 4,
+                            child: Container(
+                              height: 80,
+                              color: Colors.blue,
+                              child: const Row(
+                                children: [
+                                  // Upper content
+                                ],
+                              ),
+                            ),
+                          ),
+                          Flexible(
+                            flex: 1,
+                            child: Container(
+                              height: 20,
+                              color: Colors.green,
+                              child: const Row(
+                                children: [
+                                  // Lower content
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 1,
+                    child: SizedBox(
+                      height: 153,
+                      child: Column(
+                        children: [
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Image.asset(
+                                'images/GUI/gold_GUI.png',
+                                width: 200,
+                                height: 100,
+                              ),
+                              Text(
+                                '$money',
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 1,
+                    child: SizedBox(
+                      height: 100,
+                      child: Transform.translate(
+                        offset: const Offset(0, -26),
+                        child: Image.asset(
+                          'images/GUI/star_coin_GUI.png',
                           width: 200,
                           height: 100,
                         ),
-                        Text(
-                          '$money',
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                  Transform.translate(
+                    offset: const Offset(10, -15),
+                    child: IconButton(
+                      iconSize: 50,
+                      icon: Image.asset(
+                        'images/setting_button.png',
+                        width: 50,
+                        height: 50,
+                      ),
+                      onPressed: () {
+                        print('설정 아이콘 클릭');
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 10), // 8px 간격 추가
-            Expanded(
-              // Expanded로 감싸서 비율 유지
-              flex: 1,
-              child: Container(
-                height: 100,
-                child: Image.asset(
-                  'images/GUI/star_coin_GUI.png',
-                  width: 200,
-                  height: 100,
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            iconSize: 50,
-            icon: Image.asset(
-              'images/setting_button.png',
-              width: 50,
-              height: 50,
-            ),
-            onPressed: () {
-              print('설정 아이콘 클릭');
-            },
           ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          const Center(
-            child: Text('이곳은 바디 영역입니다.'),
-          ),
+          
+          // 바닥에 러그 배치
           Positioned(
-            top: 0,
-            right: 8,
-            child: IconButton(
-              iconSize: 50,
-              icon: Image.asset(
-                'images/post_button.png',
-                width: 50,
-                height: 50,
-              ),
-              onPressed: () {
-                print('편지 아이콘 클릭');
-              },
-            ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).size.height / 2 - 380,
-            left: MediaQuery.of(context).size.width / 2 - 250,
+            top: MediaQuery.of(context).size.height / 2 - 110,
+            left: MediaQuery.of(context).size.width / 2 - 295,
             child: Image.asset(
               'images/floor-blue-rug.png',
-              width: 500,
-              height: 500,
+              width: 600,
+              height: 750,
+              fit: BoxFit.contain,
             ),
           ),
+
+          // 새 GIF 배치
           Positioned(
-            top: MediaQuery.of(context).size.height / 2 - 320,
-            left: MediaQuery.of(context).size.width / 2 - 100,
+            top: MediaQuery.of(context).size.height / 2 - -60,
+            left: MediaQuery.of(context).size.width / 2 - 95,
             child: Gif(
               controller: controller,
               image: const AssetImage('images/bird_Omoknoonii.gif'),
               width: 200,
               height: 200,
+              fit: BoxFit.contain,
             ),
           ),
+
+          // 하단 네비게이션 바
           Positioned(
             bottom: 0,
             left: 0,
@@ -290,7 +298,12 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        print('가방을 클릭했습니다.');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const BagPage(),
+                          ),
+                        );
                       },
                       child: Stack(
                         alignment: Alignment.center,

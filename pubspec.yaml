@@ -69,6 +69,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - images/kakao_login_medium_wide.png
+    - images/background/main_page_width_background.png
+    - images/background/main_page_length_background.png
     - images/bird_Omoknoonii.gif
     - images/floor-blue-rug.png
     - images/post_button.png
