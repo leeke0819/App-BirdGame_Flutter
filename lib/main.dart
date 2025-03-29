@@ -10,11 +10,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart'; //웹 환경구분을 위한 import
 
-//import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
-
 void main() {
   //카카오 로그인
-  WidgetsFlutterBinding.ensureInitialized();  
+  WidgetsFlutterBinding.ensureInitialized();
   KakaoSdk.init(
     nativeAppKey: '20c7d3f66691c7dc19454411cd6a8751',
     javaScriptAppKey: 'd85aa4100c1fd9fe52a7414e8a8493c3',
@@ -44,8 +42,8 @@ class _LoginPageState extends State<LoginPage> {
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'email': _emailController.text,
-          'password': _passwordController.text,
+          'email': 'apple@naver.com',
+          'password': '123Time^^',
         }),
       );
 
