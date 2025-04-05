@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:http/http.dart' as http;
 import 'package:bird_raise_app/api/api_shop.dart';
@@ -26,6 +27,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   int userMoney = 0;
   bool isDataLoaded = false;
   bool _isLoading = true;
+  int category = 1; // Default category
 
   @override
   void initState() {
@@ -42,8 +44,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
       _isLoading = true;
     });
 
-    print("11111");
-    String requestUrl = "http://localhost:8080/api/v1/shop/page?pageNo=" + "0";
+    String requestUrl =
+        "http://localhost:8080/api/v1/shop/page?pageNo=0&category=$category";
     final url = Uri.parse(requestUrl);
 
     String? token = getChromeAccessToken();
@@ -108,6 +110,55 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
         userMoney = money;
       });
     }
+  }
+
+  // 아이템 구매 핸들러
+  Future<void> _handleBuyItem(String itemCode) async {
+    int result = await buyItem(itemCode);
+    if (result == 1) {
+      await _fetchUserMoney();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("구매 완료!")),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("구매 실패: 골드가 부족합니다.")),
+        );
+      }
+    }
+  }
+
+  // 아이템 판매 핸들러
+  Future<void> _handleSellItem(String itemCode) async {
+    int result = await sellItem(itemCode);
+    if (result == 1) {
+      await _fetchUserMoney();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("판매 완료!")),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("판매 실패: 판매할 아이템이 없습니다.")),
+        );
+      }
+    }
+  }
+
+  // 카테고리 변경 핸들러
+  Future<void> _handleCategoryChange(int newCategory) async {
+    // 같은 카테고리를 클릭했을 때는 API 호출하지 않음
+    if (category == newCategory) return;
+
+    setState(() {
+      category = newCategory;
+    });
+    await _initializeData();
   }
 
   @override
@@ -206,13 +257,22 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                                   5)
                                               .clamp(40, 70),
                                       decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        border: Border.all(color: Colors.black),
+                                        borderRadius: BorderRadius.circular(8),
+                                        image: const DecorationImage(
+                                          image: AssetImage(
+                                              'images/background/shop_item_background.png'),
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
+                                      clipBehavior: Clip.hardEdge,
                                       child: imagePaths.isNotEmpty
-                                          ? Image.asset(
-                                              'images/items/${imagePaths[selectedIndex]}',
-                                              fit: BoxFit.contain,
+                                          ? Padding(
+                                              padding: const EdgeInsets.all(
+                                                  4.0), // 숫자를 늘리면 이미지가 작아짐
+                                              child: Image.asset(
+                                                'images/items/${imagePaths[selectedIndex]}',
+                                                fit: BoxFit.contain,
+                                              ),
                                             )
                                           : Container(),
                                     ),
@@ -247,8 +307,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                 ),
                                 const SizedBox(width: 8),
                                 GestureDetector(
-                                  onTap: () {
-                                    buyItem(itemCode[selectedIndex]);
+                                  onTap: () async {
+                                    _handleBuyItem(itemCode[selectedIndex]);
                                   },
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
@@ -270,7 +330,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                 const SizedBox(width: 8),
                                 GestureDetector(
                                   onTap: () {
-                                    sellItem(itemCode[selectedIndex]);
+                                    _handleSellItem(itemCode[selectedIndex]);
                                   },
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
@@ -336,7 +396,74 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                     ),
                   ],
                 ),
-                const SizedBox(height: 3),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _handleCategoryChange(1),
+                        child: Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color:
+                                category == 1 ? Colors.blue : Colors.blue[100]!,
+                            border: Border.all(
+                              color: category == 1
+                                  ? Colors.blue[700]!
+                                  : Colors.blue[300]!,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '영역 1',
+                              style: TextStyle(
+                                color:
+                                    category == 1 ? Colors.white : Colors.black,
+                                fontWeight: category == 1
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _handleCategoryChange(2),
+                        child: Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: category == 2
+                                ? Colors.green
+                                : Colors.green[100]!,
+                            border: Border.all(
+                              color: category == 2
+                                  ? Colors.green[700]!
+                                  : Colors.green[300]!,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '영역 2',
+                              style: TextStyle(
+                                color:
+                                    category == 2 ? Colors.white : Colors.black,
+                                fontWeight: category == 2
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 Expanded(
                   child: GridView.builder(
                     gridDelegate:
@@ -363,6 +490,13 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                           margin: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
+                            image: imagePaths.isNotEmpty
+                                ? const DecorationImage(
+                                    image: AssetImage(
+                                        'images/background/shop_item_background.png'),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
                           ),
                           child: imagePaths.isEmpty
                               ? Container(
@@ -375,9 +509,12 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                     ),
                                   ),
                                 )
-                              : Image.asset(
-                                  'images/items/${imagePaths[index]}',
-                                  fit: BoxFit.cover,
+                              : Padding(
+                                  padding: const EdgeInsets.all(6.0),
+                                  child: Image.asset(
+                                    'images/items/${imagePaths[index]}',
+                                    fit: BoxFit.contain,
+                                  ),
                                 ),
                         ),
                       );
@@ -404,12 +541,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const ShopPage(),
-                              ),
-                            );
+                            Get.off(() => const ShopPage());
                           },
                           child: Stack(
                             alignment: Alignment.center,
@@ -433,12 +565,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const BagPage(),
-                              ),
-                            );
+                            Get.off(() => const BagPage());
                           },
                           child: Stack(
                             alignment: Alignment.center,

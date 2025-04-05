@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:bird_raise_app/api/api_shop.dart';
 import 'package:bird_raise_app/gui_click_pages/shop_page.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
@@ -57,22 +58,28 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
         final List<dynamic> jsonResponse =
             jsonDecode(utf8.decode(response.bodyBytes));
 
+        // 수량 1 이상인 아이템만 필터링
+        final filteredItems = jsonResponse.where((item) {
+          return item['amount'] > 0;
+        }).toList();
+
         setState(() {
-          imagePaths = jsonResponse
+          imagePaths = filteredItems
               .map((item) => item['itemEntity']['imageRoot'].toString())
               .toList();
-          itemNames = jsonResponse
+          itemNames = filteredItems
               .map((item) => item['itemEntity']['itemName'].toString())
               .toList();
-          itemLore = jsonResponse
+          itemLore = filteredItems
               .map((item) => item['itemEntity']['itemDescription'].toString())
               .toList();
           itemAmounts =
-              jsonResponse.map((item) => item['amount'].toString()).toList();
-          itemCode = jsonResponse
+              filteredItems.map((item) => item['amount'].toString()).toList();
+          itemCode = filteredItems
               .map((item) => item['itemEntity']['itemCode'].toString())
               .toList();
           _isLoading = false;
+          selectedIndex = 0;
         });
       } else {
         print('API 호출 실패: ${response.statusCode}');
@@ -128,17 +135,28 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               if (imagePaths.isNotEmpty)
-                                Container(
-                                  width: 80,
-                                  height: 80,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(color: Colors.black),
-                                  ),
-                                  child: Image.asset(
-                                    'images/items/${imagePaths[selectedIndex]}',
-                                    fit: BoxFit.contain,
-                                  ),
+                                Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Container(
+                                      width: 80,
+                                      height: 80,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        image: const DecorationImage(
+                                          image: AssetImage(
+                                              'images/background/shop_item_background.png'),
+                                          fit: BoxFit.fill,
+                                        ),
+                                      ),
+                                    ),
+                                    Image.asset(
+                                      'images/items/${imagePaths[selectedIndex]}',
+                                      width: 70,
+                                      height: 70,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ],
                                 ),
                               const SizedBox(height: 10),
                               if (itemAmounts.isNotEmpty)
@@ -212,34 +230,58 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                         },
                         child: Stack(
                           children: [
-                            Container(
-                              margin: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: selectedIndex == index
-                                      ? Colors.blue
-                                      : Colors.grey,
-                                  width: 2,
-                                ),
-                              ),
+                            // 아이템 배경
+                            Positioned.fill(
                               child: Image.asset(
-                                'images/items/${imagePaths[index]}',
+                                'images/background/shop_item_background.png',
                                 fit: BoxFit.cover,
                               ),
                             ),
-                            Positioned(
-                              right: 2,
-                              bottom: 2,
-                              child: Container(
-                                padding: const EdgeInsets.all(2),
-                                color: Colors.black54,
-                                child: Text(
-                                  itemAmounts[index],
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
+
+                            // 아이템 이미지
+                            Center(
+                              child: FractionallySizedBox(
+                                widthFactor: 0.9,
+                                heightFactor: 0.9,
+                                child: Image.asset(
+                                  'images/items/${imagePaths[index]}',
+                                  fit: BoxFit.contain,
                                 ),
+                              ),
+                            ),
+                            Positioned(
+                              right: 4,
+                              bottom: 4,
+                              child: Builder(
+                                builder: (context) {
+                                  double screenWidth =
+                                      MediaQuery.of(context).size.width;
+                                  double fontSize =
+                                      screenWidth * 0.03; // 예: 3% 비율
+                                  double horizontalPadding =
+                                      screenWidth * 0.020; // padding도 비율로!
+                                  double verticalPadding =
+                                      screenWidth * 0.010; // 세로 패딩도 비율로!
+
+                                  return Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: horizontalPadding,
+                                      vertical: verticalPadding,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black54,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      itemAmounts[index],
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: fontSize,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ],
@@ -269,12 +311,7 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const ShopPage(),
-                              ),
-                            );
+                            Get.off(() => const ShopPage());
                           },
                           child: Stack(
                             alignment: Alignment.center,
@@ -298,12 +335,7 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const BagPage(),
-                              ),
-                            );
+                            Get.off(() => const BagPage());
                           },
                           child: Stack(
                             alignment: Alignment.center,

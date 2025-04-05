@@ -3,6 +3,7 @@ import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gif/gif.dart';
 import 'package:http/http.dart' as http;
 import '../gui_click_pages/shop_page.dart';
@@ -86,6 +87,29 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       Future.delayed(Duration.zero, () {
         print('로그인 성공!');
       });
+    }
+  }
+
+  // user money 값만 다시 로딩
+  Future<void> _fetchUserMoney() async {
+    final url = Uri.parse('http://localhost:8080/api/v1/user');
+    String? token = getChromeAccessToken();
+    String bearerToken = "Bearer $token";
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': bearerToken},
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        setState(() {
+          money = responseData['money'];
+        });
+      }
+    } catch (e) {
+      print('돈 가져오기 실패: $e');
     }
   }
 
@@ -219,7 +243,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               ),
             ),
           ),
-          
+
           // 바닥에 러그 배치
           Positioned(
             top: MediaQuery.of(context).size.height / 2 - 110,
@@ -268,13 +292,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   ),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ShopPage(),
-                          ),
-                        );
+                      onTap: () async {
+                        await Get.to(() => const ShopPage());
+                        await _fetchUserMoney(); // money 값 갱신
                       },
                       child: Stack(
                         alignment: Alignment.center,
@@ -297,13 +317,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   ),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const BagPage(),
-                          ),
-                        );
+                      onTap: () async {
+                        await Get.to(() => const BagPage());
+                        await _fetchUserMoney(); // money 값 갱신
                       },
                       child: Stack(
                         alignment: Alignment.center,

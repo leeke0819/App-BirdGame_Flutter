@@ -39,6 +39,7 @@ dependencies:
   flame_tiled: ^1.21.0
   http: ^1.2.2
   gif: ^2.3.0
+  get: ^4.7.2
   flutter_secure_storage: ^9.2.4
 
 dev_dependencies:
@@ -71,6 +72,7 @@ flutter:
     - images/kakao_login_medium_wide.png
     - images/background/main_page_width_background.png
     - images/background/main_page_length_background.png
+    - images/background/shop_item_background.png
     - images/bird_Omoknoonii.gif
     - images/floor-blue-rug.png
     - images/post_button.png
@@ -85,6 +87,7 @@ flutter:
     - images/items/3_sun_flower_seed_v2.png
     - images/items/4_peanut_v1.png
     - images/items/5_peanut_v2.png
+    - images/items/bird_001.png
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

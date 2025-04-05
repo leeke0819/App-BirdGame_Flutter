@@ -12,12 +12,29 @@ Future<int> buyItem(String itemCode) async {
   print("$itemCode구매 시도");
   String? token = getChromeAccessToken();
   String? bearerToken = "Bearer $token";
+
   final response = await http.post(Uri.parse("$baseUrl/buy?itemCode=$itemCode"),
       headers: {'Authorization': bearerToken});
+
   if (response.statusCode == 200) {
-    print("구매 성공");
+    final Map<String, dynamic> jsonResponse =
+        Map<String, dynamic>.from(jsonDecode(utf8.decode(response.bodyBytes)));
+
+    // 서버 응답 파싱
+    String status = jsonResponse['buy_status'];
+    int money = jsonResponse['user_money'];
+
+    // 전역 변수 업데이트 (GUI 갱신)
+    userMoney = money;
+    isDataLoaded = true;
+
+    print("구매 상태 : $status, 현재 골드 : $money");
     return 1;
   } else if (response.statusCode == 400) {
+    final Map<String, dynamic> errorResponse =
+        Map<String, dynamic>.from(jsonDecode(utf8.decode(response.bodyBytes)));
+
+    print("구매 실패 : ${errorResponse['error_message']}");
     return 0;
   }
   return 0;
@@ -28,13 +45,30 @@ Future<int> sellItem(String itemCode) async {
   print("$itemCode판매 시도");
   String? token = getChromeAccessToken();
   String? bearerToken = "Bearer $token";
+
   final response = await http.post(
       Uri.parse("$baseUrl/sell?itemCode=$itemCode"),
       headers: {'Authorization': bearerToken});
+
   if (response.statusCode == 200) {
-    print("판매 성공");
+    final Map<String, dynamic> jsonResponse =
+        Map<String, dynamic>.from(jsonDecode(utf8.decode(response.bodyBytes)));
+
+    // 서버 응답 파싱
+    String status = jsonResponse['sell_status'];
+    int money = jsonResponse['user_money'];
+
+    // 전역 변수 업데이트 (GUI 갱신)
+    userMoney = money;
+    isDataLoaded = true;
+
+    print("판매 상태 : $status, 현재 골드 : $money");
     return 1;
   } else if (response.statusCode == 400) {
+    final Map<String, dynamic> errorResponse =
+        Map<String, dynamic>.from(jsonDecode(utf8.decode(response.bodyBytes)));
+
+    print("판매 실패 : ${errorResponse['error_message']}");
     return 0;
   }
   return 0;

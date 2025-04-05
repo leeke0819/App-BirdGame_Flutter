@@ -5,6 +5,7 @@ import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:bird_raise_app/login_members/main_page.dart';
 import 'package:bird_raise_app/login_members/normal_members.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
@@ -17,7 +18,7 @@ void main() {
     nativeAppKey: '20c7d3f66691c7dc19454411cd6a8751',
     javaScriptAppKey: 'd85aa4100c1fd9fe52a7414e8a8493c3',
   );
-  runApp(const MaterialApp(
+  runApp(const GetMaterialApp(
     debugShowCheckedModeBanner: false,
     home: LoginPage(),
   ));
@@ -42,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'email': 'apple@naver.com',
+          'email': "test1111@naver.com",
           'password': '123Time^^',
         }),
       );
@@ -221,11 +222,7 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const SocialMembers()));
+                            Get.to(() => const SocialMembers());
                           },
                           child: const Text(
                             'SNS 계정으로 로그인',
@@ -238,11 +235,7 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(width: 20),
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const NormalMembers()),
-                            );
+                            Get.to(() => const NormalMembers());
                           },
                           child: const Text(
                             '회원가입',
