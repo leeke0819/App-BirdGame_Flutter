@@ -85,7 +85,12 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
         print('API 호출 실패: ${response.statusCode}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('API 호출에 실패했습니다.')),
+            const SnackBar(
+              content: Text(
+                'API 호출에 실패했습니다.',
+                style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+              ),
+            ),
           );
         }
       }
@@ -93,7 +98,12 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
       print('Error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('서버 연결에 실패했습니다.')),
+          const SnackBar(
+            content: Text(
+              '서버 연결에 실패했습니다.',
+              style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+            ),
+          ),
         );
       }
       setState(() {
@@ -119,13 +129,23 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
       await _fetchUserMoney();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("구매 완료!")),
+          const SnackBar(
+            content: Text(
+              "구매 완료!",
+              style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+            ),
+          ),
         );
       }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("구매 실패: 골드가 부족합니다.")),
+          const SnackBar(
+            content: Text(
+              "구매 실패: 골드가 부족합니다.",
+              style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+            ),
+          ),
         );
       }
     }
@@ -138,13 +158,23 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
       await _fetchUserMoney();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("판매 완료!")),
+          const SnackBar(
+            content: Text(
+              "판매 완료!",
+              style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+            ),
+          ),
         );
       }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("판매 실패: 판매할 아이템이 없습니다.")),
+          const SnackBar(
+            content: Text(
+              "판매 실패: 판매할 아이템이 없습니다.",
+              style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+            ),
+          ),
         );
       }
     }
@@ -189,6 +219,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                             color: Colors.black,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
+                            fontFamily: 'NaverNanumSquareRound',
                           ),
                         ),
                       ],
@@ -302,6 +333,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                       color: Colors.black,
                                       fontSize: 14,
                                       fontWeight: FontWeight.normal,
+                                      fontFamily: 'NaverNanumSquareRound',
                                     ),
                                   ),
                                 ),
@@ -323,6 +355,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                         color: Colors.white,
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
+                                        fontFamily: 'NaverNanumSquareRound',
                                       ),
                                     ),
                                   ),
@@ -345,6 +378,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                         color: Colors.white,
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
+                                        fontFamily: 'NaverNanumSquareRound',
                                       ),
                                     ),
                                   ),
@@ -373,6 +407,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                   color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
+                                  fontFamily: 'NaverNanumSquareRound',
                                 ),
                               ),
                             ),
@@ -386,6 +421,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     color: Colors.white,
+                                    fontFamily: 'NaverNanumSquareRound',
                                   ),
                                 ),
                               ),
@@ -416,13 +452,14 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                           ),
                           child: Center(
                             child: Text(
-                              '영역 1',
+                              '재료',
                               style: TextStyle(
                                 color:
                                     category == 1 ? Colors.white : Colors.black,
                                 fontWeight: category == 1
                                     ? FontWeight.bold
                                     : FontWeight.normal,
+                                fontFamily: 'NaverNanumSquareRound',
                               ),
                             ),
                           ),
@@ -449,13 +486,14 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                           ),
                           child: Center(
                             child: Text(
-                              '영역 2',
+                              '새·알',
                               style: TextStyle(
                                 color:
                                     category == 2 ? Colors.white : Colors.black,
                                 fontWeight: category == 2
                                     ? FontWeight.bold
                                     : FontWeight.normal,
+                                fontFamily: 'NaverNanumSquareRound',
                               ),
                             ),
                           ),
@@ -481,7 +519,12 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                           });
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('${imagePaths[index]}번째 물건입니다.'),
+                              content: Text(
+                                '${imagePaths[index]}번째 물건입니다.',
+                                style: const TextStyle(
+                                  fontFamily: 'NaverNanumSquareRound',
+                                ),
+                              ),
                               duration: const Duration(milliseconds: 250),
                             ),
                           );
@@ -529,13 +572,27 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                       Expanded(
                         child: Container(
                           color: Colors.blue[100],
-                          child: const Center(child: Text('도감')),
+                          child: const Center(
+                            child: Text(
+                              '도감',
+                              style: TextStyle(
+                                fontFamily: 'NaverNanumSquareRound',
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                       Expanded(
                         child: Container(
                           color: Colors.green[100],
-                          child: const Center(child: Text('모험')),
+                          child: const Center(
+                            child: Text(
+                              '모험',
+                              style: TextStyle(
+                                fontFamily: 'NaverNanumSquareRound',
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                       Expanded(

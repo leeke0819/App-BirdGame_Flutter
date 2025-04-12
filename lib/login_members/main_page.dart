@@ -70,7 +70,12 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         print('API 호출 실패 : ${response.statusCode}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('API 호출에 실패했습니다.')),
+            const SnackBar(
+              content: Text(
+                'API 호출에 실패했습니다.',
+                style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+              ),
+            ),
           );
         }
       }
@@ -78,7 +83,12 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       print('Error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('서버 연결에 실패했습니다.')),
+          const SnackBar(
+            content: Text(
+              '서버 연결에 실패했습니다.',
+              style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+            ),
+          ),
         );
       }
     }
@@ -202,6 +212,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                   color: Colors.black,
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
+                                  fontFamily: 'NaverNanumSquareRound',
                                 ),
                               ),
                             ],
@@ -281,13 +292,23 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   Expanded(
                     child: Container(
                       color: Colors.blue[100],
-                      child: const Center(child: Text('도감')),
+                      child: const Center(
+                        child: Text(
+                          '도감',
+                          style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+                        ),
+                      ),
                     ),
                   ),
                   Expanded(
                     child: Container(
                       color: Colors.green[100],
-                      child: const Center(child: Text('모험')),
+                      child: const Center(
+                        child: Text(
+                          '모험',
+                          style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+                        ),
+                      ),
                     ),
                   ),
                   Expanded(

@@ -9,14 +9,17 @@ class SocialMembers extends StatefulWidget {
 }
 
 Future<OAuthToken> kakaoLogin() async {
-  try{
+  try {
     print("카카오 로그인 시도");
-    return await UserApi.instance.loginWithKakaoTalk(); // ios, android 카카오톡 로그인(앱 내부 로그인) 시도
-  } catch(e) { // 로그인 시도가 실패하면? 카카오 로그인(아이디, 비번 직접 입력) 실행
+    return await UserApi.instance
+        .loginWithKakaoTalk(); // ios, android 카카오톡 로그인(앱 내부 로그인) 시도
+  } catch (e) {
+    // 로그인 시도가 실패하면? 카카오 로그인(아이디, 비번 직접 입력) 실행
     print("KakaoTalk로그인 실패 KakaoAccount 로그인 시도");
     try {
       return await UserApi.instance.loginWithKakaoAccount();
-    } catch(error) { // 위의 예외처리에서도 실패할 경우
+    } catch (error) {
+      // 위의 예외처리에서도 실패할 경우
       print("실패: ${error}");
       await Future.delayed(const Duration(seconds: 1)); // 1초 딜레이 걸기
       return await UserApi.instance.loginWithKakaoAccount(); // 카카오 로그인 한번 더 시도
@@ -31,13 +34,12 @@ Future<void> kakaoLoadUserProfile() async {
     print('카카오 사용자 정보 요청 성공'
         '\n닉네임: ${user.kakaoAccount?.profile?.nickname}'
         '\n프로필사진: ${user.kakaoAccount?.profile?.profileImageUrl}');
-  } catch(error) {
+  } catch (error) {
     print('사용자 정보 요청 실패 $error');
   }
 }
 
 class _SocialMembers extends State<SocialMembers> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,6 +57,7 @@ class _SocialMembers extends State<SocialMembers> {
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
+                    fontFamily: 'NaverNanumSquareRound',
                   ),
                 ),
               ),
@@ -65,7 +68,6 @@ class _SocialMembers extends State<SocialMembers> {
                   OAuthToken token = await kakaoLogin();
                   print(token);
                   await kakaoLoadUserProfile();
-
                 },
                 child: Image.asset(
                   'images/kakao_login_medium_wide.png',

@@ -85,14 +85,24 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
         print('API 호출 실패: ${response.statusCode}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('API 호출에 실패했습니다.')),
+            const SnackBar(
+              content: Text(
+                'API 호출에 실패했습니다.',
+                style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+              ),
+            ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('서버 연결에 실패했습니다.')),
+          const SnackBar(
+            content: Text(
+              '서버 연결에 실패했습니다.',
+              style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+            ),
+          ),
         );
       }
       setState(() {
@@ -114,7 +124,10 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('가방'),
+        title: const Text(
+          '가방',
+          style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+        ),
         centerTitle: true,
       ),
       body: _isLoading
@@ -165,6 +178,7 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
+                                    fontFamily: 'NaverNanumSquareRound',
                                   ),
                                 ),
                             ],
@@ -188,6 +202,7 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                                 color: Colors.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
+                                fontFamily: 'NaverNanumSquareRound',
                               ),
                             ),
                           ),
@@ -201,6 +216,7 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   color: Colors.white,
+                                  fontFamily: 'NaverNanumSquareRound',
                                 ),
                               ),
                             ),
@@ -228,63 +244,73 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                             selectedIndex = index;
                           });
                         },
-                        child: Stack(
-                          children: [
-                            // 아이템 배경
-                            Positioned.fill(
-                              child: Image.asset(
-                                'images/background/shop_item_background.png',
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-
-                            // 아이템 이미지
-                            Center(
-                              child: FractionallySizedBox(
-                                widthFactor: 0.9,
-                                heightFactor: 0.9,
-                                child: Image.asset(
-                                  'images/items/${imagePaths[index]}',
-                                  fit: BoxFit.contain,
+                        child: Container(
+                          margin: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Stack(
+                            children: [
+                              // 아이템 배경
+                              Positioned.fill(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.asset(
+                                    'images/background/shop_item_background.png',
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Positioned(
-                              right: 4,
-                              bottom: 4,
-                              child: Builder(
-                                builder: (context) {
-                                  double screenWidth =
-                                      MediaQuery.of(context).size.width;
-                                  double fontSize =
-                                      screenWidth * 0.03; // 예: 3% 비율
-                                  double horizontalPadding =
-                                      screenWidth * 0.020; // padding도 비율로!
-                                  double verticalPadding =
-                                      screenWidth * 0.010; // 세로 패딩도 비율로!
 
-                                  return Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: horizontalPadding,
-                                      vertical: verticalPadding,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black54,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      itemAmounts[index],
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: fontSize,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  );
-                                },
+                              // 아이템 이미지
+                              Center(
+                                child: FractionallySizedBox(
+                                  widthFactor: 0.9,
+                                  heightFactor: 0.9,
+                                  child: Image.asset(
+                                    'images/items/${imagePaths[index]}',
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
+                              Positioned(
+                                right: 4,
+                                bottom: 4,
+                                child: Builder(
+                                  builder: (context) {
+                                    double screenWidth =
+                                        MediaQuery.of(context).size.width;
+                                    double fontSize =
+                                        screenWidth * 0.03; // 예: 3% 비율
+                                    double horizontalPadding =
+                                        screenWidth * 0.020; // padding도 비율로!
+                                    double verticalPadding =
+                                        screenWidth * 0.010; // 세로 패딩도 비율로!
+
+                                    return Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: horizontalPadding,
+                                        vertical: verticalPadding,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black54,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        itemAmounts[index],
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: fontSize,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'NaverNanumSquareRound',
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -299,13 +325,25 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                       Expanded(
                         child: Container(
                           color: Colors.blue[100],
-                          child: const Center(child: Text('도감')),
+                          child: const Center(
+                            child: Text(
+                              '도감',
+                              style: TextStyle(
+                                  fontFamily: 'NaverNanumSquareRound'),
+                            ),
+                          ),
                         ),
                       ),
                       Expanded(
                         child: Container(
                           color: Colors.green[100],
-                          child: const Center(child: Text('모험')),
+                          child: const Center(
+                            child: Text(
+                              '모험',
+                              style: TextStyle(
+                                  fontFamily: 'NaverNanumSquareRound'),
+                            ),
+                          ),
                         ),
                       ),
                       Expanded(

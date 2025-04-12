@@ -55,7 +55,12 @@ class _NormalMembersState extends State<NormalMembers> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration successful!')),
+          const SnackBar(
+            content: Text(
+              'Registration successful!',
+              style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+            ),
+          ),
         );
         // 로그인 성공 시 메인 페이지로 이동
         Navigator.pushReplacement(
@@ -64,12 +69,22 @@ class _NormalMembersState extends State<NormalMembers> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration failed: ${response.body}')),
+          SnackBar(
+            content: Text(
+              'Registration failed: ${response.body}',
+              style: const TextStyle(fontFamily: 'NaverNanumSquareRound'),
+            ),
+          ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(
+          content: Text(
+            'Error: $e',
+            style: const TextStyle(fontFamily: 'NaverNanumSquareRound'),
+          ),
+        ),
       );
     }
   }
@@ -92,6 +107,7 @@ class _NormalMembersState extends State<NormalMembers> {
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
+                  fontFamily: 'NaverNanumSquareRound',
                 ),
               ),
             ),
@@ -106,6 +122,7 @@ class _NormalMembersState extends State<NormalMembers> {
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
+                  fontFamily: 'NaverNanumSquareRound',
                 ),
               ),
             ),
@@ -125,10 +142,16 @@ class _NormalMembersState extends State<NormalMembers> {
                         controller: _emailController,
                         decoration: const InputDecoration(
                           hintText: '이메일 입력',
-                          hintStyle: TextStyle(color: Colors.grey),
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'NaverNanumSquareRound',
+                          ),
                           border: InputBorder.none,
                         ),
-                        style: const TextStyle(fontSize: 16),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'NaverNanumSquareRound',
+                        ),
                       ),
                     ),
                   ],
@@ -146,6 +169,7 @@ class _NormalMembersState extends State<NormalMembers> {
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
+                  fontFamily: 'NaverNanumSquareRound',
                 ),
               ),
             ),
@@ -166,7 +190,10 @@ class _NormalMembersState extends State<NormalMembers> {
                         obscureText: _obscurePassword, // 상태 변수로 제어
                         decoration: InputDecoration(
                           hintText: '비밀번호 입력',
-                          hintStyle: const TextStyle(color: Colors.grey),
+                          hintStyle: const TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'NaverNanumSquareRound',
+                          ),
                           border: InputBorder.none,
                           suffixIcon: GestureDetector(
                             onTap: () {
@@ -182,7 +209,10 @@ class _NormalMembersState extends State<NormalMembers> {
                             ),
                           ),
                         ),
-                        style: const TextStyle(fontSize: 16),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'NaverNanumSquareRound',
+                        ),
                         onChanged: (_) => _validatePasswords(), // 비밀번호 변경 시 확인
                       ),
                     ),
@@ -201,6 +231,7 @@ class _NormalMembersState extends State<NormalMembers> {
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
+                  fontFamily: 'NaverNanumSquareRound',
                 ),
               ),
             ),
@@ -221,10 +252,16 @@ class _NormalMembersState extends State<NormalMembers> {
                         obscureText: true,
                         decoration: const InputDecoration(
                           hintText: '비밀번호 입력',
-                          hintStyle: TextStyle(color: Colors.grey),
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'NaverNanumSquareRound',
+                          ),
                           border: InputBorder.none,
                         ),
-                        style: const TextStyle(fontSize: 16),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'NaverNanumSquareRound',
+                        ),
                         onChanged: (_) => _validatePasswords(), // 확인 필드 변경 시 검증
                       ),
                     ),
@@ -237,7 +274,11 @@ class _NormalMembersState extends State<NormalMembers> {
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Text(
                   _errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 14),
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 14,
+                    fontFamily: 'NaverNanumSquareRound',
+                  ),
                 ),
               ),
             const SizedBox(height: 20),
@@ -251,6 +292,7 @@ class _NormalMembersState extends State<NormalMembers> {
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
+                  fontFamily: 'NaverNanumSquareRound',
                 ),
               ),
             ),
@@ -270,10 +312,16 @@ class _NormalMembersState extends State<NormalMembers> {
                         controller: _nicknameController,
                         decoration: const InputDecoration(
                           hintText: '닉네임 입력',
-                          hintStyle: TextStyle(color: Colors.grey),
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'NaverNanumSquareRound',
+                          ),
                           border: InputBorder.none,
                         ),
-                        style: const TextStyle(fontSize: 16),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'NaverNanumSquareRound',
+                        ),
                       ),
                     ),
                   ],
@@ -300,6 +348,7 @@ class _NormalMembersState extends State<NormalMembers> {
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      fontFamily: 'NaverNanumSquareRound',
                     ),
                   ),
                 ),

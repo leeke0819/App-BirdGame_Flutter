@@ -18,9 +18,12 @@ void main() {
     nativeAppKey: '20c7d3f66691c7dc19454411cd6a8751',
     javaScriptAppKey: 'd85aa4100c1fd9fe52a7414e8a8493c3',
   );
-  runApp(const GetMaterialApp(
+  runApp(GetMaterialApp(
     debugShowCheckedModeBanner: false,
-    home: LoginPage(),
+    home: const LoginPage(),
+    theme: ThemeData(
+      fontFamily: 'NaverNanumSquareRound',
+    ),
   ));
 }
 
@@ -94,6 +97,9 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          fontFamily: 'NaverNanumSquareRound',
+        ),
         home: Scaffold(
           appBar: AppBar(),
           body: Center(
