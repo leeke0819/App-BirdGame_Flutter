@@ -4,7 +4,7 @@ import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:http/http.dart' as http;
 
 String baseUrl = "http://localhost:8080/api/v1/shop";
-int userMoney = 0;
+int userGold = 0;
 bool isDataLoaded = false;
 
 //사용자 아이템 구매하기
@@ -22,13 +22,13 @@ Future<int> buyItem(String itemCode) async {
 
     // 서버 응답 파싱
     String status = jsonResponse['buy_status'];
-    int money = jsonResponse['user_money'];
+    int gold = jsonResponse['user_gold'];
 
     // 전역 변수 업데이트 (GUI 갱신)
-    userMoney = money;
+    userGold = gold;
     isDataLoaded = true;
 
-    print("구매 상태 : $status, 현재 골드 : $money");
+    print("구매 상태 : $status, 현재 골드 : $gold");
     return 1;
   } else if (response.statusCode == 400) {
     final Map<String, dynamic> errorResponse =
@@ -56,13 +56,13 @@ Future<int> sellItem(String itemCode) async {
 
     // 서버 응답 파싱
     String status = jsonResponse['sell_status'];
-    int money = jsonResponse['user_money'];
+    int gold = jsonResponse['user_gold'];
 
     // 전역 변수 업데이트 (GUI 갱신)
-    userMoney = money;
+    userGold = gold;
     isDataLoaded = true;
 
-    print("판매 상태 : $status, 현재 골드 : $money");
+    print("판매 상태 : $status, 현재 골드 : $gold");
     return 1;
   } else if (response.statusCode == 400) {
     final Map<String, dynamic> errorResponse =
@@ -74,7 +74,7 @@ Future<int> sellItem(String itemCode) async {
   return 0;
 }
 
-Future<int> loadUserMoney() async {
+Future<Map<String, dynamic>?> loadUserInfo() async {
   String requestUrl = "http://localhost:8080/api/v1/user";
   final url = Uri.parse(requestUrl);
 
@@ -90,13 +90,13 @@ Future<int> loadUserMoney() async {
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonResponse =
           jsonDecode(utf8.decode(response.bodyBytes));
-      return jsonResponse['money'] as int; // 서버에서 받은 money 값 반환
+      return jsonResponse;
     } else {
       print('API 호출 실패: ${response.statusCode}');
-      return -1; // 실패 시 -1 반환
+      return null;
     }
   } catch (e) {
     print('Error: $e');
-    return -1; // 예외 발생 시 -1 반환
+    return null;
   }
 }

@@ -24,7 +24,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   List<String> itemCode = [];
 
   int selectedIndex = 0;
-  int userMoney = 0;
+  int userGold = 0;
+  int starCoin = 0;
   bool isDataLoaded = false;
   bool _isLoading = true;
   int category = 1; // Default category
@@ -35,7 +36,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeData();
-      _fetchUserMoney();
+      _fetchUserInfo();
     });
   }
 
@@ -113,12 +114,29 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   }
 
   // API에서 사용자 돈 가져오기
-  Future<void> _fetchUserMoney() async {
-    int money = await loadUserMoney();
-    if (money != -1) {
+  Future<void> _fetchUserInfo() async {
+    final userInfo = await loadUserInfo();
+    if (userInfo != null) {
       setState(() {
-        userMoney = money;
+        userGold = userInfo['gold'];
+        starCoin = userInfo['starCoin'];
       });
+    }
+  }
+
+  String formatKoreanNumber(int number) {
+    if (number >= 100000000) {
+      return (number / 100000000).toStringAsFixed(1) + '억';
+    } else if (number >= 10000000) {
+      return (number / 10000000).toStringAsFixed(1) + '천만';
+    } else if (number >= 1000000) {
+      return (number / 1000000).toStringAsFixed(1) + '백만';
+    } else if (number >= 10000) {
+      return (number / 10000).toStringAsFixed(1) + '만';
+    } else if (number >= 1000) {
+      return (number / 1000).toStringAsFixed(1) + '천';
+    } else {
+      return number.toString();
     }
   }
 
@@ -126,7 +144,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   Future<void> _handleBuyItem(String itemCode) async {
     int result = await buyItem(itemCode);
     if (result == 1) {
-      await _fetchUserMoney();
+      await _fetchUserInfo();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -155,7 +173,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   Future<void> _handleSellItem(String itemCode) async {
     int result = await sellItem(itemCode);
     if (result == 1) {
-      await _fetchUserMoney();
+      await _fetchUserInfo();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -213,13 +231,44 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                           width: 200,
                           height: 100,
                         ),
-                        Text(
-                          '$userMoney',
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'NaverNanumSquareRound',
+                        Positioned(
+                          child: Container(
+                            width: 200,
+                            height: 100,
+                            padding: const EdgeInsets.symmetric(horizontal: 0),
+                            child: Row(
+                              children: [
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        formatKoreanNumber(userGold),
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'NaverNanumSquareRound',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                GestureDetector(
+                                  onTap: () {
+                                    print('골드 충전 버튼 클릭');
+                                  },
+                                  child: Image.asset(
+                                    'images/GUI/gold_plus_button_GUI.png',
+                                    width: 32,
+                                    height: 32,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -230,12 +279,65 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
             ),
             Expanded(
               flex: 1,
-              child: Container(
-                height: 100,
-                child: Image.asset(
-                  'images/GUI/star_coin_GUI.png',
-                  width: 200,
+              child: Transform.translate(
+                offset: const Offset(0, 0),
+                child: SizedBox(
                   height: 100,
+                  child: Column(
+                    children: [
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Image.asset(
+                            'images/GUI/star_coin_GUI.png',
+                            width: 200,
+                            height: 100,
+                          ),
+                          Positioned(
+                            child: Container(
+                              width: 200,
+                              height: 100,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 0),
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          '$starCoin',
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'NaverNanumSquareRound',
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  GestureDetector(
+                                    onTap: () {
+                                      print('스타 코인 충전 버튼 클릭');
+                                    },
+                                    child: Image.asset(
+                                      'images/GUI/star_coin_plus_button_GUI.png',
+                                      width: 32,
+                                      height: 32,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

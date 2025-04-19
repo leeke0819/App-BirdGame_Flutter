@@ -4,7 +4,7 @@ class GoldService {
   static const String baseUrl = "http://localhost:8080/api/v1/user";
 
   /// 현재 골드 가져오기
-  static Future<int?> getMoney() async {
+  static Future<int?> getgold() async {
     final response = await http.get(Uri.parse(baseUrl));
     if (response.statusCode == 200) {
       return int.tryParse(response.body);

@@ -16,11 +16,15 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
-  final TextEditingController _moneyController = TextEditingController();
+  final TextEditingController _goldController = TextEditingController();
   final TextEditingController _nicknameController = TextEditingController();
   late final GifController controller;
-  int money = 0;
+  String gold = '0';
+  int starCoin = 0;
   String? nickname;
+  int exp = 0;
+  int level = 0;
+
   bool isLoading = true;
 
   @override
@@ -62,8 +66,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         final responseData = jsonDecode(response.body);
         print('API 호출 성공 : ${responseData}');
         setState(() {
-          money = responseData['money'];
+          int goldAmount = responseData['gold'];
+          gold = formatKoreanNumber(goldAmount);
           nickname = responseData['nickname'];
+          level = responseData['userLevel'];
+          starCoin = responseData['starCoin'];
           isLoading = false;
         });
       } else {
@@ -73,7 +80,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             const SnackBar(
               content: Text(
                 'API 호출에 실패했습니다.',
-                style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+                style: TextStyle(fontFamily: 'NanumSquareRound'),
               ),
             ),
           );
@@ -86,7 +93,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           const SnackBar(
             content: Text(
               '서버 연결에 실패했습니다.',
-              style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+              style: TextStyle(fontFamily: 'NanumSquareRound'),
             ),
           ),
         );
@@ -100,8 +107,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     }
   }
 
-  // user money 값만 다시 로딩
-  Future<void> _fetchUserMoney() async {
+  // user gold 값만 다시 로딩,gold만 바뀌는 상황이니까, server에서 골드만 조회하는 API
+  // TODO: Server에서 골드만 조회해서 반환해주는 API개발 필요
+  Future<void> _fetchUserGold() async {
     final url = Uri.parse('http://localhost:8080/api/v1/user');
     String? token = getChromeAccessToken();
     String bearerToken = "Bearer $token";
@@ -115,7 +123,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         setState(() {
-          money = responseData['money'];
+          gold = responseData['gold'];
         });
       }
     } catch (e) {
@@ -123,9 +131,25 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     }
   }
 
+  String formatKoreanNumber(int number) {
+    if (number >= 100000000) {
+      return (number / 100000000).toStringAsFixed(1) + '억';
+    } else if (number >= 10000000) {
+      return (number / 10000000).toStringAsFixed(1) + '천만';
+    } else if (number >= 1000000) {
+      return (number / 1000000).toStringAsFixed(1) + '백만';
+    } else if (number >= 10000) {
+      return (number / 10000).toStringAsFixed(1) + '만';
+    } else if (number >= 1000) {
+      return (number / 1000).toStringAsFixed(1) + '천';
+    } else {
+      return number.toString();
+    }
+  }
+
   @override
   void dispose() {
-    _moneyController.dispose();
+    _goldController.dispose();
     _nicknameController.dispose();
     super.dispose();
   }
@@ -167,10 +191,55 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                             flex: 4,
                             child: Container(
                               height: 80,
-                              color: Colors.blue,
-                              child: const Row(
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                border: Border.all(
+                                    color: Colors.white, width: 2), // 테두리 추가
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
                                 children: [
-                                  // Upper content
+                                  Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                    ),
+                                    child: ClipOval(
+                                      child: Image.asset(
+                                        'images/test_profile.png', // 프로필 이미지 경로
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+
+                                  // 프로필과 텍스트 사이 여백
+                                  // Lv. 과 이름 텍스트
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '테스트',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        'Lv. ' + level.toString(),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),
@@ -179,10 +248,20 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                             flex: 1,
                             child: Container(
                               height: 20,
-                              color: Colors.green,
-                              child: const Row(
+                              color: Colors.purple,
+                              child: Row(
                                 children: [
-                                  // Lower content
+                                  Expanded(
+                                    child: Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 5, vertical: 3.5),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green,
+                                        borderRadius:
+                                            BorderRadius.circular(10), // 둥근 모서리
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -191,59 +270,162 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 14),
                   Expanded(
                     flex: 1,
-                    child: SizedBox(
-                      height: 153,
-                      child: Column(
-                        children: [
-                          Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Image.asset(
-                                'images/GUI/gold_GUI.png',
-                                width: 200,
-                                height: 100,
-                              ),
-                              Text(
-                                '$money',
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'NaverNanumSquareRound',
+                    child: Transform.translate(
+                      offset: const Offset(5, 0), // 위치 조정 가능
+                      child: SizedBox(
+                        height: 153,
+                        child: Column(
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Image.asset(
+                                  'images/GUI/gold_GUI.png',
+                                  width: 200,
+                                  height: 100,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                                Positioned(
+                                  child: Container(
+                                    width: 200,
+                                    height: 100,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 0),
+                                    child: Row(
+                                      children: [
+                                        const SizedBox(
+                                            width: 8), // 왼쪽 여백 (아이콘 등 필요시 조절)
+                                        Expanded(
+                                          child: Align(
+                                            alignment: Alignment.centerRight,
+                                            child: FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Text(
+                                                '$gold',
+                                                style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontFamily:
+                                                      'NaverNanumSquareRound',
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 2),
+                                        GestureDetector(
+                                          onTap: () {
+                                            print('골드 충전 버튼 클릭');
+                                          },
+                                          child: Image.asset(
+                                            'images/GUI/gold_plus_button_GUI.png',
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.052, // 화면 너비의 2%
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.052, // 정사각형 비율 유지
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 5),
                   Expanded(
                     flex: 1,
-                    child: SizedBox(
-                      height: 100,
-                      child: Transform.translate(
-                        offset: const Offset(0, -26),
-                        child: Image.asset(
-                          'images/GUI/star_coin_GUI.png',
-                          width: 200,
-                          height: 100,
+                    child: Transform.translate(
+                      offset: const Offset(8, -26),
+                      child: SizedBox(
+                        height: 100,
+                        child: Column(
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Image.asset(
+                                  'images/GUI/star_coin_GUI.png',
+                                  width: 200,
+                                  height: 100,
+                                ),
+                                Positioned(
+                                  child: Container(
+                                    width: 200,
+                                    height: 100,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 0),
+                                    child: Row(
+                                      children: [
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Align(
+                                            alignment: Alignment.centerRight,
+                                            child: FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Text(
+                                                '$starCoin',
+                                                style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontFamily:
+                                                      'NaverNanumSquareRound',
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        GestureDetector(
+                                          onTap: () {
+                                            print('스타 코인 충전 버튼 클릭');
+                                          },
+                                          child: Image.asset(
+                                            'images/GUI/star_coin_plus_button_GUI.png',
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.052, // 화면 너비의 2%
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.052,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
                   Transform.translate(
-                    offset: const Offset(10, -15),
+                    offset: const Offset(18, -22), // gold_GUI와 같은 높이로 설정
                     child: IconButton(
-                      iconSize: 50,
+                      iconSize: MediaQuery.of(context).size.width *
+                          0.037, // 50을 화면 너비의 3.7%로 변환
                       icon: Image.asset(
                         'images/setting_button.png',
-                        width: 50,
-                        height: 50,
+                        width: MediaQuery.of(context).size.width *
+                            0.09, // 40을 화면 너비의 3%로 변환
+                        height: MediaQuery.of(context).size.width *
+                            0.09, // 40을 화면 너비의 3%로 변환
                       ),
                       onPressed: () {
                         print('설정 아이콘 클릭');
@@ -315,7 +497,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     child: GestureDetector(
                       onTap: () async {
                         await Get.to(() => const ShopPage());
-                        await _fetchUserMoney(); // money 값 갱신
+                        await _fetchUserGold(); // gold 값 갱신
                       },
                       child: Stack(
                         alignment: Alignment.center,
@@ -340,7 +522,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     child: GestureDetector(
                       onTap: () async {
                         await Get.to(() => const BagPage());
-                        await _fetchUserMoney(); // money 값 갱신
+                        await _fetchUserGold(); // gold 값 갱신
                       },
                       child: Stack(
                         alignment: Alignment.center,

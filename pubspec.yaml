@@ -77,9 +77,12 @@ flutter:
     - images/floor-blue-rug.png
     - images/post_button.png
     - images/setting_button.png
+    - images/test_profile.png
     - images/GUI/gold_GUI.png
+    - images/GUI/gold_plus_button_GUI.png
     - images/GUI/shop_GUI.png
     - images/GUI/star_coin_GUI.png
+    - images/GUI/star_coin_plus_button_GUI.png
     - images/GUI/bag_GUI.png
     - images/GUI/background_GUI.png
     - images/items/1_apple.png
@@ -87,7 +90,8 @@ flutter:
     - images/items/3_sun_flower_seed_v2.png
     - images/items/4_peanut_v1.png
     - images/items/5_peanut_v2.png
-    - images/items/bird_001.png
+    - images/items/bird_egg_001.png
+    - images/birds/bird_001.png
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -101,12 +105,9 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: NoonnuBasicGothic
+    - family: NaverNanumSquareRound
       fonts:
-        - asset: fonts/NoonnuBasicGothicRegular.ttf
-    - family: NotoSansKR
-      fonts:
-        - asset: fonts/NotoSansKR-VariableFont_wght.ttf
+        - asset: fonts/NanumSquareRoundEB.ttf
 
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic

@@ -36,8 +36,10 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true; // 비밀번호 숨김 여부를 관리하는 상태 변수
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController =
+      TextEditingController(text: 'testuser0419@naver.com');
+  final TextEditingController _passwordController =
+      TextEditingController(text: 'Abc1234^^');
 
   Future<void> _login() async {
     final url = Uri.parse('http://localhost:8080/api/v1/user/login');
@@ -46,8 +48,8 @@ class _LoginPageState extends State<LoginPage> {
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'email': "test1111@naver.com",
-          'password': '123Time^^',
+          'email': _emailController.text,
+          'password': _passwordController.text,
         }),
       );
 

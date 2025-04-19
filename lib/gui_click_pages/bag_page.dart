@@ -22,7 +22,7 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
   List<String> itemAmounts = [];
   List<String> itemCode = [];
   int selectedIndex = 0;
-  int userMoney = 0;
+  int userGold = 0;
   bool isDataLoaded = false;
   bool _isLoading = true;
 
@@ -31,7 +31,7 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeData();
-      _fetchUserMoney();
+      _fetchUserInfo();
     });
   }
 
@@ -111,11 +111,11 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _fetchUserMoney() async {
-    int money = await loadUserMoney();
-    if (money != -1) {
+  Future<void> _fetchUserInfo() async {
+    final userInfo = await loadUserInfo();
+    if (userInfo != null) {
       setState(() {
-        userMoney = money;
+        userGold = userInfo['gold'];
       });
     }
   }
