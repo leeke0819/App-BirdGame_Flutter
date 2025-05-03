@@ -1,29 +1,45 @@
 import 'package:bird_raise_app/login_members/social_members.dart';
-import 'package:bird_raise_app/token/all_Token.dart';
+import 'package:bird_raise_app/model/gold_model.dart';
+import 'package:bird_raise_app/token/mobile_secure_token.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
-
 import 'package:bird_raise_app/login_members/main_page.dart';
 import 'package:bird_raise_app/login_members/normal_members.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart'; //웹 환경구분을 위한 import
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
+import 'package:provider/provider.dart'; //웹 환경구분을 위한 import
 
-void main() {
-  //카카오 로그인
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 저장된 토큰 확인
+  String? token;
+  if (kIsWeb) {
+    token = getChromeAccessToken();
+  } else {
+    token = await getAccessToken();
+  }
+
+  //카카오 로그인
   KakaoSdk.init(
     nativeAppKey: '20c7d3f66691c7dc19454411cd6a8751',
     javaScriptAppKey: 'd85aa4100c1fd9fe52a7414e8a8493c3',
   );
-  runApp(GetMaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: const LoginPage(),
-    theme: ThemeData(
-      fontFamily: 'NaverNanumSquareRound',
-    ),
+
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => GoldModel()),
+    ],
+    child: GetMaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: token != null ? const MainPage() : const LoginPage(),
+        theme: ThemeData(
+          fontFamily: 'NaverNanumSquareRound',
+        )),
   ));
 }
 
@@ -42,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
       TextEditingController(text: 'Abc1234^^');
 
   Future<void> _login() async {
-    final url = Uri.parse('http://localhost:8080/api/v1/user/login');
+    final url = Uri.parse('http://192.168.10.9:8080/api/v1/user/login');
     try {
       final response = await http.post(
         url,
@@ -66,14 +82,11 @@ class _LoginPageState extends State<LoginPage> {
         } else {
           print("모바일 환경에서 동작하는 코드"); //얘가 먼저 실행
           await saveAccessToken(responseData['accessToken']); //3초정도 걸린다 가정.
-          //print(getAccessToken()); //1초짜리 print문
+          print(getAccessToken()); //1초짜리 print문
         }
 
         // 로그인 성공
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MainPage()),
-        );
+        Get.offAll(() => const MainPage());
       } else {
         // 로그인 실패
         ScaffoldMessenger.of(context).showSnackBar(

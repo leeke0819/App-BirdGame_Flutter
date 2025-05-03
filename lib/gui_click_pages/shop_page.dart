@@ -1,11 +1,15 @@
 import 'dart:convert';
 
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
+import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:http/http.dart' as http;
 import 'package:bird_raise_app/api/api_shop.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:bird_raise_app/token/mobile_secure_token.dart';
+import 'package:provider/provider.dart';
 
 class ShopPage extends StatefulWidget {
   const ShopPage({super.key});
@@ -24,9 +28,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   List<String> itemCode = [];
 
   int selectedIndex = 0;
-  int userGold = 0;
   int starCoin = 0;
-  bool isDataLoaded = false;
   bool _isLoading = true;
   int category = 1; // Default category
 
@@ -46,10 +48,16 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
     });
 
     String requestUrl =
-        "http://localhost:8080/api/v1/shop/page?pageNo=0&category=$category";
+        "http://192.168.10.9:8080/api/v1/shop/page?pageNo=0&category=$category";
     final url = Uri.parse(requestUrl);
 
-    String? token = getChromeAccessToken();
+    String? token;
+    if (kIsWeb) {
+        token = getChromeAccessToken();
+    }
+    else{
+        token = await getAccessToken(); //1초짜리 print문
+    }
     print("발급된 JWT: $token");
     String bearerToken = "Bearer $token";
 
@@ -142,7 +150,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
 
   // 아이템 구매 핸들러
   Future<void> _handleBuyItem(String itemCode) async {
-    int result = await buyItem(itemCode);
+    int result = await buyItem(itemCode, context);
     if (result == 1) {
       await _fetchUserInfo();
       if (mounted) {
@@ -171,7 +179,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
 
   // 아이템 판매 핸들러
   Future<void> _handleSellItem(String itemCode) async {
-    int result = await sellItem(itemCode);
+    int result = await sellItem(itemCode, context);
     if (result == 1) {
       await _fetchUserInfo();
       if (mounted) {
@@ -211,6 +219,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final goldModel = context.watch<GoldModel>();
+    final gold = goldModel.gold;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -245,7 +255,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                     child: FittedBox(
                                       fit: BoxFit.scaleDown,
                                       child: Text(
-                                        formatKoreanNumber(userGold),
+                                        formatKoreanNumber(gold),
                                         style: const TextStyle(
                                           color: Colors.black,
                                           fontSize: 22,
@@ -699,8 +709,9 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () {
+                          onTap: () async{
                             Get.off(() => const ShopPage());
+                            await goldModel.fetchGold(); // gold 값 갱신
                           },
                           child: Stack(
                             alignment: Alignment.center,
@@ -723,8 +734,9 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () {
+                          onTap: () async{
                             Get.off(() => const BagPage());
+                            await goldModel.fetchGold(); // gold 값 갱신
                           },
                           child: Stack(
                             alignment: Alignment.center,

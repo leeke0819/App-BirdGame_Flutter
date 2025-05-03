@@ -1,14 +1,2 @@
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html';
-
-void saveChromeAccessToken(String token){
-  window.localStorage['accessToken'] = token;
-}
-
-String ?getChromeAccessToken(){
-  return window.localStorage['accessToken'];
-}
-
-void clearChromeAccessToken(){
-  window.localStorage.remove('accessToken');
-}
+export 'chrome/chrome_token_stub.dart'
+  if (dart.library.html) 'chrome/chrome_token_web.dart';

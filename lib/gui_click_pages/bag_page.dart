@@ -2,10 +2,14 @@ import 'dart:convert';
 
 import 'package:bird_raise_app/api/api_shop.dart';
 import 'package:bird_raise_app/gui_click_pages/shop_page.dart';
+import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:bird_raise_app/token/mobile_secure_token.dart';
+import 'package:provider/provider.dart';
 
 class BagPage extends StatefulWidget {
   const BagPage({super.key});
@@ -40,10 +44,15 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
       _isLoading = true;
     });
 
-    String requestUrl = "http://localhost:8080/api/v1/bag/page?pageNo=" + "0";
+    String requestUrl = "http://192.168.10.9:8080/api/v1/bag/page?pageNo=" + "0";
     final url = Uri.parse(requestUrl);
 
-    String? token = getChromeAccessToken();
+    String? token;
+    if (kIsWeb) {
+      token = getChromeAccessToken();
+    } else {
+      token = await getAccessToken(); //1초짜리 print문
+    }
     print("발급된 JWT: $token");
     String bearerToken = "Bearer $token";
 
@@ -114,14 +123,13 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
   Future<void> _fetchUserInfo() async {
     final userInfo = await loadUserInfo();
     if (userInfo != null) {
-      setState(() {
-        userGold = userInfo['gold'];
-      });
+      context.read<GoldModel>().updateGold(userInfo['gold']); // 골드만 전역 상태에 반영
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final goldModel = context.watch<GoldModel>();
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -348,8 +356,9 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () {
+                          onTap: () async{
                             Get.off(() => const ShopPage());
+                            await goldModel.fetchGold(); // gold 값 갱신
                           },
                           child: Stack(
                             alignment: Alignment.center,
@@ -372,8 +381,9 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () {
+                          onTap: () async{
                             Get.off(() => const BagPage());
+                            await goldModel.fetchGold(); // gold 값 갱신
                           },
                           child: Stack(
                             alignment: Alignment.center,

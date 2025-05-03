@@ -1,12 +1,16 @@
 import 'dart:convert';
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
+import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gif/gif.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import '../gui_click_pages/shop_page.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:bird_raise_app/token/mobile_secure_token.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -35,6 +39,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     // 비동기 메서드 실행
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeData();
+      context.read<GoldModel>().fetchGold();
     });
 
     // gif 루프
@@ -42,9 +47,14 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   }
 
   Future<void> _initializeData() async {
-    final url = Uri.parse('http://localhost:8080/api/v1/user');
+    final url = Uri.parse('http://192.168.10.9:8080/api/v1/user');
 
-    String? token = getChromeAccessToken();
+    String? token;
+    if (kIsWeb) {
+      token = getChromeAccessToken();
+    } else {
+      token = await getAccessToken(); //1초짜리 print문
+    }
     print("발급된 JWT: $token");
     String bearerToken = "Bearer $token";
 
@@ -65,9 +75,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         print('API 호출 성공 : ${responseData}');
+
+        int goldAmount = responseData['gold'];
+        context.read<GoldModel>().updateGold(goldAmount);
+
         setState(() {
-          int goldAmount = responseData['gold'];
-          gold = formatKoreanNumber(goldAmount);
           nickname = responseData['nickname'];
           level = responseData['userLevel'];
           starCoin = responseData['starCoin'];
@@ -107,28 +119,17 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     }
   }
 
-  // user gold 값만 다시 로딩,gold만 바뀌는 상황이니까, server에서 골드만 조회하는 API
-  // TODO: Server에서 골드만 조회해서 반환해주는 API개발 필요
-  Future<void> _fetchUserGold() async {
-    final url = Uri.parse('http://localhost:8080/api/v1/user');
-    String? token = getChromeAccessToken();
-    String bearerToken = "Bearer $token";
+  Future<void> _handleLogout() async {
+    // // 웹 환경
+    // if (kIsWeb) {
+    //   removeChromeAccessToken();
+    // }
+    // // 모바일 환경  
+    // else {
+    //   await removeAccessToken();
+    // }
 
-    try {
-      final response = await http.get(
-        url,
-        headers: {'Authorization': bearerToken},
-      );
-
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        setState(() {
-          gold = responseData['gold'];
-        });
-      }
-    } catch (e) {
-      print('돈 가져오기 실패: $e');
-    }
+    Get.offAllNamed('/');
   }
 
   String formatKoreanNumber(int number) {
@@ -156,6 +157,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final goldModel = context.watch<GoldModel>();
+    final gold = goldModel.gold;
+    final formattedGold = formatKoreanNumber(gold);
     return Scaffold(
       body: Stack(
         children: [
@@ -303,7 +307,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                             child: FittedBox(
                                               fit: BoxFit.scaleDown,
                                               child: Text(
-                                                '$gold',
+                                                formattedGold,
                                                 style: const TextStyle(
                                                   color: Colors.black,
                                                   fontSize: 16,
@@ -429,6 +433,43 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       ),
                       onPressed: () {
                         print('설정 아이콘 클릭');
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Dialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: Container(
+                                height: 200,
+                                width: 300,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 50,
+                                          vertical: 15,
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        '로그아웃',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontFamily: 'NaverNanumSquareRound',
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      onPressed: _handleLogout,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
                       },
                     ),
                   ),
@@ -497,7 +538,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     child: GestureDetector(
                       onTap: () async {
                         await Get.to(() => const ShopPage());
-                        await _fetchUserGold(); // gold 값 갱신
+                        await goldModel.fetchGold(); // gold 값 갱신
                       },
                       child: Stack(
                         alignment: Alignment.center,
@@ -522,7 +563,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     child: GestureDetector(
                       onTap: () async {
                         await Get.to(() => const BagPage());
-                        await _fetchUserGold(); // gold 값 갱신
+                        await goldModel.fetchGold(); // gold 값 갱신
                       },
                       child: Stack(
                         alignment: Alignment.center,

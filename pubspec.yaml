@@ -41,6 +41,9 @@ dependencies:
   gif: ^2.3.0
   get: ^4.7.2
   flutter_secure_storage: ^9.2.4
+  shared_preferences: ^2.0.15
+  universal_html: ^2.0.6
+  provider: ^6.1.5
 
 dev_dependencies:
   flutter_test:
@@ -85,11 +88,13 @@ flutter:
     - images/GUI/star_coin_plus_button_GUI.png
     - images/GUI/bag_GUI.png
     - images/GUI/background_GUI.png
-    - images/items/1_apple.png
-    - images/items/2_sun_flower_seed_v1.png
-    - images/items/3_sun_flower_seed_v2.png
-    - images/items/4_peanut_v1.png
-    - images/items/5_peanut_v2.png
+    - images/items/apple.png
+    - images/items/sun_flower_seed_v1.png
+    - images/items/sun_flower_seed_v2.png
+    - images/items/peanut_v1.png
+    - images/items/peanut_v2.png
+    - images/items/gamgyul.png
+    - images/items/grape.png
     - images/items/bird_egg_001.png
     - images/birds/bird_001.png
     

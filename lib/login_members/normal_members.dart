@@ -39,7 +39,7 @@ class _NormalMembersState extends State<NormalMembers> {
   }
 
   Future<void> _register() async {
-    final url = Uri.parse('http://localhost:8080/api/v1/user');
+    final url = Uri.parse('http://192.168.10.9:8080/api/v1/user');
     final Map<String, dynamic> data = {
       'nickname': _nicknameController.text,
       'email': _emailController.text,

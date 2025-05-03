@@ -1,16 +1,26 @@
 import 'dart:convert';
 
+import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:bird_raise_app/token/mobile_secure_token.dart';
+import 'package:provider/provider.dart';
 
-String baseUrl = "http://localhost:8080/api/v1/shop";
+String baseUrl = "http://192.168.10.9:8080/api/v1/shop";
 int userGold = 0;
 bool isDataLoaded = false;
 
 //사용자 아이템 구매하기
-Future<int> buyItem(String itemCode) async {
+Future<int> buyItem(String itemCode, BuildContext context) async {
   print("$itemCode구매 시도");
-  String? token = getChromeAccessToken();
+  String? token;
+  if (kIsWeb) {
+    token = getChromeAccessToken();
+  } else {
+    token = await getAccessToken(); //1초짜리 print문
+  }
   String? bearerToken = "Bearer $token";
 
   final response = await http.post(Uri.parse("$baseUrl/buy?itemCode=$itemCode"),
@@ -25,8 +35,7 @@ Future<int> buyItem(String itemCode) async {
     int gold = jsonResponse['user_gold'];
 
     // 전역 변수 업데이트 (GUI 갱신)
-    userGold = gold;
-    isDataLoaded = true;
+    context.read<GoldModel>().updateGold(gold);
 
     print("구매 상태 : $status, 현재 골드 : $gold");
     return 1;
@@ -41,9 +50,14 @@ Future<int> buyItem(String itemCode) async {
 }
 
 // 사용자 아이템 판매하기
-Future<int> sellItem(String itemCode) async {
+Future<int> sellItem(String itemCode, BuildContext context) async {
   print("$itemCode판매 시도");
-  String? token = getChromeAccessToken();
+  String? token;
+  if (kIsWeb) {
+    token = getChromeAccessToken();
+  } else {
+    token = await getAccessToken(); //1초짜리 print문
+  }
   String? bearerToken = "Bearer $token";
 
   final response = await http.post(
@@ -59,8 +73,7 @@ Future<int> sellItem(String itemCode) async {
     int gold = jsonResponse['user_gold'];
 
     // 전역 변수 업데이트 (GUI 갱신)
-    userGold = gold;
-    isDataLoaded = true;
+    context.read<GoldModel>().updateGold(gold);
 
     print("판매 상태 : $status, 현재 골드 : $gold");
     return 1;
@@ -75,10 +88,14 @@ Future<int> sellItem(String itemCode) async {
 }
 
 Future<Map<String, dynamic>?> loadUserInfo() async {
-  String requestUrl = "http://localhost:8080/api/v1/user";
+  String requestUrl = "http://192.168.10.9:8080/api/v1/user";
   final url = Uri.parse(requestUrl);
-
-  String? token = getChromeAccessToken();
+  String? token;
+  if (kIsWeb) {
+    token = getChromeAccessToken();
+  } else {
+    token = await getAccessToken(); //1초짜리 print문
+  }
   String bearerToken = "Bearer $token";
 
   try {
