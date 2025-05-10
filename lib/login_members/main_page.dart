@@ -47,7 +47,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   }
 
   Future<void> _initializeData() async {
-    final url = Uri.parse('http://192.168.10.9:8080/api/v1/user');
+    final url = Uri.parse('http://3.27.57.243:8080/api/v1/user');
 
     String? token;
     if (kIsWeb) {

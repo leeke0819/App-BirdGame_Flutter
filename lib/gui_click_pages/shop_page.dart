@@ -19,7 +19,7 @@ class ShopPage extends StatefulWidget {
 }
 
 class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
-  String imagepath = 'images/items/1_apple.png';
+  String imagepath = 'images/items/apple.png';
 
   List<String> imagePaths = [];
   List<String> itemNames = [];
@@ -48,7 +48,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
     });
 
     String requestUrl =
-        "http://192.168.10.9:8080/api/v1/shop/page?pageNo=0&category=$category";
+        "http://3.27.57.243:8080/api/v1/shop/page?pageNo=0&category=$category";
     final url = Uri.parse(requestUrl);
 
     String? token;

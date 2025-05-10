@@ -19,7 +19,7 @@ class BagPage extends StatefulWidget {
 }
 
 class _BagPage extends State<BagPage> with TickerProviderStateMixin {
-  String imagepath = 'images/items/1_apple.png';
+  String imagepath = 'images/items/apple.png';
   List<String> imagePaths = [];
   List<String> itemNames = [];
   List<String> itemLore = [];
@@ -44,7 +44,7 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
       _isLoading = true;
     });
 
-    String requestUrl = "http://192.168.10.9:8080/api/v1/bag/page?pageNo=" + "0";
+    String requestUrl = "http://3.27.57.243:8080/api/v1/bag/page?pageNo=" + "0";
     final url = Uri.parse(requestUrl);
 
     String? token;

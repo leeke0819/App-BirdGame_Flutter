@@ -43,6 +43,7 @@ class _SocialMembers extends State<SocialMembers> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: Center(
         child: Transform.translate(
           offset: const Offset(0, -50),

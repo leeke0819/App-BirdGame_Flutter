@@ -1,5 +1,6 @@
 import 'package:bird_raise_app/main.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -39,7 +40,7 @@ class _NormalMembersState extends State<NormalMembers> {
   }
 
   Future<void> _register() async {
-    final url = Uri.parse('http://192.168.10.9:8080/api/v1/user');
+    final url = Uri.parse('http://3.27.57.243:8080/api/v1/user');
     final Map<String, dynamic> data = {
       'nickname': _nicknameController.text,
       'email': _emailController.text,
@@ -338,8 +339,9 @@ class _NormalMembersState extends State<NormalMembers> {
               ),
               child: InkWell(
                 onTap: () async {
-                  // 가입 완료 버튼 클릭 시 _register 메서드 호출
+                  // 가입 완료 버튼 클릭 시 _register 메서드 호출 후 메인으로 이동
                   await _register();
+                  Get.offAll(() => const LoginPage());
                 },
                 child: const Center(
                   child: Text(

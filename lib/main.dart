@@ -58,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
       TextEditingController(text: 'Abc1234^^');
 
   Future<void> _login() async {
-    final url = Uri.parse('http://192.168.10.9:8080/api/v1/user/login');
+    final url = Uri.parse('http://3.27.57.243:8080/api/v1/user/login');
     try {
       final response = await http.post(
         url,
