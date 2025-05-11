@@ -41,3 +41,78 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Dart
+.dart_tool/
+.packages
+.buildlog/
+.flutter-plugins
+.flutter-plugins-dependencies
+.melos_tool/
+
+# Flutter related
+.flutter-*
+.pub-cache/
+.pub/
+
+# Environment
+.env
+*.env
+*.env.*
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/App.framework
+ios/Flutter/engine/
+
+# Xcode
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+*.xcworkspace
+*.xcuserstate
+DerivedData/
+xcuserdata/
+
+# Android
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+.gradle/
+*.iml
+
+# Web (Chrome)
+build/
+web/.dart_tool/
+web/.packages
+
+# VS Code
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Linux
+*.swp
+*~
+
+# Firebase or secrets
+*.keystore
+*.jks
+google-services.json
+GoogleService-Info.plist
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+
+# Temporary
+tmp/
