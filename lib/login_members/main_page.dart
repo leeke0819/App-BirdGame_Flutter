@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:bird_raise_app/api/api_bag.dart';
+import 'package:bird_raise_app/api/api_main.dart';
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
@@ -28,8 +30,12 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   String? nickname;
   int exp = 0;
   int level = 0;
-
+  bool isBagVisible = false;
   bool isLoading = true;
+  List<Map<String, String>> bagItems = [];
+
+  List<String> imagePaths = [];
+  List<String> itemAmounts = [];
 
   @override
   void initState() {
@@ -40,6 +46,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeData();
       context.read<GoldModel>().fetchGold();
+      _loadBagItems();
     });
 
     // gif 루프
@@ -47,35 +54,10 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   }
 
   Future<void> _initializeData() async {
-    final url = Uri.parse('http://3.27.57.243:8080/api/v1/user');
-
-    String? token;
-    if (kIsWeb) {
-      token = getChromeAccessToken();
-    } else {
-      token = await getAccessToken(); //1초짜리 print문
-    }
-    print("발급된 JWT: $token");
-    String bearerToken = "Bearer $token";
-
-    // 웹인지 모바일인지 검사
-    if (kIsWeb) {
-      print("현재 웹에서 실행 중입니다.");
-    } else {
-      print("현재 모바일(Android)에서 실행 중입니다.");
-    }
-
     try {
-      final response = await http.get(
-        url,
-        headers: {'Authorization': bearerToken},
-      );
+      final responseData = await ApiMain.fetchUserInfo();
 
-      // 응답이 성공적인지 아닌지 여부를 메시지 보내기
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        print('API 호출 성공 : ${responseData}');
-
+      if (responseData != null && mounted) {
         int goldAmount = responseData['gold'];
         context.read<GoldModel>().updateGold(goldAmount);
 
@@ -86,50 +68,39 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           isLoading = false;
         });
       } else {
-        print('API 호출 실패 : ${response.statusCode}');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'API 호출에 실패했습니다.',
-                style: TextStyle(fontFamily: 'NanumSquareRound'),
-              ),
-            ),
-          );
-        }
+        _showError('API 호출에 실패했습니다.');
       }
     } catch (e) {
-      print('Error: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              '서버 연결에 실패했습니다.',
-              style: TextStyle(fontFamily: 'NanumSquareRound'),
-            ),
-          ),
-        );
-      }
-    }
-
-    if (mounted) {
-      Future.delayed(Duration.zero, () {
-        print('로그인 성공!');
-      });
+      print('❌ 예외 발생: $e');
+      _showError('서버 연결에 실패했습니다.');
     }
   }
 
   Future<void> _handleLogout() async {
-    // // 웹 환경
-    // if (kIsWeb) {
-    //   removeChromeAccessToken();
-    // }
-    // // 모바일 환경  
-    // else {
-    //   await removeAccessToken();
-    // }
+    try {
+      await ApiMain.logout();
+      Get.offAllNamed('/');
+    } catch (e) {
+      print('❌ 로그아웃 실패: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그아웃 중 문제가 발생했습니다.')),
+      );
+    }
+  }
 
-    Get.offAllNamed('/');
+  void _showError(String message) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(fontFamily: 'NanumSquareRound'),
+        ),
+        backgroundColor: Colors.redAccent.withOpacity(0.9),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   String formatKoreanNumber(int number) {
@@ -145,6 +116,21 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       return (number / 1000).toStringAsFixed(1) + '천';
     } else {
       return number.toString();
+    }
+  }
+
+  Future<void> _loadBagItems() async {
+    setState(() {});
+    try {
+      final items = await fetchBagData();
+      setState(() {
+        imagePaths = items.map((e) => e['imagePath'] ?? '').toList();
+        itemAmounts = items.map((e) => e['amount'] ?? '').toList();
+      });
+    } catch (e) {
+      print('❌ 가방 데이터 로딩 실패: $e');
+      _showError('가방 아이템을 불러오지 못했습니다.');
+      setState(() {});
     }
   }
 
@@ -419,6 +405,14 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
+                  IconButton(
+                    icon: Icon(Icons.backpack, color: Colors.white),
+                    onPressed: () {
+                      setState(() {
+                        isBagVisible = !isBagVisible;
+                      });
+                    },
+                  ),
                   Transform.translate(
                     offset: const Offset(18, -22), // gold_GUI와 같은 높이로 설정
                     child: IconButton(
@@ -502,6 +496,75 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               fit: BoxFit.contain,
             ),
           ),
+          if (isBagVisible)
+            Positioned(
+              top: MediaQuery.of(context).size.height * 0.2,
+              left: MediaQuery.of(context).size.width / 2 -
+                  (MediaQuery.of(context).size.width * 0.6) / 2,
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.6,
+                height: 240,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black26, blurRadius: 8),
+                  ],
+                ),
+                child: GridView.builder(
+                  itemCount: imagePaths.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 4,
+                    crossAxisSpacing: 4,
+                    childAspectRatio: 1.0,
+                  ),
+                  itemBuilder: (context, index) {
+                    return Stack(
+                      children: [
+                        // 배경 이미지
+                        Image.asset(
+                          'images/background/shop_item_background.png',
+                          fit: BoxFit.cover,
+                        ),
+
+                        // 아이템 이미지 (가운데 정렬)
+                        Center(
+                          child: Image.asset(
+                            'images/items/${imagePaths[index]}',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+
+                        // 수량 텍스트 - 우하단에 겹쳐서 표시
+                        Positioned(
+                          right: 4,
+                          bottom: 4,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '${itemAmounts[index]}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'NaverNanumSquareRound',
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
 
           // 하단 네비게이션 바
           Positioned(
