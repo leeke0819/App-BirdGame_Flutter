@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bird_raise_app/api/api_bag.dart';
 import 'package:bird_raise_app/api/api_shop.dart';
 import 'package:bird_raise_app/gui_click_pages/shop_page.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
@@ -39,78 +40,32 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
     });
   }
 
+  List<Map<String, String>> bagItems = [];
   Future<void> _initializeData() async {
     setState(() {
       _isLoading = true;
     });
 
-    String requestUrl = "http://3.27.57.243:8080/api/v1/bag/page?pageNo=" + "0";
-    final url = Uri.parse(requestUrl);
-
-    String? token;
-    if (kIsWeb) {
-      token = getChromeAccessToken();
-    } else {
-      token = await getAccessToken(); //1초짜리 print문
-    }
-    print("발급된 JWT: $token");
-    String bearerToken = "Bearer $token";
-
     try {
-      final response = await http.get(
-        url,
-        headers: {'Authorization': bearerToken},
-      );
-      print(response.body);
+      final items = await fetchBagData(); // List<Map<String, String>>
 
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonResponse =
-            jsonDecode(utf8.decode(response.bodyBytes));
+      setState(() {
+        imagePaths = items.map((item) => item['imagePath'] ?? '').toList();
+        itemNames = items.map((item) => item['itemName'] ?? '').toList();
+        itemLore = items.map((item) => item['itemDescription'] ?? '').toList();
+        itemAmounts = items.map((item) => item['amount'] ?? '').toList();
+        itemCode = items.map((item) => item['itemCode'] ?? '').toList();
 
-        // 수량 1 이상인 아이템만 필터링
-        final filteredItems = jsonResponse.where((item) {
-          return item['amount'] > 0;
-        }).toList();
-
-        setState(() {
-          imagePaths = filteredItems
-              .map((item) => item['itemEntity']['imageRoot'].toString())
-              .toList();
-          itemNames = filteredItems
-              .map((item) => item['itemEntity']['itemName'].toString())
-              .toList();
-          itemLore = filteredItems
-              .map((item) => item['itemEntity']['itemDescription'].toString())
-              .toList();
-          itemAmounts =
-              filteredItems.map((item) => item['amount'].toString()).toList();
-          itemCode = filteredItems
-              .map((item) => item['itemEntity']['itemCode'].toString())
-              .toList();
-          _isLoading = false;
-          selectedIndex = 0;
-        });
-      } else {
-        print('API 호출 실패: ${response.statusCode}');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'API 호출에 실패했습니다.',
-                style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
-              ),
-            ),
-          );
-        }
-      }
+        selectedIndex = 0;
+        _isLoading = false;
+      });
     } catch (e) {
+      print('가방 데이터 로딩 실패: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-              '서버 연결에 실패했습니다.',
-              style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
-            ),
+            content: Text('가방 아이템을 불러오지 못했습니다.',
+                style: TextStyle(fontFamily: 'NaverNanumSquareRound')),
           ),
         );
       }
@@ -356,7 +311,7 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () async{
+                          onTap: () async {
                             Get.off(() => const ShopPage());
                             await goldModel.fetchGold(); // gold 값 갱신
                           },
@@ -381,7 +336,7 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () async{
+                          onTap: () async {
                             Get.off(() => const BagPage());
                             await goldModel.fetchGold(); // gold 값 갱신
                           },
