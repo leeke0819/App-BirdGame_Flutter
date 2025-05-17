@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:bird_raise_app/api/api_bag.dart';
 import 'package:bird_raise_app/api/api_main.dart';
+import 'package:bird_raise_app/component/bag_window.dart';
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
@@ -405,14 +406,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.backpack, color: Colors.white),
-                    onPressed: () {
-                      setState(() {
-                        isBagVisible = !isBagVisible;
-                      });
-                    },
-                  ),
                   Transform.translate(
                     offset: const Offset(18, -22), // gold_GUI와 같은 높이로 설정
                     child: IconButton(
@@ -497,73 +490,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             ),
           ),
           if (isBagVisible)
-            Positioned(
-              top: MediaQuery.of(context).size.height * 0.2,
-              left: MediaQuery.of(context).size.width / 2 -
-                  (MediaQuery.of(context).size.width * 0.6) / 2,
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.6,
-                height: 240,
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.95),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black26, blurRadius: 8),
-                  ],
-                ),
-                child: GridView.builder(
-                  itemCount: imagePaths.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    mainAxisSpacing: 4,
-                    crossAxisSpacing: 4,
-                    childAspectRatio: 1.0,
-                  ),
-                  itemBuilder: (context, index) {
-                    return Stack(
-                      children: [
-                        // 배경 이미지
-                        Image.asset(
-                          'images/background/shop_item_background.png',
-                          fit: BoxFit.cover,
-                        ),
-
-                        // 아이템 이미지 (가운데 정렬)
-                        Center(
-                          child: Image.asset(
-                            'images/items/${imagePaths[index]}',
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-
-                        // 수량 텍스트 - 우하단에 겹쳐서 표시
-                        Positioned(
-                          right: 4,
-                          bottom: 4,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 4, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.black54,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              '${itemAmounts[index]}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'NaverNanumSquareRound',
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
+            BagWindow(
+              imagePaths: imagePaths,
+              itemAmounts: itemAmounts,
             ),
 
           // 하단 네비게이션 바
@@ -648,6 +577,22 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).size.height / 2 - 24, // 아이콘 높이 절반만큼 위
+            right: 16,
+            child: GestureDetector(
+              onTap: () async {
+                print("가방 아이콘 눌림");
+                setState(() => isBagVisible = !isBagVisible);
+                if (isBagVisible) await _loadBagItems();
+              },
+              child: Image.asset(
+                'images/GUI/bag_GUI.png',
+                width: 48,
+                height: 48,
               ),
             ),
           ),
