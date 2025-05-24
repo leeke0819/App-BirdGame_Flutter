@@ -88,6 +88,8 @@ flutter:
     - images/GUI/star_coin_plus_button_GUI.png
     - images/GUI/bag_GUI.png
     - images/GUI/background_GUI.png
+    - images/GUI/buy_button_GUI.png
+    - images/GUI/sell_button_GUI.png
     - images/items/apple.png
     - images/items/sun_flower_seed_v1.png
     - images/items/sun_flower_seed_v2.png

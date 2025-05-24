@@ -53,10 +53,9 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
 
     String? token;
     if (kIsWeb) {
-        token = getChromeAccessToken();
-    }
-    else{
-        token = await getAccessToken(); //1초짜리 print문
+      token = getChromeAccessToken();
+    } else {
+      token = await getAccessToken(); //1초짜리 print문
     }
     print("발급된 JWT: $token");
     String bearerToken = "Bearer $token";
@@ -477,22 +476,25 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                   onTap: () {
                                     _handleSellItem(itemCode[selectedIndex]);
                                   },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 18, vertical: 9),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: const Text(
-                                      '판매',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'NaverNanumSquareRound',
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Image.asset(
+                                        'images/GUI/sell_button_GUI.png',
+                                        width: 80,
+                                        height: 36,
+                                        fit: BoxFit.contain,
                                       ),
-                                    ),
+                                      const Text(
+                                        '판매',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'NaverNanumSquareRound',
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
@@ -709,7 +711,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () async{
+                          onTap: () async {
                             Get.off(() => const ShopPage());
                             await goldModel.fetchGold(); // gold 값 갱신
                           },
@@ -734,7 +736,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () async{
+                          onTap: () async {
                             Get.off(() => const BagPage());
                             await goldModel.fetchGold(); // gold 값 갱신
                           },
