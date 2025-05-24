@@ -477,21 +477,32 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                     _handleSellItem(itemCode[selectedIndex]);
                                   },
                                   child: Stack(
-                                    alignment: Alignment.center,
+                                    alignment: Alignment.centerLeft,
                                     children: [
-                                      Image.asset(
-                                        'images/GUI/sell_button_GUI.png',
-                                        width: 80,
-                                        height: 36,
-                                        fit: BoxFit.contain,
+                                      SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.15,
+                                        height:
+                                            MediaQuery.of(context).size.width *
+                                                0.15,
+                                        child: Image.asset(
+                                          'images/GUI/sell_button_GUI.png',
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
-                                      const Text(
-                                        '판매',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'NaverNanumSquareRound',
+                                      Positioned(
+                                        left:
+                                            MediaQuery.of(context).size.width *
+                                                0.06,
+                                        child: const Text(
+                                          '판매',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'NaverNanumSquareRound',
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -631,17 +642,17 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                           setState(() {
                             selectedIndex = index;
                           });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                '${imagePaths[index]}번째 물건입니다.',
-                                style: const TextStyle(
-                                  fontFamily: 'NaverNanumSquareRound',
-                                ),
-                              ),
-                              duration: const Duration(milliseconds: 250),
-                            ),
-                          );
+                          // ScaffoldMessenger.of(context).showSnackBar(
+                          //   SnackBar(
+                          //     content: Text(
+                          //       '${imagePaths[index]}번째 물건입니다.',
+                          //       style: const TextStyle(
+                          //         fontFamily: 'NaverNanumSquareRound',
+                          //       ),
+                          //     ),
+                          //     duration: const Duration(milliseconds: 250),
+                          //   ),
+                          // );
                         },
                         child: Container(
                           margin: const EdgeInsets.all(2),

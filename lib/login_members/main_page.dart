@@ -37,6 +37,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
   List<String> imagePaths = [];
   List<String> itemAmounts = [];
+  List<String> itemCodes = [];
 
   @override
   void initState() {
@@ -127,6 +128,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       setState(() {
         imagePaths = items.map((e) => e['imagePath'] ?? '').toList();
         itemAmounts = items.map((e) => e['amount'] ?? '').toList();
+        itemCodes = items.map((e) => e['itemCode'] ?? '').toList();
       });
     } catch (e) {
       print('❌ 가방 데이터 로딩 실패: $e');
@@ -493,6 +495,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             BagWindow(
               imagePaths: imagePaths,
               itemAmounts: itemAmounts,
+              itemCodes: itemCodes,
             ),
 
           // 하단 네비게이션 바

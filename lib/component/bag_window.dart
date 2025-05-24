@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:bird_raise_app/api/api_main.dart';
 
 class BagWindow extends StatefulWidget {
   final List<String> imagePaths;
   final List<String> itemAmounts;
+  final List<String> itemCodes;
 
   const BagWindow({
     super.key,
     required this.imagePaths,
     required this.itemAmounts,
+    required this.itemCodes,
   });
 
   @override
@@ -57,43 +60,48 @@ class _BagWindowState extends State<BagWindow> {
                     selectedIndex = index;
                   });
                 },
-                child: Stack(
-                  children: [
-                    Image.asset(
-                      'images/background/shop_item_background.png',
+                child: Stack(children: [
+                  Image.asset(
+                    'images/background/shop_item_background.png',
+                    fit: BoxFit.cover,
+                  ),
+                  Center(
+                    child: Image.asset(
+                      'images/items/${widget.imagePaths[index]}',
                       fit: BoxFit.cover,
                     ),
-                    Center(
-                      child: Image.asset(
-                        'images/items/${widget.imagePaths[index]}',
-                        fit: BoxFit.cover,
+                  ),
+                  Positioned(
+                    right: 4,
+                    bottom: 4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        widget.itemAmounts[index],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'NaverNanumSquareRound',
+                        ),
                       ),
                     ),
+                  ),
+                  if (selectedIndex == index)
                     Positioned(
+                      top: 4,
                       right: 4,
-                      bottom: 4,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 4, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          widget.itemAmounts[index],
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'NaverNanumSquareRound',
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (selectedIndex == index)
-                      Positioned(
-                        top: 4,
-                        right: 4,
+                      child: GestureDetector(
+                        onTap: () async {
+                          final apiMain = ApiMain();
+                          await apiMain.feed(widget.itemCodes[index]);
+                          print('Give item at index $index');
+                        },
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 4),
@@ -105,15 +113,15 @@ class _BagWindowState extends State<BagWindow> {
                             "주기",
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 12,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'NaverNanumSquareRound',
                             ),
                           ),
                         ),
                       ),
-                  ],
-                ),
+                    ),
+                ]),
               );
             },
           ),

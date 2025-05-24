@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:bird_raise_app/token/mobile_secure_token.dart';
 import 'package:provider/provider.dart';
 
+
 class BagPage extends StatefulWidget {
   const BagPage({super.key});
 
