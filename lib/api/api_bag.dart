@@ -1,6 +1,7 @@
 // lib/api/api_bag.dart
 
 import 'dart:convert';
+import 'package:bird_raise_app/config/env_config.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:bird_raise_app/token/chrome_token.dart';
@@ -8,7 +9,7 @@ import 'package:bird_raise_app/token/mobile_secure_token.dart';
 
 Future<List<Map<String, String>>> fetchBagData({int page = 0}) async {
   print("fetchData");
-  final url = Uri.parse("http://3.27.57.243:8080/api/v1/bag/page?pageNo=$page");
+  final url = Uri.parse("${EnvConfig.apiUrl}/bag/page?pageNo=$page");
 
   String? token = kIsWeb ? getChromeAccessToken() : await getAccessToken();
   if (token == null) throw Exception("Token is null");

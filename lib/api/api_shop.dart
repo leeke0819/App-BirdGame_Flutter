@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bird_raise_app/config/env_config.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:flutter/widgets.dart';
@@ -8,7 +9,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:bird_raise_app/token/mobile_secure_token.dart';
 import 'package:provider/provider.dart';
 
-String baseUrl = "http://3.27.57.243:8080/api/v1/shop";
+String baseUrl = "${EnvConfig.apiUrl}/shop";
 int userGold = 0;
 bool isDataLoaded = false;
 
@@ -88,7 +89,7 @@ Future<int> sellItem(String itemCode, BuildContext context) async {
 }
 
 Future<Map<String, dynamic>?> loadUserInfo() async {
-  String requestUrl = "http://3.27.57.243:8080/api/v1/user";
+  String requestUrl = "${EnvConfig.apiUrl}/user";
   final url = Uri.parse(requestUrl);
   String? token;
   if (kIsWeb) {

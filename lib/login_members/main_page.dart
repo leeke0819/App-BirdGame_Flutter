@@ -4,6 +4,7 @@ import 'package:bird_raise_app/api/api_main.dart';
 import 'package:bird_raise_app/component/bag_window.dart';
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
+import 'package:bird_raise_app/model/experience_level.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -28,8 +29,10 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   late final GifController controller;
   String gold = '0';
   int starCoin = 0;
-  String? nickname;
+  String nickname = "유저1";
   int exp = 0;
+  int maxExp = 0;
+  int minExp = 0;
   int level = 0;
   bool isBagVisible = false;
   bool isLoading = true;
@@ -62,13 +65,19 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       if (responseData != null && mounted) {
         int goldAmount = responseData['gold'];
         context.read<GoldModel>().updateGold(goldAmount);
-
+        print(responseData);
         setState(() {
-          nickname = responseData['nickname'];
+          nickname = utf8.decode(responseData['nickname'].toString().codeUnits);
           level = responseData['userLevel'];
           starCoin = responseData['starCoin'];
+          exp = responseData['userExp'];
+          minExp = responseData['minExp'];
+          maxExp = responseData['maxExp'];
           isLoading = false;
         });
+        print("EXP: $exp");
+        print("Min EXP: $minExp");
+        print("Max EXP: $maxExp");
       } else {
         _showError('API 호출에 실패했습니다.');
       }
@@ -149,6 +158,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     final goldModel = context.watch<GoldModel>();
     final gold = goldModel.gold;
     final formattedGold = formatKoreanNumber(gold);
+
     return Scaffold(
       body: Stack(
         children: [
@@ -216,10 +226,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        '테스트',
+                                        nickname,
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 14,
+                                          fontFamily: 'NaverNanumSquareRound',
                                         ),
                                       ),
                                       SizedBox(height: 4),
@@ -241,17 +252,27 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                             flex: 1,
                             child: Container(
                               height: 20,
-                              color: Colors.purple,
-                              child: Row(
+                              child: Stack(
                                 children: [
-                                  Expanded(
-                                    child: Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 5, vertical: 3.5),
-                                      decoration: BoxDecoration(
-                                        color: Colors.green,
-                                        borderRadius:
-                                            BorderRadius.circular(10), // 둥근 모서리
+                                  // 배경 이미지 (회색)
+                                  Positioned.fill(
+                                    child: Image.asset(
+                                      'images/GUI/profile_exp_bar_background_GUI.png',
+                                      fit: BoxFit.fill,
+                                      filterQuality: FilterQuality.none,
+                                    ),
+                                  ),
+                                  // 경험치 채워지는 이미지 (초록색)
+                                  Positioned.fill(
+                                    child: FractionallySizedBox(
+                                      alignment: Alignment.centerLeft,
+                                      widthFactor:
+                                          ExperienceLevel.calculateProgress(
+                                              exp, level, maxExp, minExp),
+                                      child: Image.asset(
+                                        'images/GUI/profile_exp_bar_GUI.png',
+                                        fit: BoxFit.fill,
+                                        filterQuality: FilterQuality.none,
                                       ),
                                     ),
                                   ),

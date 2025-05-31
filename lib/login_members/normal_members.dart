@@ -1,3 +1,4 @@
+import 'package:bird_raise_app/config/env_config.dart';
 import 'package:bird_raise_app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -36,11 +37,13 @@ class _NormalMembersState extends State<NormalMembers> {
   void dispose() {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _emailController.dispose();
+    _nicknameController.dispose();
     super.dispose();
   }
 
   Future<void> _register() async {
-    final url = Uri.parse('http://3.27.57.243:8080/api/v1/user');
+    final url = Uri.parse('${EnvConfig.apiUrl}/user');
     final Map<String, dynamic> data = {
       'nickname': _nicknameController.text,
       'email': _emailController.text,
@@ -69,10 +72,14 @@ class _NormalMembersState extends State<NormalMembers> {
           MaterialPageRoute(builder: (context) => const LoginPage()),
         );
       } else {
+        print("회원가입 실패");
+        print(response.statusCode);
+        print(response.body);
+        final errorMessage = utf8.decode(response.bodyBytes); // 한글 깨짐 방지
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Registration failed: ${response.body}',
+              errorMessage,
               style: const TextStyle(fontFamily: 'NaverNanumSquareRound'),
             ),
           ),
@@ -341,7 +348,7 @@ class _NormalMembersState extends State<NormalMembers> {
                 onTap: () async {
                   // 가입 완료 버튼 클릭 시 _register 메서드 호출 후 메인으로 이동
                   await _register();
-                  Get.offAll(() => const LoginPage());
+                  // Get.offAll(() => const LoginPage());
                 },
                 child: const Center(
                   child: Text(

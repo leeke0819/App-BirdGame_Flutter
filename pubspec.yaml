@@ -44,6 +44,7 @@ dependencies:
   shared_preferences: ^2.0.15
   universal_html: ^2.0.6
   provider: ^6.1.5
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -81,6 +82,10 @@ flutter:
     - images/post_button.png
     - images/setting_button.png
     - images/test_profile.png
+    - images/GUI/profile_border_GUI.png
+    - images/GUI/profile_background_GUI.png
+    - images/GUI/profile_exp_bar_GUI.png
+    - images/GUI/profile_exp_bar_background_GUI.png
     - images/GUI/gold_GUI.png
     - images/GUI/gold_plus_button_GUI.png
     - images/GUI/shop_GUI.png

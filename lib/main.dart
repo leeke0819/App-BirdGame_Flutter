@@ -1,3 +1,4 @@
+import 'package:bird_raise_app/config/env_config.dart';
 import 'package:bird_raise_app/login_members/social_members.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/token/mobile_secure_token.dart';
@@ -12,8 +13,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:provider/provider.dart'; //웹 환경구분을 위한 import
+import 'package:flutter_dotenv/flutter_dotenv.dart'; //환경변수 등록용
 
 void main() async {
+  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
 
   // 저장된 토큰 확인
@@ -53,12 +56,12 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true; // 비밀번호 숨김 여부를 관리하는 상태 변수
   final TextEditingController _emailController =
-      TextEditingController(text: 'testuser0419@naver.com');
+      TextEditingController(text: 'test123@naver.com');
   final TextEditingController _passwordController =
-      TextEditingController(text: 'Abc1234^^');
+      TextEditingController(text: '123Time^^');
 
   Future<void> _login() async {
-    final url = Uri.parse('http://3.27.57.243:8080/api/v1/user/login');
+    final url = Uri.parse('${EnvConfig.apiUrl}/user/login');
     try {
       final response = await http.post(
         url,

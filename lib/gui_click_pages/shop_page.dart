@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bird_raise_app/config/env_config.dart';
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +49,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
     });
 
     String requestUrl =
-        "http://3.27.57.243:8080/api/v1/shop/page?pageNo=0&category=$category";
+        "${EnvConfig.apiUrl}/shop/page?pageNo=0&category=$category";
     final url = Uri.parse(requestUrl);
 
     String? token;
