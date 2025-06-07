@@ -73,28 +73,44 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    #로그인 관련
     - images/kakao_login_medium_wide.png
+    #메인 페이지 관련
     - images/background/main_page_width_background.png
     - images/background/main_page_length_background.png
-    - images/background/shop_item_background.png
-    - images/bird_Omoknoonii.gif
     - images/floor-blue-rug.png
     - images/post_button.png
     - images/setting_button.png
+
+    #상점 페이지 관련
+    - images/background/shop_item_background.png
+    - images/GUI/buy_button_GUI.png
+    - images/GUI/sell_button_GUI.png
+
+    #새 관련
+    - images/bird_Omoknoonii.gif
+    - images/bird_Omoknoonii_feed_behavior.gif
+
+    #user 프로필 관련
     - images/test_profile.png
     - images/GUI/profile_border_GUI.png
     - images/GUI/profile_background_GUI.png
+    - images/GUI/empty_profile_exp_bar_GUI.png
     - images/GUI/profile_exp_bar_GUI.png
     - images/GUI/profile_exp_bar_background_GUI.png
+
+    #재화 GUI 관련
     - images/GUI/gold_GUI.png
     - images/GUI/gold_plus_button_GUI.png
-    - images/GUI/shop_GUI.png
     - images/GUI/star_coin_GUI.png
     - images/GUI/star_coin_plus_button_GUI.png
+
+    #하단 GUI 관련
+    - images/GUI/shop_GUI.png
     - images/GUI/bag_GUI.png
     - images/GUI/background_GUI.png
-    - images/GUI/buy_button_GUI.png
-    - images/GUI/sell_button_GUI.png
+
+    #아이템 관련
     - images/items/apple.png
     - images/items/sun_flower_seed_v1.png
     - images/items/sun_flower_seed_v2.png
@@ -103,6 +119,8 @@ flutter:
     - images/items/gamgyul.png
     - images/items/grape.png
     - images/items/bird_egg_001.png
+
+    #새 알 관련
     - images/birds/bird_001.png
     
   # An image asset can refer to one or more resolution-specific "variants", see

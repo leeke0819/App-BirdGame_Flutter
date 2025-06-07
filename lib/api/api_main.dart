@@ -49,7 +49,7 @@ class ApiMain {
     }
   }
 
-  Future<void> feed(String itemCode) async {
+  Future<Map<String, dynamic>?> feed(String itemCode) async {
     String? token;
     if (kIsWeb) {
       token = getChromeAccessToken();
@@ -71,6 +71,7 @@ class ApiMain {
         'amount': 1,
       }),
     );
+    print(response.statusCode);
 
     if (response.statusCode == 200) {
       print('✅ 아이템 사용 성공');

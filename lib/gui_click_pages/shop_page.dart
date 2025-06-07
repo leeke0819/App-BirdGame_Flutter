@@ -451,25 +451,34 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                 ),
                                 const SizedBox(width: 8),
                                 GestureDetector(
-                                  onTap: () async {
+                                  onTap: () {
                                     _handleBuyItem(itemCode[selectedIndex]);
                                   },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 18, vertical: 9),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: const Text(
-                                      '구매',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'NaverNanumSquareRound',
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.12,
+                                        height:
+                                            MediaQuery.of(context).size.width *
+                                                0.12,
+                                        child: Image.asset(
+                                          'images/GUI/buy_button_GUI.png',
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
-                                    ),
+                                      const Text(
+                                        '구매',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'NaverNanumSquareRound',
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -478,32 +487,27 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                     _handleSellItem(itemCode[selectedIndex]);
                                   },
                                   child: Stack(
-                                    alignment: Alignment.centerLeft,
+                                    alignment: Alignment.center,
                                     children: [
                                       SizedBox(
                                         width:
                                             MediaQuery.of(context).size.width *
-                                                0.15,
+                                                0.12,
                                         height:
                                             MediaQuery.of(context).size.width *
-                                                0.15,
+                                                0.12,
                                         child: Image.asset(
                                           'images/GUI/sell_button_GUI.png',
                                           fit: BoxFit.contain,
                                         ),
                                       ),
-                                      Positioned(
-                                        left:
-                                            MediaQuery.of(context).size.width *
-                                                0.06,
-                                        child: const Text(
-                                          '판매',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'NaverNanumSquareRound',
-                                          ),
+                                      const Text(
+                                        '판매',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'NaverNanumSquareRound',
                                         ),
                                       ),
                                     ],

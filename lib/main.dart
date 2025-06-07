@@ -3,9 +3,9 @@ import 'package:bird_raise_app/login_members/social_members.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/token/mobile_secure_token.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
-import 'package:bird_raise_app/login_members/main_page.dart';
+import 'package:bird_raise_app/main_page.dart';
 import 'package:bird_raise_app/login_members/normal_members.dart';
-
+import 'package:bird_raise_app/model/bag_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -36,6 +36,7 @@ void main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => GoldModel()),
+      ChangeNotifierProvider(create: (_) => BagModel()),
     ],
     child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
@@ -85,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
         } else {
           print("모바일 환경에서 동작하는 코드"); //얘가 먼저 실행
           await saveAccessToken(responseData['accessToken']); //3초정도 걸린다 가정.
-          print(getAccessToken()); //1초짜리 print문
+          print(getAccessToken()); //1초짜리 print문ㅂ
         }
 
         // 로그인 성공
@@ -219,15 +220,15 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Container(
-                      width: 300,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.purple,
-                        borderRadius: BorderRadius.circular(7),
-                      ),
-                      child: GestureDetector(
-                        onTap: _login,
+                    GestureDetector(
+                      onTap: _login,
+                      child: Container(
+                        width: 300,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.purple,
+                          borderRadius: BorderRadius.circular(7),
+                        ),
                         child: const Center(
                           child: Text(
                             '로그인',

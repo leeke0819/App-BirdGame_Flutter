@@ -1,16 +1,20 @@
+import 'package:bird_raise_app/model/bag_model.dart';
 import 'package:flutter/material.dart';
 import 'package:bird_raise_app/api/api_main.dart';
+import 'package:provider/provider.dart';
 
 class BagWindow extends StatefulWidget {
   final List<String> imagePaths;
   final List<String> itemAmounts;
   final List<String> itemCodes;
+  final Function() onFeed;
 
   const BagWindow({
     super.key,
     required this.imagePaths,
     required this.itemAmounts,
     required this.itemCodes,
+    required this.onFeed,
   });
 
   @override
@@ -28,6 +32,7 @@ class _BagWindowState extends State<BagWindow> {
 
   @override
   Widget build(BuildContext context) {
+    final bagModel = context.watch<BagModel>();
     return Positioned(
       top: MediaQuery.of(context).size.height * 0.2,
       left: MediaQuery.of(context).size.width / 2 -
@@ -60,68 +65,83 @@ class _BagWindowState extends State<BagWindow> {
                     selectedIndex = index;
                   });
                 },
-                child: Stack(children: [
-                  Image.asset(
-                    'images/background/shop_item_background.png',
-                    fit: BoxFit.cover,
-                  ),
-                  Center(
-                    child: Image.asset(
-                      'images/items/${widget.imagePaths[index]}',
+                child: Stack(
+                  children: [
+                    Image.asset(
+                      'images/background/shop_item_background.png',
                       fit: BoxFit.cover,
                     ),
-                  ),
-                  Positioned(
-                    right: 4,
-                    bottom: 4,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 4, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(4),
+                    Center(
+                      child: Image.asset(
+                        'images/items/${widget.imagePaths[index]}',
+                        fit: BoxFit.cover,
                       ),
-                      child: Text(
-                        widget.itemAmounts[index],
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'NaverNanumSquareRound',
+                    ),
+                    Positioned(
+                      right: 4,
+                      bottom: 4,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 4, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          widget.itemAmounts[index],
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'NaverNanumSquareRound',
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  if (selectedIndex == index)
-                    Positioned(
-                      top: 4,
-                      right: 4,
-                      child: GestureDetector(
-                        onTap: () async {
-                          final apiMain = ApiMain();
-                          await apiMain.feed(widget.itemCodes[index]);
-                          print('Give item at index $index');
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.blueAccent,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Text(
-                            "주기",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'NaverNanumSquareRound',
+                    if (selectedIndex == index)
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: GestureDetector(
+                          onTap: () async {
+                            final apiMain = ApiMain();
+                            final response = await apiMain.feed(widget.itemCodes[index]);
+                            if (response != null) {
+                              setState(() {
+                                int newAmount = int.parse(widget.itemAmounts[index]) - 1;
+                                if (newAmount <= 0) {
+                                  widget.imagePaths.removeAt(index);
+                                  widget.itemAmounts.removeAt(index);
+                                  widget.itemCodes.removeAt(index);
+                                  selectedIndex = null;
+                                } else {
+                                  widget.itemAmounts[index] = newAmount.toString();
+                                }
+                              });
+                              widget.onFeed();
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.blueAccent,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text(
+                              "주기",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'NaverNanumSquareRound',
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                ]),
+                  ],
+                ),
               );
             },
           ),

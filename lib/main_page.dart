@@ -5,16 +5,12 @@ import 'package:bird_raise_app/component/bag_window.dart';
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/model/experience_level.dart';
-import 'package:bird_raise_app/token/chrome_token.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gif/gif.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../gui_click_pages/shop_page.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:bird_raise_app/token/mobile_secure_token.dart';
+import '../component/bird_status.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -34,8 +30,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   int maxExp = 0;
   int minExp = 0;
   int level = 0;
+  int birdHungry = 5;  // 기본값 설정 (0-10 범위)
+  int birdThirst = 5;  // 기본값 설정 (0-10 범위)
   bool isBagVisible = false;
   bool isLoading = true;
+  bool isFeeding = false;
   List<Map<String, String>> bagItems = [];
 
   List<String> imagePaths = [];
@@ -112,6 +111,25 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         duration: const Duration(seconds: 2),
       ),
     );
+  }
+
+  void _handleFeed() async {
+    if (isFeeding) return; // 중복 방지
+
+    setState(() {
+      isFeeding = true; // 새 이미지 feed_behavior.gif로 전환
+      // 임시로 상태 업데이트 (실제로는 API 응답에 따라 업데이트해야 함)
+      birdHungry = (birdHungry + 2).clamp(0, 10);
+      birdThirst = (birdThirst + 2).clamp(0, 10);
+    });
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (mounted) {
+      setState(() {
+        isFeeding = false; // 다시 기본 이미지로 복귀
+      });
+    }
   }
 
   String formatKoreanNumber(int number) {
@@ -194,55 +212,74 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                             flex: 4,
                             child: Container(
                               height: 80,
-                              decoration: BoxDecoration(
-                                color: Colors.blue,
-                                border: Border.all(
-                                    color: Colors.white, width: 2), // 테두리 추가
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
+                              child: Stack(
                                 children: [
-                                  Container(
-                                    width: 50,
-                                    height: 50,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white,
-                                    ),
-                                    child: ClipOval(
-                                      child: Image.asset(
-                                        'images/test_profile.png', // 프로필 이미지 경로
-                                        fit: BoxFit.cover,
-                                      ),
+                                  // 배경 이미지
+                                  Positioned.fill(
+                                    child: Image.asset(
+                                      'images/GUI/profile_background_GUI.png',
+                                      fit: BoxFit.fill,
                                     ),
                                   ),
+                                  // 프로필 테두리
+                                  Positioned.fill(
+                                    child: Image.asset(
+                                      'images/GUI/profile_border_GUI.png',
+                                      fit: BoxFit.fill,
+                                    ),
+                                  ),
+                                  // 프로필 내용
+                                  Positioned(
+                                    left: 8, // 왼쪽 여백
+                                    top: 6.5,  // 위쪽 여백
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: 50,
+                                          height: 50,
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                          ),
+                                          child: Image.asset(
+                                            'images/test_profile.png', // 프로필 이미지 경로
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
 
-                                  // 프로필과 텍스트 사이 여백
-                                  // Lv. 과 이름 텍스트
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        nickname,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontFamily: 'NaverNanumSquareRound',
+                                        // 프로필과 텍스트 사이 여백
+                                        const SizedBox(width: 15), // 여백 추가
+                                        
+                                        // Lv. 과 이름 텍스트
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              children: [
+                                                Text(
+                                                  nickname,
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14,
+                                                    fontFamily: 'NaverNanumSquareRound',
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  'Lv. ' + level.toString(),
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ),
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        'Lv. ' + level.toString(),
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
@@ -252,6 +289,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                             flex: 1,
                             child: Container(
                               height: 20,
+                              margin: const EdgeInsets.only(top: 8), // 아래로 살짝 이동
                               child: Stack(
                                 children: [
                                   // 배경 이미지 (회색)
@@ -506,10 +544,23 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             left: MediaQuery.of(context).size.width / 2 - 95,
             child: Gif(
               controller: controller,
-              image: const AssetImage('images/bird_Omoknoonii.gif'),
+              image: AssetImage(
+                isFeeding
+                  ? 'images/bird_Omoknoonii_feed_behavior.gif'
+                  : 'images/bird_Omoknoonii.gif',
+              ),
               width: 200,
               height: 200,
               fit: BoxFit.contain,
+            ),
+          ),
+          // 새 상태 표시
+          Positioned(
+            top: MediaQuery.of(context).size.height / 2 + 140,
+            left: MediaQuery.of(context).size.width / 2 - 100,
+            child: BirdStatus(
+              birdHungry: birdHungry,
+              birdThirst: birdThirst,
             ),
           ),
           if (isBagVisible)
@@ -517,8 +568,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               imagePaths: imagePaths,
               itemAmounts: itemAmounts,
               itemCodes: itemCodes,
+              onFeed: _handleFeed,
             ),
-
           // 하단 네비게이션 바
           Positioned(
             bottom: 0,
