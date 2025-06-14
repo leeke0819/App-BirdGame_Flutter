@@ -11,6 +11,8 @@ import 'package:bird_raise_app/api/api_shop.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:bird_raise_app/token/mobile_secure_token.dart';
 import 'package:provider/provider.dart';
+import 'package:bird_raise_app/model/shop_model.dart';
+
 
 class ShopPage extends StatefulWidget {
   const ShopPage({super.key});
@@ -32,15 +34,23 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   int starCoin = 0;
   bool _isLoading = true;
   int category = 1; // Default category
+  late ShopModel shopModel;
 
   @override
   void initState() {
     super.initState();
+    shopModel = ShopModel();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeData();
       _fetchUserInfo();
     });
+  }
+
+  @override
+  void dispose() {
+    shopModel.dispose();
+    super.dispose();
   }
 
   Future<void> _initializeData() async {
@@ -69,13 +79,11 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
       print(response.body);
 
       if (response.statusCode == 200) {
-        // 한글 깨짐 발생 시 jsonDecode(response.body)에서 jsonDecode(utf8.decode(response.bodyBytes))으로 변경
         final Map<String, dynamic> jsonResponse = Map<String, dynamic>.from(
             jsonDecode(utf8.decode(response.bodyBytes)));
         final List<dynamic> contentList =
             jsonResponse['content'] as List<dynamic>;
 
-        // Update imagePaths list and rebuild UI
         setState(() {
           imagePaths =
               contentList.map((item) => item['imageRoot'].toString()).toList();
@@ -148,61 +156,35 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
     }
   }
 
-  // 아이템 구매 핸들러
-  Future<void> _handleBuyItem(String itemCode) async {
-    int result = await buyItem(itemCode, context);
+  Future<void> _handleBuyItem(String itemCode, int quantity) async {
+    int result = await buyItem(itemCode, context, quantity);
     if (result == 1) {
-      await _fetchUserInfo();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "구매 완료!",
-              style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
-            ),
-          ),
-        );
-      }
+      shopModel.showCenterToast(
+        "구매 완료!",
+        bgColor: const Color(0xFF4CAF50),
+      );
     } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "구매 실패: 골드가 부족합니다.",
-              style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
-            ),
-          ),
-        );
-      }
+      shopModel.showCenterToast(
+        "구매 실패: 골드가 부족합니다.",
+        bgColor: const Color(0xFFE53935),
+        textColor: Colors.white,
+      );
     }
   }
 
-  // 아이템 판매 핸들러
-  Future<void> _handleSellItem(String itemCode) async {
-    int result = await sellItem(itemCode, context);
+  Future<void> _handleSellItem(String itemCode, int quantity) async {
+    int result = await sellItem(itemCode, context, quantity);
     if (result == 1) {
-      await _fetchUserInfo();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "판매 완료!",
-              style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
-            ),
-          ),
-        );
-      }
+      shopModel.showCenterToast(
+        "판매 완료!",
+        bgColor: const Color(0xFF4CAF50),
+      );
     } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "판매 실패: 판매할 아이템이 없습니다.",
-              style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
-            ),
-          ),
-        );
-      }
+      shopModel.showCenterToast(
+        "판매 실패: 판매할 아이템이 없습니다.",
+        bgColor: const Color(0xFFE53935),
+        textColor: Colors.white,
+      );
     }
   }
 
@@ -452,7 +434,13 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                 const SizedBox(width: 8),
                                 GestureDetector(
                                   onTap: () {
-                                    _handleBuyItem(itemCode[selectedIndex]);
+                                    shopModel.showQuantityDialog(
+                                      context,
+                                      itemCode[selectedIndex],
+                                      true,
+                                      _handleBuyItem,
+                                      _handleSellItem,
+                                    );
                                   },
                                   child: Stack(
                                     alignment: Alignment.center,
@@ -484,7 +472,13 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                 const SizedBox(width: 8),
                                 GestureDetector(
                                   onTap: () {
-                                    _handleSellItem(itemCode[selectedIndex]);
+                                    shopModel.showQuantityDialog(
+                                      context,
+                                      itemCode[selectedIndex],
+                                      false,
+                                      _handleBuyItem,
+                                      _handleSellItem,
+                                    );
                                   },
                                   child: Stack(
                                     alignment: Alignment.center,
@@ -647,17 +641,6 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                           setState(() {
                             selectedIndex = index;
                           });
-                          // ScaffoldMessenger.of(context).showSnackBar(
-                          //   SnackBar(
-                          //     content: Text(
-                          //       '${imagePaths[index]}번째 물건입니다.',
-                          //       style: const TextStyle(
-                          //         fontFamily: 'NaverNanumSquareRound',
-                          //       ),
-                          //     ),
-                          //     duration: const Duration(milliseconds: 250),
-                          //   ),
-                          // );
                         },
                         child: Container(
                           margin: const EdgeInsets.all(2),

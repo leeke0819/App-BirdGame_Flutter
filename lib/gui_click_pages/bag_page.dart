@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:bird_raise_app/api/api_bag.dart';
+import 'package:bird_raise_app/api/api_bird.dart';
 import 'package:bird_raise_app/api/api_shop.dart';
 import 'package:bird_raise_app/gui_click_pages/shop_page.dart';
+import 'package:bird_raise_app/model/bag_model.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:get/get.dart';
@@ -79,6 +81,30 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
     final userInfo = await loadUserInfo();
     if (userInfo != null) {
       context.read<GoldModel>().updateGold(userInfo['gold']); // 골드만 전역 상태에 반영
+    }
+  }
+
+  void _handleUseItem(String itemCode) async {
+    print("$itemCode 사용 시도");
+    final response = await ApiBird.feed(itemCode);
+    if (response != null) {
+      print("아이템 사용 성공");
+      // 아이템 사용 후 가방 데이터 새로고침
+      _initializeData();
+      // 메인 페이지 새로고침을 위한 이벤트 발생
+      Get.find<BagModel>().notifyListeners();
+    } else {
+      print("아이템 사용 실패");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('아이템 사용에 실패했습니다. 잠시 후 다시 시도해주세요.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // 실패 시에도 가방 데이터 새로고침
+        _initializeData();
+      }
     }
   }
 
@@ -190,94 +216,105 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                   ],
                 ),
                 const SizedBox(height: 3),
-                // 그리드 형태의 아이템 목록
+                // 그리드 형태의 아이템 목록 또는 빈 가방 메시지
                 Expanded(
-                  child: GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 5,
-                      mainAxisSpacing: 3,
-                      childAspectRatio: 1.0,
-                    ),
-                    itemCount: imagePaths.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedIndex = index;
-                          });
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
+                  child: imagePaths.isEmpty
+                      ? const Center(
+                          child: Text(
+                            '가방에 아이템이 없습니다 ;ㅇ;',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 18,
+                              fontFamily: 'NaverNanumSquareRound',
+                            ),
                           ),
-                          child: Stack(
-                            children: [
-                              // 아이템 배경
-                              Positioned.fill(
-                                child: ClipRRect(
+                        )
+                      : GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 5,
+                            mainAxisSpacing: 3,
+                            childAspectRatio: 1.0,
+                          ),
+                          itemCount: imagePaths.length,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selectedIndex = index;
+                                });
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: Image.asset(
-                                    'images/background/shop_item_background.png',
-                                    fit: BoxFit.cover,
-                                  ),
                                 ),
-                              ),
-
-                              // 아이템 이미지
-                              Center(
-                                child: FractionallySizedBox(
-                                  widthFactor: 0.9,
-                                  heightFactor: 0.9,
-                                  child: Image.asset(
-                                    'images/items/${imagePaths[index]}',
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                right: 4,
-                                bottom: 4,
-                                child: Builder(
-                                  builder: (context) {
-                                    double screenWidth =
-                                        MediaQuery.of(context).size.width;
-                                    double fontSize =
-                                        screenWidth * 0.03; // 예: 3% 비율
-                                    double horizontalPadding =
-                                        screenWidth * 0.020; // padding도 비율로!
-                                    double verticalPadding =
-                                        screenWidth * 0.010; // 세로 패딩도 비율로!
-
-                                    return Container(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: horizontalPadding,
-                                        vertical: verticalPadding,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black54,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        itemAmounts[index],
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: fontSize,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'NaverNanumSquareRound',
+                                child: Stack(
+                                  children: [
+                                    // 아이템 배경
+                                    Positioned.fill(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.asset(
+                                          'images/background/shop_item_background.png',
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
-                                    );
-                                  },
+                                    ),
+
+                                    // 아이템 이미지
+                                    Center(
+                                      child: FractionallySizedBox(
+                                        widthFactor: 0.9,
+                                        heightFactor: 0.9,
+                                        child: Image.asset(
+                                          'images/items/${imagePaths[index]}',
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      right: 4,
+                                      bottom: 4,
+                                      child: Builder(
+                                        builder: (context) {
+                                          double screenWidth =
+                                              MediaQuery.of(context).size.width;
+                                          double fontSize =
+                                              screenWidth * 0.03; // 예: 3% 비율
+                                          double horizontalPadding =
+                                              screenWidth * 0.020; // padding도 비율로!
+                                          double verticalPadding =
+                                              screenWidth * 0.010; // 세로 패딩도 비율로!
+
+                                          return Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: horizontalPadding,
+                                              vertical: verticalPadding,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black54,
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              itemAmounts[index],
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: fontSize,
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily: 'NaverNanumSquareRound',
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
                 ),
                 // Footer navigation bar 추가
                 const SizedBox(height: 3),

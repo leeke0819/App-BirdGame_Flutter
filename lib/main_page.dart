@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:bird_raise_app/api/api_bag.dart';
 import 'package:bird_raise_app/api/api_main.dart';
+import 'package:bird_raise_app/api/api_bird.dart';
 import 'package:bird_raise_app/component/bag_window.dart';
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
@@ -55,6 +56,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
     // gif 루프
     controller.repeat(period: Duration(milliseconds: 1300));
+
   }
 
   Future<void> _initializeData() async {
@@ -72,11 +74,15 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           exp = responseData['userExp'];
           minExp = responseData['minExp'];
           maxExp = responseData['maxExp'];
+          birdHungry = responseData['birdHungry'] ?? 5;  // 새의 배고픔 상태
+          birdThirst = responseData['birdThirst'] ?? 5;  // 새의 목마름 상태
           isLoading = false;
         });
         print("EXP: $exp");
         print("Min EXP: $minExp");
         print("Max EXP: $maxExp");
+        print("Bird Hungry: $birdHungry");
+        print("Bird Thirst: $birdThirst");
       } else {
         _showError('API 호출에 실패했습니다.');
       }
@@ -113,21 +119,40 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     );
   }
 
-  void _handleFeed() async {
-    if (isFeeding) return; // 중복 방지
-
-    setState(() {
-      isFeeding = true; // 새 이미지 feed_behavior.gif로 전환
-      // 임시로 상태 업데이트 (실제로는 API 응답에 따라 업데이트해야 함)
-      birdHungry = (birdHungry + 2).clamp(0, 10);
-      birdThirst = (birdThirst + 2).clamp(0, 10);
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-
+  void _updateBirdStatus(int hungry, int thirst) {
     if (mounted) {
       setState(() {
-        isFeeding = false; // 다시 기본 이미지로 복귀
+        birdHungry = hungry;
+        birdThirst = thirst;
+      });
+    }
+  }
+
+  void _handleFeed(String itemCode) async {
+    if (isFeeding) return;
+
+    setState(() {
+      isFeeding = true;
+    });
+
+    try {
+      final response = await ApiBird.feed(itemCode);
+      if (response != null) {
+        // 서버 응답에서 새의 상태 업데이트
+        _updateBirdStatus(
+          response['birdHungry'] ?? birdHungry,
+          response['birdThirst'] ?? birdThirst
+        );
+      }
+    } catch (e) {
+      print('❌ 아이템 사용 중 오류 발생: $e');
+    }
+
+    // 2초 후에 애니메이션 상태 초기화
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) {
+      setState(() {
+        isFeeding = false;
       });
     }
   }
@@ -542,25 +567,25 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           Positioned(
             top: MediaQuery.of(context).size.height / 2 - -60,
             left: MediaQuery.of(context).size.width / 2 - 95,
-            child: Gif(
-              controller: controller,
-              image: AssetImage(
-                isFeeding
-                  ? 'images/bird_Omoknoonii_feed_behavior.gif'
-                  : 'images/bird_Omoknoonii.gif',
-              ),
-              width: 200,
-              height: 200,
-              fit: BoxFit.contain,
-            ),
-          ),
-          // 새 상태 표시
-          Positioned(
-            top: MediaQuery.of(context).size.height / 2 + 140,
-            left: MediaQuery.of(context).size.width / 2 - 100,
-            child: BirdStatus(
-              birdHungry: birdHungry,
-              birdThirst: birdThirst,
+            child: Row(
+              children: [
+                Gif(
+                  controller: controller,
+                  image: AssetImage(
+                    isFeeding
+                      ? 'images/bird_Omoknoonii_feed_behavior.gif'
+                      : 'images/bird_Omoknoonii.gif',
+                  ),
+                  width: 200,
+                  height: 200,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(width: 10), // 새와 상태 표시 사이 간격
+                BirdStatus(
+                  birdHungry: birdHungry,
+                  birdThirst: birdThirst,
+                ),
+              ],
             ),
           ),
           if (isBagVisible)
@@ -568,7 +593,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               imagePaths: imagePaths,
               itemAmounts: itemAmounts,
               itemCodes: itemCodes,
-              onFeed: _handleFeed,
+              onFeed: (itemCode) => _handleFeed(itemCode),
             ),
           // 하단 네비게이션 바
           Positioned(

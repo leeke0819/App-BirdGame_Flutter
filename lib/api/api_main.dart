@@ -24,16 +24,24 @@ class ApiMain {
       return null;
     }
 
-    final response = await http.get(
-      _userUrl,
-      headers: {'Authorization': 'Bearer $token'},
-    );
+    try {
+      final response = await http.get(
+        _userUrl,
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
-    if (response.statusCode == 200) {
-      print('✅ 사용자 정보 조회 성공');
-      return jsonDecode(response.body);
-    } else {
-      print('❌ 사용자 정보 호출 실패: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        print('✅ 사용자 정보 조회 성공');
+        final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+        print('서버 응답 데이터: $responseData');
+        return responseData;
+      } else {
+        print('❌ 사용자 정보 호출 실패: ${response.statusCode}');
+        print('응답 내용: ${utf8.decode(response.bodyBytes)}');
+        return null;
+      }
+    } catch (e) {
+      print('❌ API 호출 중 오류 발생: $e');
       return null;
     }
   }

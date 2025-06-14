@@ -1,13 +1,13 @@
 import 'package:bird_raise_app/model/bag_model.dart';
 import 'package:flutter/material.dart';
-import 'package:bird_raise_app/api/api_main.dart';
+import 'package:bird_raise_app/api/api_bird.dart';
 import 'package:provider/provider.dart';
 
 class BagWindow extends StatefulWidget {
   final List<String> imagePaths;
   final List<String> itemAmounts;
   final List<String> itemCodes;
-  final Function() onFeed;
+  final Function(String) onFeed;
 
   const BagWindow({
     super.key,
@@ -104,8 +104,7 @@ class _BagWindowState extends State<BagWindow> {
                         right: 4,
                         child: GestureDetector(
                           onTap: () async {
-                            final apiMain = ApiMain();
-                            final response = await apiMain.feed(widget.itemCodes[index]);
+                            final response = await ApiBird.feed(widget.itemCodes[index]);
                             if (response != null) {
                               setState(() {
                                 int newAmount = int.parse(widget.itemAmounts[index]) - 1;
@@ -118,7 +117,7 @@ class _BagWindowState extends State<BagWindow> {
                                   widget.itemAmounts[index] = newAmount.toString();
                                 }
                               });
-                              widget.onFeed();
+                              widget.onFeed(widget.itemCodes[index]);
                             }
                           },
                           child: Container(

@@ -12,6 +12,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart'; //웹 환경구분을 위한 import
 import 'package:flutter_dotenv/flutter_dotenv.dart'; //환경변수 등록용
 
@@ -33,18 +34,23 @@ void main() async {
     javaScriptAppKey: 'd85aa4100c1fd9fe52a7414e8a8493c3',
   );
 
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (_) => GoldModel()),
-      ChangeNotifierProvider(create: (_) => BagModel()),
-    ],
-    child: GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: token != null ? const MainPage() : const LoginPage(),
-        theme: ThemeData(
-          fontFamily: 'NaverNanumSquareRound',
-        )),
-  ));
+  runApp(
+    OverlaySupport.global(
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => GoldModel()),
+          ChangeNotifierProvider(create: (_) => BagModel()),
+        ],
+        child: GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: token != null ? const MainPage() : const LoginPage(),
+          theme: ThemeData(
+            fontFamily: 'NaverNanumSquareRound',
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class LoginPage extends StatefulWidget {

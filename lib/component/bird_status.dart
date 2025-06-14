@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 class BirdStatus extends StatelessWidget {
   final int birdHungry;
@@ -10,8 +11,39 @@ class BirdStatus extends StatelessWidget {
     required this.birdThirst,
   });
 
+  void _checkStatus(BuildContext context) {
+    if (birdHungry > 10) {
+      showSimpleNotification(
+        const Text(
+          '새가 배불러 먹지 못합니다.',
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: 'NaverNanumSquareRound',
+          ),
+        ),
+        background: Colors.orange,
+        duration: const Duration(seconds: 2),
+      );
+    }
+    if (birdThirst > 10) {
+      showSimpleNotification(
+        const Text(
+          '새가 더는 목마르지 않습니다.',
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: 'NaverNanumSquareRound',
+          ),
+        ),
+        background: Colors.blue,
+        duration: const Duration(seconds: 2),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // 상태 체크
+    _checkStatus(context);
 
     return Container(
       padding: const EdgeInsets.all(8.0),

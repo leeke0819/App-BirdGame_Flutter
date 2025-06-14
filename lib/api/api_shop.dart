@@ -14,8 +14,8 @@ int userGold = 0;
 bool isDataLoaded = false;
 
 //사용자 아이템 구매하기
-Future<int> buyItem(String itemCode, BuildContext context) async {
-  print("$itemCode구매 시도");
+Future<int> buyItem(String itemCode, BuildContext context, [int quantity = 1]) async {
+  print("$itemCode $quantity개 구매 시도");
   String? token;
   if (kIsWeb) {
     token = getChromeAccessToken();
@@ -24,8 +24,10 @@ Future<int> buyItem(String itemCode, BuildContext context) async {
   }
   String? bearerToken = "Bearer $token";
 
-  final response = await http.post(Uri.parse("$baseUrl/buy?itemCode=$itemCode"),
-      headers: {'Authorization': bearerToken});
+  final response = await http.post(
+    Uri.parse("$baseUrl/buy?itemCode=$itemCode&amount=$quantity"),
+    headers: {'Authorization': bearerToken}
+  );
 
   if (response.statusCode == 200) {
     final Map<String, dynamic> jsonResponse =
@@ -51,8 +53,8 @@ Future<int> buyItem(String itemCode, BuildContext context) async {
 }
 
 // 사용자 아이템 판매하기
-Future<int> sellItem(String itemCode, BuildContext context) async {
-  print("$itemCode판매 시도");
+Future<int> sellItem(String itemCode, BuildContext context, [int quantity = 1]) async {
+  print("$itemCode $quantity개 판매 시도");
   String? token;
   if (kIsWeb) {
     token = getChromeAccessToken();
@@ -62,8 +64,9 @@ Future<int> sellItem(String itemCode, BuildContext context) async {
   String? bearerToken = "Bearer $token";
 
   final response = await http.post(
-      Uri.parse("$baseUrl/sell?itemCode=$itemCode"),
-      headers: {'Authorization': bearerToken});
+    Uri.parse("$baseUrl/sell?itemCode=$itemCode&amount=$quantity"),
+    headers: {'Authorization': bearerToken}
+  );
 
   if (response.statusCode == 200) {
     final Map<String, dynamic> jsonResponse =

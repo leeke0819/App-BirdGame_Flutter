@@ -45,6 +45,7 @@ dependencies:
   universal_html: ^2.0.6
   provider: ^6.1.5
   flutter_dotenv: ^5.2.1
+  overlay_support: ^2.1.0
 
 dev_dependencies:
   flutter_test:
