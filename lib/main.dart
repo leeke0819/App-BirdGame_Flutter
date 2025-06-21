@@ -6,6 +6,7 @@ import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:bird_raise_app/main_page.dart';
 import 'package:bird_raise_app/login_members/normal_members.dart';
 import 'package:bird_raise_app/model/bag_model.dart';
+import 'package:bird_raise_app/services/timer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -19,6 +20,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart'; //환경변수 등록용
 void main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 전역 타이머 서비스 시작
+  TimerService().startTimer();
 
   // 저장된 토큰 확인
   String? token;

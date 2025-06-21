@@ -6,12 +6,78 @@ import 'package:bird_raise_app/component/bag_window.dart';
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/model/experience_level.dart';
+import 'package:bird_raise_app/services/timer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gif/gif.dart';
 import 'package:provider/provider.dart';
 import '../gui_click_pages/shop_page.dart';
 import '../component/bird_status.dart';
+import 'dart:async';
+
+/// 타이머만을 위한 별도 위젯
+class TimerWidget extends StatefulWidget {
+  const TimerWidget({super.key});
+
+  @override
+  State<TimerWidget> createState() => _TimerWidgetState();
+}
+
+class _TimerWidgetState extends State<TimerWidget> {
+  String _elapsedTimeString = '00:00';
+  final TimerService _timerService = TimerService();
+
+  @override
+  void initState() {
+    super.initState();
+    _timerService.addListener(_onTimerUpdate);
+  }
+
+  void _onTimerUpdate(Duration elapsedTime) {
+    if (mounted) {
+      setState(() {
+        _elapsedTimeString = _timerService.formattedElapsedTime;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timerService.removeListener(_onTimerUpdate);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.access_time,
+            color: Colors.white,
+            size: 16,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            _elapsedTimeString,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'NaverNanumSquareRound',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -42,6 +108,10 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   List<String> itemAmounts = [];
   List<String> itemCodes = [];
 
+  // 새의 생성 시간 관련 변수
+  String? birdCreatedAt;
+  String birdAgeString = '0분';
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +127,14 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     // gif 루프
     controller.repeat(period: Duration(milliseconds: 1300));
 
+    // 새의 나이를 1분마다 업데이트
+    Timer.periodic(const Duration(minutes: 1), (timer) {
+      if (mounted) {
+        _updateBirdAge();
+      } else {
+        timer.cancel();
+      }
+    });
   }
 
   Future<void> _initializeData() async {
@@ -66,7 +144,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       if (responseData != null && mounted) {
         int goldAmount = responseData['gold'];
         context.read<GoldModel>().updateGold(goldAmount);
-        print(responseData);
         setState(() {
           nickname = utf8.decode(responseData['nickname'].toString().codeUnits);
           level = responseData['userLevel'];
@@ -78,11 +155,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           birdThirst = responseData['birdThirst'] ?? 5;  // 새의 목마름 상태
           isLoading = false;
         });
-        print("EXP: $exp");
-        print("Min EXP: $minExp");
-        print("Max EXP: $maxExp");
-        print("Bird Hungry: $birdHungry");
-        print("Bird Thirst: $birdThirst");
+        
+        // 새의 상태 정보 가져오기 (createdAt 포함)
+        await _fetchBirdState();
       } else {
         _showError('API 호출에 실패했습니다.');
       }
@@ -91,6 +166,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       _showError('서버 연결에 실패했습니다.');
     }
   }
+
 
   Future<void> _handleLogout() async {
     try {
@@ -119,15 +195,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     );
   }
 
-  void _updateBirdStatus(int hungry, int thirst) {
-    if (mounted) {
-      setState(() {
-        birdHungry = hungry;
-        birdThirst = thirst;
-      });
-    }
-  }
-
   void _handleFeed(String itemCode) async {
     if (isFeeding) return;
 
@@ -138,11 +205,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     try {
       final response = await ApiBird.feed(itemCode);
       if (response != null) {
-        // 서버 응답에서 새의 상태 업데이트
-        _updateBirdStatus(
-          response['birdHungry'] ?? birdHungry,
-          response['birdThirst'] ?? birdThirst
-        );
+        // 서버 응답에서 새의 상태 업데이트 (setState 없이)
+        birdHungry = response['birdHungry'] ?? birdHungry;
+        birdThirst = response['birdThirst'] ?? birdThirst;
       }
     } catch (e) {
       print('❌ 아이템 사용 중 오류 발생: $e');
@@ -186,6 +251,34 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       print('❌ 가방 데이터 로딩 실패: $e');
       _showError('가방 아이템을 불러오지 못했습니다.');
       setState(() {});
+    }
+  }
+
+  /// 새의 나이를 업데이트하는 메서드
+  void _updateBirdAge() {
+    if (birdCreatedAt != null) {
+      setState(() {
+        birdAgeString = ApiBird.formatBirdAge(birdCreatedAt!);
+      });
+    }
+  }
+
+  /// 새의 상태 정보를 가져오는 메서드
+  Future<void> _fetchBirdState() async {
+    try {
+      final response = await ApiBird.getBirdState();
+      if (response != null && mounted) {
+        setState(() {
+          birdHungry = response['hungry'] ?? birdHungry;
+          birdThirst = response['thirst'] ?? birdThirst;
+          birdCreatedAt = response['createdAt'];
+        });
+        
+        // 새의 나이 업데이트
+        _updateBirdAge();
+      }
+    } catch (e) {
+      print('❌ 새 상태 가져오기 실패: $e');
     }
   }
 
@@ -347,7 +440,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 10),
                   Expanded(
                     flex: 1,
                     child: Transform.translate(
@@ -527,6 +620,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                           vertical: 15,
                                         ),
                                       ),
+                                      onPressed: _handleLogout,
                                       child: const Text(
                                         '로그아웃',
                                         style: TextStyle(
@@ -535,7 +629,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                           color: Colors.white,
                                         ),
                                       ),
-                                      onPressed: _handleLogout,
                                     ),
                                   ],
                                 ),
@@ -567,23 +660,59 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           Positioned(
             top: MediaQuery.of(context).size.height / 2 - -60,
             left: MediaQuery.of(context).size.width / 2 - 95,
-            child: Row(
+            child: Column(
               children: [
-                Gif(
-                  controller: controller,
-                  image: AssetImage(
-                    isFeeding
-                      ? 'images/bird_Omoknoonii_feed_behavior.gif'
-                      : 'images/bird_Omoknoonii.gif',
-                  ),
-                  width: 200,
-                  height: 200,
-                  fit: BoxFit.contain,
+                Row(
+                  children: [
+                    Gif(
+                      controller: controller,
+                      image: AssetImage(
+                        isFeeding
+                          ? 'images/bird_Omoknoonii_feed_behavior.gif'
+                          : 'images/bird_Omoknoonii.gif',
+                      ),
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(width: 10), // 새와 상태 표시 사이 간격
+                    BirdStatus(
+                      birdHungry: birdHungry,
+                      birdThirst: birdThirst,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10), // 새와 상태 표시 사이 간격
-                BirdStatus(
-                  birdHungry: birdHungry,
-                  birdThirst: birdThirst,
+                const SizedBox(height: 10), // 새와 타이머 사이 간격
+                // 타이머 표시
+                TimerWidget(),
+                const SizedBox(height: 8), // 타이머와 새 나이 사이 간격
+                // 새의 나이 표시
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.pets,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '태어난지 : $birdAgeString',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'NaverNanumSquareRound',
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
