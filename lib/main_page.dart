@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import '../gui_click_pages/shop_page.dart';
 import '../component/bird_status.dart';
 import 'dart:async';
+import '../gui_click_pages/adventure_page.dart';
 
 /// 타이머만을 위한 별도 위젯
 class TimerWidget extends StatefulWidget {
@@ -308,342 +309,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               fit: BoxFit.fill, // 화면 크기에 맞게 이미지 늘림 (세로 압축 가능)
             ),
           ),
-
-          // AppBar 역할을 하는 커스텀 위젯
-          Positioned(
-            top: -50,
-            left: -8,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                      height: 80,
-                      color: Colors.grey,
-                      child: Column(
-                        children: [
-                          Flexible(
-                            flex: 4,
-                            child: Container(
-                              height: 80,
-                              child: Stack(
-                                children: [
-                                  // 배경 이미지
-                                  Positioned.fill(
-                                    child: Image.asset(
-                                      'images/GUI/profile_background_GUI.png',
-                                      fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                  // 프로필 테두리
-                                  Positioned.fill(
-                                    child: Image.asset(
-                                      'images/GUI/profile_border_GUI.png',
-                                      fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                  // 프로필 내용
-                                  Positioned(
-                                    left: 8, // 왼쪽 여백
-                                    top: 6.5,  // 위쪽 여백
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          width: 50,
-                                          height: 50,
-                                          decoration: const BoxDecoration(
-                                            color: Colors.white,
-                                          ),
-                                          child: Image.asset(
-                                            'images/test_profile.png', // 프로필 이미지 경로
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-
-                                        // 프로필과 텍스트 사이 여백
-                                        const SizedBox(width: 15), // 여백 추가
-                                        
-                                        // Lv. 과 이름 텍스트
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          children: [
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.end,
-                                              children: [
-                                                Text(
-                                                  nickname,
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 14,
-                                                    fontFamily: 'NaverNanumSquareRound',
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  'Lv. ' + level.toString(),
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Flexible(
-                            flex: 1,
-                            child: Container(
-                              height: 20,
-                              margin: const EdgeInsets.only(top: 8), // 아래로 살짝 이동
-                              child: Stack(
-                                children: [
-                                  // 배경 이미지 (회색)
-                                  Positioned.fill(
-                                    child: Image.asset(
-                                      'images/GUI/profile_exp_bar_background_GUI.png',
-                                      fit: BoxFit.fill,
-                                      filterQuality: FilterQuality.none,
-                                    ),
-                                  ),
-                                  // 경험치 채워지는 이미지 (초록색)
-                                  Positioned.fill(
-                                    child: FractionallySizedBox(
-                                      alignment: Alignment.centerLeft,
-                                      widthFactor:
-                                          ExperienceLevel.calculateProgress(
-                                              exp, level, maxExp, minExp),
-                                      child: Image.asset(
-                                        'images/GUI/profile_exp_bar_GUI.png',
-                                        fit: BoxFit.fill,
-                                        filterQuality: FilterQuality.none,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 1,
-                    child: Transform.translate(
-                      offset: const Offset(5, 0), // 위치 조정 가능
-                      child: SizedBox(
-                        height: 153,
-                        child: Column(
-                          children: [
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Image.asset(
-                                  'images/GUI/gold_GUI.png',
-                                  width: 200,
-                                  height: 100,
-                                ),
-                                Positioned(
-                                  child: Container(
-                                    width: 200,
-                                    height: 100,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 0),
-                                    child: Row(
-                                      children: [
-                                        const SizedBox(
-                                            width: 8), // 왼쪽 여백 (아이콘 등 필요시 조절)
-                                        Expanded(
-                                          child: Align(
-                                            alignment: Alignment.centerRight,
-                                            child: FittedBox(
-                                              fit: BoxFit.scaleDown,
-                                              child: Text(
-                                                formattedGold,
-                                                style: const TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontFamily:
-                                                      'NaverNanumSquareRound',
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 2),
-                                        GestureDetector(
-                                          onTap: () {
-                                            print('골드 충전 버튼 클릭');
-                                          },
-                                          child: Image.asset(
-                                            'images/GUI/gold_plus_button_GUI.png',
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.052, // 화면 너비의 2%
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.052, // 정사각형 비율 유지
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  Expanded(
-                    flex: 1,
-                    child: Transform.translate(
-                      offset: const Offset(8, -26),
-                      child: SizedBox(
-                        height: 100,
-                        child: Column(
-                          children: [
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Image.asset(
-                                  'images/GUI/star_coin_GUI.png',
-                                  width: 200,
-                                  height: 100,
-                                ),
-                                Positioned(
-                                  child: Container(
-                                    width: 200,
-                                    height: 100,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 0),
-                                    child: Row(
-                                      children: [
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Align(
-                                            alignment: Alignment.centerRight,
-                                            child: FittedBox(
-                                              fit: BoxFit.scaleDown,
-                                              child: Text(
-                                                '$starCoin',
-                                                style: const TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontFamily:
-                                                      'NaverNanumSquareRound',
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        GestureDetector(
-                                          onTap: () {
-                                            print('스타 코인 충전 버튼 클릭');
-                                          },
-                                          child: Image.asset(
-                                            'images/GUI/star_coin_plus_button_GUI.png',
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.052, // 화면 너비의 2%
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.052,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Transform.translate(
-                    offset: const Offset(18, -22), // gold_GUI와 같은 높이로 설정
-                    child: IconButton(
-                      iconSize: MediaQuery.of(context).size.width *
-                          0.037, // 50을 화면 너비의 3.7%로 변환
-                      icon: Image.asset(
-                        'images/setting_button.png',
-                        width: MediaQuery.of(context).size.width *
-                            0.09, // 40을 화면 너비의 3%로 변환
-                        height: MediaQuery.of(context).size.width *
-                            0.09, // 40을 화면 너비의 3%로 변환
-                      ),
-                      onPressed: () {
-                        print('설정 아이콘 클릭');
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return Dialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: Container(
-                                height: 200,
-                                width: 300,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 50,
-                                          vertical: 15,
-                                        ),
-                                      ),
-                                      onPressed: _handleLogout,
-                                      child: const Text(
-                                        '로그아웃',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontFamily: 'NaverNanumSquareRound',
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
           // 바닥에 러그 배치
           Positioned(
             top: MediaQuery.of(context).size.height / 2 - 110,
@@ -655,7 +320,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               fit: BoxFit.contain,
             ),
           ),
-
           // 새 GIF 배치
           Positioned(
             top: MediaQuery.of(context).size.height / 2 - -60,
@@ -722,7 +386,19 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               imagePaths: imagePaths,
               itemAmounts: itemAmounts,
               itemCodes: itemCodes,
-              onFeed: (itemCode) => _handleFeed(itemCode),
+              onFeed: (itemCode) async {
+                try {
+                  final response = await ApiBird.feed(itemCode);
+                  if (response != null) {
+                    setState(() {
+                      birdHungry = response['birdHungry'] ?? birdHungry;
+                      birdThirst = response['birdThirst'] ?? birdThirst;
+                    });
+                  }
+                } catch (e) {
+                  print('❌ 아이템 사용 중 오류 발생: $e');
+                }
+              },
             ),
           // 하단 네비게이션 바
           Positioned(
@@ -745,12 +421,17 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     ),
                   ),
                   Expanded(
-                    child: Container(
-                      color: Colors.green[100],
-                      child: const Center(
-                        child: Text(
-                          '모험',
-                          style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+                    child: GestureDetector(
+                      onTap: () async {
+                        await Get.to(() => const AdventurePage());
+                      },
+                      child: Container(
+                        color: Colors.green[100],
+                        child: const Center(
+                          child: Text(
+                            '모험',
+                            style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+                          ),
                         ),
                       ),
                     ),
@@ -822,6 +503,305 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                 'images/GUI/bag_GUI.png',
                 width: 48,
                 height: 48,
+              ),
+            ),
+          ),
+          // 헤더를 Stack의 맨 위에 고정
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 프로필+경험치바 영역
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 프로필 영역
+                        SizedBox(
+                          width: 96,
+                          height: 48,
+                          child: Stack(
+                            children: [
+                              // 배경 이미지
+                              Positioned.fill(
+                                child: Image.asset(
+                                  'images/GUI/profile_background_GUI.png',
+                                  fit: BoxFit.fill,
+                                ),
+                              ),
+                              // 테두리 이미지 (왼쪽 48x48)
+                              Positioned(
+                                left: 0,
+                                top: 0,
+                                width: 48,
+                                height: 48,
+                                child: Image.asset(
+                                  'images/GUI/profile_border_GUI.png',
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                              // 프로필(사각형)
+                              Positioned(
+                                left: 5,
+                                top: 5,
+                                width: 38,
+                                height: 38,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue[300],
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
+                              ),
+                              // 닉네임/레벨 텍스트
+                              Positioned(
+                                left: 52,
+                                top: 8,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      nickname,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 8,
+                                        fontFamily: 'NaverNanumSquareRound',
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Lv. $level',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // 경험치 바
+                        Container(
+                          width: 128,
+                          height: 32,
+                          margin: const EdgeInsets.only(top: 0),
+                          child: Stack(
+                            children: [
+                              // 배경 이미지 (회색)
+                              Positioned.fill(
+                                child: Image.asset(
+                                  'images/GUI/profile_exp_bar_background_GUI.png',
+                                  fit: BoxFit.fill,
+                                  filterQuality: FilterQuality.none,
+                                ),
+                              ),
+                              // 경험치가 없으면 empty 이미지 전체 중앙에
+                              if (exp == minExp)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: Image.asset(
+                                    'images/GUI/empty_profile_exp_bar_GUI.png',
+                                    fit: BoxFit.fill,
+                                    filterQuality: FilterQuality.none,
+                                  ),
+                                )
+                              // 경험치가 있으면 채워지는 이미지만 widthFactor로 중앙에
+                              else
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: FractionallySizedBox(
+                                    alignment: Alignment.centerLeft,
+                                    widthFactor: ExperienceLevel.calculateProgress(
+                                        exp, level, maxExp, minExp),
+                                    child: Align(
+                                      alignment: Alignment.center,
+                                      child: Image.asset(
+                                        'images/GUI/profile_exp_bar_GUI.png',
+                                        fit: BoxFit.fill,
+                                        filterQuality: FilterQuality.none,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // 골드
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 8),
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('images/GUI/gold_GUI.png'),
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      formattedGold,
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'NaverNanumSquareRound',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () {
+                                  print('골드 충전 버튼 클릭');
+                                },
+                                child: Image.asset(
+                                  'images/GUI/gold_plus_button_GUI.png',
+                                  height: 20,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // 스타코인
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 8),
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('images/GUI/star_coin_GUI.png'),
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      '$starCoin',
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'NaverNanumSquareRound',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () {
+                                  print('스타 코인 충전 버튼 클릭');
+                                },
+                                child: Image.asset(
+                                  'images/GUI/star_coin_plus_button_GUI.png',
+                                  height: 20,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // 설정 버튼
+                  Expanded(
+                    flex: 2,
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: GestureDetector(
+                        onTap: () {
+                          print('설정 아이콘 클릭');
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: Container(
+                                  height: 200,
+                                  width: 300,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 50,
+                                            vertical: 15,
+                                          ),
+                                        ),
+                                        onPressed: _handleLogout,
+                                        child: const Text(
+                                          '로그아웃',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontFamily: 'NaverNanumSquareRound',
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.09,
+                          height: MediaQuery.of(context).size.width * 0.09,
+                          decoration: const BoxDecoration(
+                            image: DecorationImage(
+                              image: AssetImage('images/setting_button.png'),
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

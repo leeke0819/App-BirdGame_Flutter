@@ -10,6 +10,8 @@ class ApiBird {
 
   static Future<Map<String, dynamic>?> feed(String itemCode, {int amount = 1}) async {
     String? token;
+    print("Feed Called");
+
     if (kIsWeb) {
       token = getChromeAccessToken();
     } else {
@@ -38,6 +40,7 @@ class ApiBird {
         return responseData;
       } else {
         print('❌ 아이템 사용 실패: ${response.statusCode}');
+        print('❌ 새가 배불러 먹지 못합니다');
         return null;
       }
     } catch (e) {

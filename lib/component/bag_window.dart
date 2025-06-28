@@ -117,7 +117,7 @@ class _BagWindowState extends State<BagWindow> {
                                   widget.itemAmounts[index] = newAmount.toString();
                                 }
                               });
-                              widget.onFeed(widget.itemCodes[index]);
+                              //widget.onFeed(widget.itemCodes[index],response);
                             }
                           },
                           child: Container(
