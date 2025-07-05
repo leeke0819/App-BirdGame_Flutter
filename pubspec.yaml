@@ -119,6 +119,12 @@ flutter:
     - images/items/peanut_v2.png
     - images/items/gamgyul.png
     - images/items/grape.png
+    - images/items/banana.png
+    - images/items/blue_berry.png
+    - images/items/black_berry.png
+    - images/items/rasp_berry.png
+    - images/items/cran_berry.png
+    - images/items/water_bottle.png
     - images/items/bird_egg_001.png
 
     #새 알 관련

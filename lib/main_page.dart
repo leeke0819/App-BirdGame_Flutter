@@ -4,6 +4,7 @@ import 'package:bird_raise_app/api/api_main.dart';
 import 'package:bird_raise_app/api/api_bird.dart';
 import 'package:bird_raise_app/component/bag_window.dart';
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
+import 'package:bird_raise_app/gui_click_pages/book_page.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/model/experience_level.dart';
 import 'package:bird_raise_app/services/timer_service.dart';
@@ -196,25 +197,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     );
   }
 
-  void _handleFeed(String itemCode) async {
-    if (isFeeding) return;
-
+  void _handleFeedGif() async {
     setState(() {
       isFeeding = true;
     });
 
-    try {
-      final response = await ApiBird.feed(itemCode);
-      if (response != null) {
-        // 서버 응답에서 새의 상태 업데이트 (setState 없이)
-        birdHungry = response['birdHungry'] ?? birdHungry;
-        birdThirst = response['birdThirst'] ?? birdThirst;
-      }
-    } catch (e) {
-      print('❌ 아이템 사용 중 오류 발생: $e');
-    }
-
-    // 2초 후에 애니메이션 상태 초기화
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
       setState(() {
@@ -243,6 +230,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     setState(() {});
     try {
       final items = await fetchBagData();
+      print(items);
       setState(() {
         imagePaths = items.map((e) => e['imagePath'] ?? '').toList();
         itemAmounts = items.map((e) => e['amount'] ?? '').toList();
@@ -388,12 +376,16 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               itemCodes: itemCodes,
               onFeed: (itemCode) async {
                 try {
+                  print("itemCode: $itemCode");
+                  print("onFeed Called");
                   final response = await ApiBird.feed(itemCode);
                   if (response != null) {
+                    print("response: $response");
                     setState(() {
                       birdHungry = response['birdHungry'] ?? birdHungry;
                       birdThirst = response['birdThirst'] ?? birdThirst;
                     });
+                    _handleFeedGif();
                   }
                 } catch (e) {
                   print('❌ 아이템 사용 중 오류 발생: $e');
@@ -410,12 +402,17 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               child: Row(
                 children: [
                   Expanded(
-                    child: Container(
-                      color: Colors.blue[100],
-                      child: const Center(
-                        child: Text(
-                          '도감',
-                          style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+                    child: GestureDetector(
+                      onTap: () async {
+                        await Get.to(() => const BookPage());
+                      },
+                      child: Container(
+                        color: Colors.blue[100],
+                        child: const Center(
+                          child: Text(
+                            '도감',
+                            style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+                          ),
                         ),
                       ),
                     ),
@@ -522,11 +519,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     flex: 2,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         // 프로필 영역
                         SizedBox(
-                          width: 96,
+                          width: 114,
                           height: 48,
                           child: Stack(
                             children: [
@@ -548,17 +545,46 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                   fit: BoxFit.contain,
                                 ),
                               ),
-                              // 프로필(사각형)
+                              // 프로필 이미지
                               Positioned(
                                 left: 5,
                                 top: 5,
                                 width: 38,
                                 height: 38,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue[300],
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
+                                child: Image.network(
+                                  'https://birdgamebukkit.s3.ap-northeast-2.amazonaws.com/birdgame-profile/test_profile.png',
+                                  width: 38,
+                                  height: 38,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      width: 38,
+                                      height: 38,
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue[300],
+                                      ),
+                                      child: const Icon(
+                                        Icons.person,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    );
+                                  },
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Container(
+                                      width: 38,
+                                      height: 38,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[300],
+                                      ),
+                                      child: const Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                               // 닉네임/레벨 텍스트
@@ -572,7 +598,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                       nickname,
                                       style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 8,
+                                        fontSize: 10,
                                         fontFamily: 'NaverNanumSquareRound',
                                       ),
                                     ),
@@ -593,47 +619,33 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                         ),
                         // 경험치 바
                         Container(
-                          width: 128,
-                          height: 32,
-                          margin: const EdgeInsets.only(top: 0),
+                          width: 114,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                           child: Stack(
                             children: [
-                              // 배경 이미지 (회색)
-                              Positioned.fill(
-                                child: Image.asset(
-                                  'images/GUI/profile_exp_bar_background_GUI.png',
-                                  fit: BoxFit.fill,
-                                  filterQuality: FilterQuality.none,
-                                ),
-                              ),
-                              // 경험치가 없으면 empty 이미지 전체 중앙에
-                              if (exp == minExp)
-                                Align(
-                                  alignment: Alignment.center,
-                                  child: Image.asset(
-                                    'images/GUI/empty_profile_exp_bar_GUI.png',
-                                    fit: BoxFit.fill,
-                                    filterQuality: FilterQuality.none,
-                                  ),
-                                )
-                              // 경험치가 있으면 채워지는 이미지만 widthFactor로 중앙에
-                              else
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: FractionallySizedBox(
-                                    alignment: Alignment.centerLeft,
-                                    widthFactor: ExperienceLevel.calculateProgress(
-                                        exp, level, maxExp, minExp),
-                                    child: Align(
-                                      alignment: Alignment.center,
-                                      child: Image.asset(
-                                        'images/GUI/profile_exp_bar_GUI.png',
-                                        fit: BoxFit.fill,
-                                        filterQuality: FilterQuality.none,
-                                      ),
+                              FractionallySizedBox(
+                                alignment: Alignment.centerLeft,
+                                widthFactor: ExperienceLevel.calculateProgress(
+                                  exp, level, maxExp, minExp),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    gradient: const LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.green,
+                                        Colors.lightGreen,
+                                      ],
                                     ),
                                   ),
                                 ),
+                              ),
+                              // 필요하다면 경험치 텍스트 등 추가 가능
                             ],
                           ),
                         ),
@@ -642,9 +654,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   ),
                   // 골드
                   Expanded(
-                    flex: 3,
+                    flex: 2,
                     child: Container(
-                      margin: const EdgeInsets.only(left: 8),
+                      margin: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.02),
                       decoration: const BoxDecoration(
                         image: DecorationImage(
                           image: AssetImage('images/GUI/gold_GUI.png'),
@@ -681,7 +693,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                 },
                                 child: Image.asset(
                                   'images/GUI/gold_plus_button_GUI.png',
-                                  height: 20,
+                                  height: MediaQuery.of(context).size.height * 0.024,
                                   fit: BoxFit.contain,
                                 ),
                               ),
@@ -693,9 +705,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   ),
                   // 스타코인
                   Expanded(
-                    flex: 3,
+                    flex: 2,
                     child: Container(
-                      margin: const EdgeInsets.only(left: 8),
+                      margin: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.02),
                       decoration: const BoxDecoration(
                         image: DecorationImage(
                           image: AssetImage('images/GUI/star_coin_GUI.png'),
@@ -732,7 +744,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                 },
                                 child: Image.asset(
                                   'images/GUI/star_coin_plus_button_GUI.png',
-                                  height: 20,
+                                  height: MediaQuery.of(context).size.height * 0.024,
                                   fit: BoxFit.contain,
                                 ),
                               ),
@@ -744,9 +756,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   ),
                   // 설정 버튼
                   Expanded(
-                    flex: 2,
+                    flex: 1,
                     child: Align(
-                      alignment: Alignment.topCenter,
+                      alignment: Alignment.topRight,
                       child: GestureDetector(
                         onTap: () {
                           print('설정 아이콘 클릭');

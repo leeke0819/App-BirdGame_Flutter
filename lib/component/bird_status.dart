@@ -4,6 +4,8 @@ import 'package:overlay_support/overlay_support.dart';
 class BirdStatus extends StatelessWidget {
   final int birdHungry;
   final int birdThirst;
+  static const int BIRD_MAX_HUNGER = 100;
+  static const int BIRD_MAX_THIRST = 100;
 
   const BirdStatus({
     super.key,
@@ -12,7 +14,7 @@ class BirdStatus extends StatelessWidget {
   });
 
   void _checkStatus(BuildContext context) {
-    if (birdHungry > 10) {
+    if (birdHungry > BIRD_MAX_HUNGER) {
       showSimpleNotification(
         const Text(
           '새가 배불러 먹지 못합니다.',
@@ -25,7 +27,7 @@ class BirdStatus extends StatelessWidget {
         duration: const Duration(seconds: 2),
       );
     }
-    if (birdThirst > 10) {
+    if (birdThirst > BIRD_MAX_THIRST) {
       showSimpleNotification(
         const Text(
           '새가 더는 목마르지 않습니다.',
@@ -62,7 +64,7 @@ class BirdStatus extends StatelessWidget {
                 child: RotatedBox(
                   quarterTurns: -1,
                   child: LinearProgressIndicator(
-                    value: birdHungry / 10,
+                    value: birdHungry / BIRD_MAX_HUNGER,
                     backgroundColor: Colors.grey[200],
                     valueColor: const AlwaysStoppedAnimation<Color>(Colors.orange),
                     minHeight: 20,
@@ -77,7 +79,7 @@ class BirdStatus extends StatelessWidget {
                   borderRadius: BorderRadius.circular(7),
                 ),
                 child: Text(
-                  '$birdHungry/10',
+                  '$birdHungry/$BIRD_MAX_HUNGER',
                   style: const TextStyle(fontSize: 12),
                 ),
               ),
@@ -96,7 +98,7 @@ class BirdStatus extends StatelessWidget {
                 child: RotatedBox(
                   quarterTurns: -1,
                   child: LinearProgressIndicator(
-                    value: birdThirst / 10,
+                    value: birdThirst / BIRD_MAX_THIRST,
                     backgroundColor: Colors.grey[200],
                     valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
                     minHeight: 20,
@@ -111,7 +113,7 @@ class BirdStatus extends StatelessWidget {
                   borderRadius: BorderRadius.circular(7),
                 ),
                 child: Text(
-                  '$birdThirst/10',
+                  '$birdThirst/$BIRD_MAX_THIRST',
                   style: const TextStyle(fontSize: 12),
                 ),
               ),

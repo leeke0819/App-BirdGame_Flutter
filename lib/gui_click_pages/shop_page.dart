@@ -269,6 +269,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                 ),
               ),
             ),
+            SizedBox(width: MediaQuery.of(context).size.width * 0.01),
             Expanded(
               flex: 1,
               child: Transform.translate(

@@ -104,21 +104,16 @@ class _BagWindowState extends State<BagWindow> {
                         right: 4,
                         child: GestureDetector(
                           onTap: () async {
-                            final response = await ApiBird.feed(widget.itemCodes[index]);
-                            if (response != null) {
-                              setState(() {
-                                int newAmount = int.parse(widget.itemAmounts[index]) - 1;
-                                if (newAmount <= 0) {
+                             widget.onFeed(widget.itemCodes[index]);
+                             setState(() {
+                                widget.itemAmounts[index] = (int.parse(widget.itemAmounts[index]) - 1).toString();
+                                if (int.parse(widget.itemAmounts[index]) <= 0) {
                                   widget.imagePaths.removeAt(index);
                                   widget.itemAmounts.removeAt(index);
                                   widget.itemCodes.removeAt(index);
                                   selectedIndex = null;
-                                } else {
-                                  widget.itemAmounts[index] = newAmount.toString();
                                 }
-                              });
-                              //widget.onFeed(widget.itemCodes[index],response);
-                            }
+                             });
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
