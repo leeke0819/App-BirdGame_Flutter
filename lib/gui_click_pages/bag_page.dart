@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:bird_raise_app/api/api_bag.dart';
 import 'package:bird_raise_app/api/api_bird.dart';
 import 'package:bird_raise_app/api/api_shop.dart';
+import 'package:bird_raise_app/gui_click_pages/adventure_page.dart';
+import 'package:bird_raise_app/gui_click_pages/book_page.dart';
 import 'package:bird_raise_app/gui_click_pages/shop_page.dart';
 import 'package:bird_raise_app/model/bag_model.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
@@ -323,25 +325,35 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Container(
-                          color: Colors.blue[100],
-                          child: const Center(
-                            child: Text(
-                              '도감',
-                              style: TextStyle(
-                                  fontFamily: 'NaverNanumSquareRound'),
+                        child: GestureDetector(
+                          onTap: () async {
+                            await Get.off(() => const BookPage());
+                          },
+                          child: Container(
+                            color: Colors.blue[100],
+                            child: const Center(
+                              child: Text(
+                                '도감',
+                                style: TextStyle(
+                                  fontFamily: 'NaverNanumSquareRound',
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
                       Expanded(
-                        child: Container(
-                          color: Colors.green[100],
-                          child: const Center(
-                            child: Text(
-                              '모험',
-                              style: TextStyle(
-                                  fontFamily: 'NaverNanumSquareRound'),
+                        child: GestureDetector(
+                          onTap: () async {
+                            await Get.off(() => const AdventurePage());
+                          },
+                          child: Container(
+                            color: Colors.green[100],
+                            child: const Center(
+                              child: Text(
+                                '모험',
+                                style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
+                              ),
                             ),
                           ),
                         ),

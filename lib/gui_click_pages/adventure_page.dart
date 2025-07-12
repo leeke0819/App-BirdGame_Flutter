@@ -1,5 +1,10 @@
+import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
+import 'package:bird_raise_app/gui_click_pages/book_page.dart';
+import 'package:bird_raise_app/gui_click_pages/shop_page.dart';
+import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 class AdventurePage extends StatefulWidget {
   const AdventurePage({super.key});
@@ -11,13 +16,18 @@ class AdventurePage extends StatefulWidget {
 class _AdventurePageState extends State<AdventurePage> {
   @override
   Widget build(BuildContext context) {
+    final goldModel = context.watch<GoldModel>();
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green[100],
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.back(),
+        backgroundColor: Colors.white,
+        title: const Text(
+          '모험',
+          style: TextStyle(
+            fontFamily: 'NaverNanumSquareRound',
+            fontWeight: FontWeight.bold,
+          ),
         ),
+        centerTitle: true,
       ),
       body: Container(
         color: Colors.white,
@@ -97,6 +107,100 @@ class _AdventurePageState extends State<AdventurePage> {
               ),
             ),
             const SizedBox(height: 10),
+            const SizedBox(height: 3),
+            Container(
+              height: 70,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        await Get.off(() => const BookPage());
+                      },
+                      child: Container(
+                        color: Colors.blue[100],
+                        child: const Center(
+                          child: Text(
+                            '도감',
+                            style: TextStyle(
+                              fontFamily: 'NaverNanumSquareRound',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        await Get.off(() => const AdventurePage());
+                      },
+                      child: Container(
+                        color: Colors.green[100],
+                        child: const Center(
+                          child: Text(
+                            '모험',
+                            style: TextStyle(
+                              fontFamily: 'NaverNanumSquareRound',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        Get.off(() => const ShopPage());
+                        await goldModel.fetchGold();
+                      },
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.asset(
+                              'images/GUI/background_GUI.png',
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          Image.asset(
+                            'images/GUI/shop_GUI.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        Get.off(() => const BagPage());
+                        await goldModel.fetchGold();
+                      },
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.asset(
+                              'images/GUI/background_GUI.png',
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          Image.asset(
+                            'images/GUI/bag_GUI.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

@@ -155,11 +155,10 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           maxExp = responseData['maxExp'];
           birdHungry = responseData['birdHungry'] ?? 5;  // 새의 배고픔 상태
           birdThirst = responseData['birdThirst'] ?? 5;  // 새의 목마름 상태
+          birdCreatedAt = responseData['createdAt'];
           isLoading = false;
         });
         
-        // 새의 상태 정보 가져오기 (createdAt 포함)
-        await _fetchBirdState();
       } else {
         _showError('API 호출에 실패했습니다.');
       }
@@ -230,7 +229,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     setState(() {});
     try {
       final items = await fetchBagData();
-      print(items);
       setState(() {
         imagePaths = items.map((e) => e['imagePath'] ?? '').toList();
         itemAmounts = items.map((e) => e['amount'] ?? '').toList();
@@ -376,15 +374,19 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               itemCodes: itemCodes,
               onFeed: (itemCode) async {
                 try {
-                  print("itemCode: $itemCode");
-                  print("onFeed Called");
                   final response = await ApiBird.feed(itemCode);
                   if (response != null) {
-                    print("response: $response");
+                    
                     setState(() {
-                      birdHungry = response['birdHungry'] ?? birdHungry;
-                      birdThirst = response['birdThirst'] ?? birdThirst;
+                      // API 응답에서 가능한 모든 필드명 시도
+                      birdHungry = response['birdHungry'] ?? 
+                                  response['hungry'] ?? 
+                                  birdHungry;
+                      birdThirst = response['birdThirst'] ?? 
+                                  response['thirst'] ?? 
+                                  birdThirst;
                     });
+                    
                     _handleFeedGif();
                   }
                 } catch (e) {
@@ -492,7 +494,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             right: 16,
             child: GestureDetector(
               onTap: () async {
-                print("가방 아이콘 눌림");
                 setState(() => isBagVisible = !isBagVisible);
                 if (isBagVisible) await _loadBagItems();
               },

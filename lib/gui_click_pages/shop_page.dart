@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:bird_raise_app/config/env_config.dart';
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
+import 'package:bird_raise_app/gui_click_pages/book_page.dart';
+import 'package:bird_raise_app/gui_click_pages/adventure_page.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -29,6 +31,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   List<String> itemLore = [];
   List<String> itemPrice = [];
   List<String> itemCode = [];
+  List<String> itemFeed = [];
+  List<String> itemThirst = [];
 
   int selectedIndex = 0;
   int starCoin = 0;
@@ -96,6 +100,10 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
               contentList.map((item) => item['price'].toString()).toList();
           itemCode =
               contentList.map((item) => item['itemCode'].toString()).toList();
+          itemFeed =
+              contentList.map((item) => item['feed'].toString()).toList();
+          itemThirst =
+              contentList.map((item) => item['thirst'].toString()).toList();
           _isLoading = false;
         });
       } else {
@@ -203,6 +211,10 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final goldModel = context.watch<GoldModel>();
     final gold = goldModel.gold;
+    // 버튼 간격 조절 변수
+    final double buttonGap = MediaQuery.of(context).size.width * 0; // 원하는 값으로 조정
+    // gold와 구매 버튼 사이 간격 비율 변수
+    final double goldToBuyGap = MediaQuery.of(context).size.width * 0.01; // 살짝 띄우기
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -412,100 +424,109 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                             right: 0,
                             bottom: 20,
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 30, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[300],
-                                    borderRadius: BorderRadius.circular(8),
+                                // 가격 배경 (gold_buy_GUI.png)
+                                Expanded(
+                                  flex: 2,
+                                  child: Stack(
+                                    alignment: Alignment.centerRight,
+                                    children: [
+                                      Image.asset(
+                                        'images/GUI/gold_buy_GUI.png',
+                                        width: double.infinity,
+                                        height: 32,
+                                        fit: BoxFit.contain,
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.04),
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(
+                                            itemPrice[selectedIndex],
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: MediaQuery.of(context).size.width * 0.04,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'NaverNanumSquareRound',
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  child: Text(
-                                    itemPrice[selectedIndex],
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.normal,
-                                      fontFamily: 'NaverNanumSquareRound',
+                                ),
+                                // gold와 구매 버튼 사이 간격
+                                SizedBox(width: goldToBuyGap),
+                                // 구매 버튼
+                                Expanded(
+                                  flex: 1,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      shopModel.showQuantityDialog(
+                                        context,
+                                        itemCode[selectedIndex],
+                                        true,
+                                        _handleBuyItem,
+                                        _handleSellItem,
+                                      );
+                                    },
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Image.asset(
+                                          'images/GUI/buy_button_GUI.png',
+                                          width: double.infinity,
+                                          height: 32,
+                                          fit: BoxFit.contain,
+                                        ),
+                                        Text(
+                                          '구매',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: MediaQuery.of(context).size.width * 0.035,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'NaverNanumSquareRound',
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: () {
-                                    shopModel.showQuantityDialog(
-                                      context,
-                                      itemCode[selectedIndex],
-                                      true,
-                                      _handleBuyItem,
-                                      _handleSellItem,
-                                    );
-                                  },
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.12,
-                                        height:
-                                            MediaQuery.of(context).size.width *
-                                                0.12,
-                                        child: Image.asset(
-                                          'images/GUI/buy_button_GUI.png',
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                      const Text(
-                                        '구매',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'NaverNanumSquareRound',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: () {
-                                    shopModel.showQuantityDialog(
-                                      context,
-                                      itemCode[selectedIndex],
-                                      false,
-                                      _handleBuyItem,
-                                      _handleSellItem,
-                                    );
-                                  },
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.12,
-                                        height:
-                                            MediaQuery.of(context).size.width *
-                                                0.12,
-                                        child: Image.asset(
+                                // 버튼 사이 간격
+                                SizedBox(width: buttonGap),
+                                // 판매 버튼
+                                Expanded(
+                                  flex: 1,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      shopModel.showQuantityDialog(
+                                        context,
+                                        itemCode[selectedIndex],
+                                        false,
+                                        _handleBuyItem,
+                                        _handleSellItem,
+                                      );
+                                    },
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Image.asset(
                                           'images/GUI/sell_button_GUI.png',
+                                          width: double.infinity,
+                                          height: 32,
                                           fit: BoxFit.contain,
                                         ),
-                                      ),
-                                      const Text(
-                                        '판매',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'NaverNanumSquareRound',
+                                        Text(
+                                          '판매',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: MediaQuery.of(context).size.width * 0.035,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'NaverNanumSquareRound',
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],
@@ -523,32 +544,48 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                       child: Column(
                         children: [
                           Padding(
-                            padding: EdgeInsets.only(top: 20.0),
+                            padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.012),
                             child: Center(
                               child: Text(
                                 itemNames[selectedIndex],
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 16,
+                                  fontSize: MediaQuery.of(context).size.width * 0.04,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'NaverNanumSquareRound',
                                 ),
                               ),
                             ),
                           ),
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.005),
                           Expanded(
-                            child: Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text(
-                                  itemLore[selectedIndex],
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'NaverNanumSquareRound',
+                            child: SingleChildScrollView(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.005), // 더 작은 비율 패딩
+                                    child: Text(
+                                      itemLore[selectedIndex],
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'NaverNanumSquareRound',
+                                        fontSize: MediaQuery.of(context).size.width * 0.03, // 더 작은 비율 폰트
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  SizedBox(height: MediaQuery.of(context).size.height * 0.003), // 더 작은 간격
+                                  Text(
+                                    '배고픔: +${itemFeed[selectedIndex]} , 목마름: +${itemThirst[selectedIndex]}',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: MediaQuery.of(context).size.width * 0.025, // 더 작은 비율 폰트
+                                      fontFamily: 'NaverNanumSquareRound',
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -611,7 +648,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                           ),
                           child: Center(
                             child: Text(
-                              '새·알',
+                              '새알',
                               style: TextStyle(
                                 color:
                                     category == 2 ? Colors.white : Colors.black,
@@ -684,26 +721,36 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Container(
-                          color: Colors.blue[100],
-                          child: const Center(
-                            child: Text(
-                              '도감',
-                              style: TextStyle(
-                                fontFamily: 'NaverNanumSquareRound',
+                        child: GestureDetector(
+                          onTap: () async {
+                            await Get.off(() => const BookPage());
+                          },
+                          child: Container(
+                            color: Colors.blue[100],
+                            child: const Center(
+                              child: Text(
+                                '도감',
+                                style: TextStyle(
+                                  fontFamily: 'NaverNanumSquareRound',
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
                       Expanded(
-                        child: Container(
-                          color: Colors.green[100],
-                          child: const Center(
-                            child: Text(
-                              '모험',
-                              style: TextStyle(
-                                fontFamily: 'NaverNanumSquareRound',
+                        child: GestureDetector(
+                          onTap: () async {
+                            await Get.off(() => const AdventurePage());
+                          },
+                          child: Container(
+                            color: Colors.green[100],
+                            child: const Center(
+                              child: Text(
+                                '모험',
+                                style: TextStyle(
+                                  fontFamily: 'NaverNanumSquareRound',
+                                ),
                               ),
                             ),
                           ),

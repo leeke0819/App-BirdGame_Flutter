@@ -101,8 +101,11 @@ flutter:
     - images/GUI/profile_exp_bar_background_GUI.png
 
     #재화 GUI 관련
+    - images/GUI/gold.png
     - images/GUI/gold_GUI.png
     - images/GUI/gold_plus_button_GUI.png
+    - images/GUI/gold_buy_GUI.png
+    - images/GUI/star_coin.png
     - images/GUI/star_coin_GUI.png
     - images/GUI/star_coin_plus_button_GUI.png
 
