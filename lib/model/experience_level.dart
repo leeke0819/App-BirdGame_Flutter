@@ -70,8 +70,8 @@ class ExperienceLevel {
     // 현재 레벨에서의 경험치 진행률 계산
     final expInCurrentLevel = currentExp - minExp;
     final totalExpForLevel = maxExp - minExp;
-    print(expInCurrentLevel);
-    print(totalExpForLevel);
+    //print(expInCurrentLevel);
+    //print(totalExpForLevel);
 
     // 0.0과 1.0 사이의 값으로 제한
     return (expInCurrentLevel / totalExpForLevel).clamp(0.0, 1.0);

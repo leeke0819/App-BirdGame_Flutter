@@ -4,6 +4,7 @@ import 'package:bird_raise_app/config/env_config.dart';
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:bird_raise_app/gui_click_pages/book_page.dart';
 import 'package:bird_raise_app/gui_click_pages/adventure_page.dart';
+import 'package:bird_raise_app/main_page.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -211,12 +212,13 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final goldModel = context.watch<GoldModel>();
     final gold = goldModel.gold;
-    // 버튼 간격 조절 변수
-    final double buttonGap = MediaQuery.of(context).size.width * 0; // 원하는 값으로 조정
-    // gold와 구매 버튼 사이 간격 비율 변수
-    final double goldToBuyGap = MediaQuery.of(context).size.width * 0.01; // 살짝 띄우기
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Get.off(() => const MainPage()),
+        ),
         centerTitle: true,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -302,8 +304,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                             child: Container(
                               width: 200,
                               height: 100,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 0),
+                              padding: const EdgeInsets.symmetric(horizontal: 0),
                               child: Row(
                                 children: [
                                   const SizedBox(width: 8),
@@ -353,114 +354,142 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
           ? const Center(
               child: CircularProgressIndicator(),
             )
-          : Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          Container(
-                            height: MediaQuery.of(context).size.height / 5,
-                            decoration: const BoxDecoration(
-                              color: Color.fromARGB(255, 145, 238, 207),
-                            ),
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 60),
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width >
-                                              600
-                                          ? (MediaQuery.of(context).size.width *
-                                                  0.6 /
-                                                  5)
-                                              .clamp(50, 90) // 크기를 50~90 사이로 제한
-                                          : (MediaQuery.of(context).size.width *
-                                                  0.7 /
-                                                  5)
-                                              .clamp(40, 70),
-                                      height: MediaQuery.of(context)
-                                                  .size
-                                                  .width >
-                                              600
-                                          ? (MediaQuery.of(context).size.width *
-                                                  0.6 /
-                                                  5)
-                                              .clamp(50, 90)
-                                          : (MediaQuery.of(context).size.width *
-                                                  0.7 /
-                                                  5)
-                                              .clamp(40, 70),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        image: const DecorationImage(
-                                          image: AssetImage(
-                                              'images/background/shop_item_background.png'),
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                      clipBehavior: Clip.hardEdge,
-                                      child: imagePaths.isNotEmpty
-                                          ? Padding(
-                                              padding: const EdgeInsets.all(
-                                                  4.0), // 숫자를 늘리면 이미지가 작아짐
-                                              child: Image.asset(
-                                                'images/items/${imagePaths[selectedIndex]}',
-                                                fit: BoxFit.contain,
-                                              ),
-                                            )
-                                          : Container(),
-                                    ),
-                                  ),
-                                ],
-                              ),
+          : Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.orange[100]!,
+                    Colors.orange[200]!,
+                  ],
+                ),
+              ),
+              child: Column(
+                children: [
+                  // 선택된 아이템 상세 정보 표시
+                  Container(
+                    margin: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.orange[300]!, width: 2),
+                    ),
+                    child: Column(
+                      children: [
+                        // 제목
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.orange[300],
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(10),
+                              topRight: Radius.circular(10),
                             ),
                           ),
-                          Positioned(
-                            left: 0,
-                            right: 0,
-                            bottom: 20,
-                            child: Row(
-                              children: [
-                                // 가격 배경 (gold_buy_GUI.png)
-                                Expanded(
-                                  flex: 2,
-                                  child: Stack(
-                                    alignment: Alignment.centerRight,
-                                    children: [
-                                      Image.asset(
-                                        'images/GUI/gold_buy_GUI.png',
-                                        width: double.infinity,
-                                        height: 32,
-                                        fit: BoxFit.contain,
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.04),
-                                        child: FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: Text(
-                                            itemPrice[selectedIndex],
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: MediaQuery.of(context).size.width * 0.04,
-                                              fontWeight: FontWeight.bold,
-                                              fontFamily: 'NaverNanumSquareRound',
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                          child: const Text(
+                            '선택된 아이템',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'NaverNanumSquareRound',
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                        // 아이템 정보
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              // 선택된 아이템 이미지
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  image: const DecorationImage(
+                                    image: AssetImage('images/background/shop_item_background.png'),
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
-                                // gold와 구매 버튼 사이 간격
-                                SizedBox(width: goldToBuyGap),
-                                // 구매 버튼
-                                Expanded(
-                                  flex: 1,
-                                  child: GestureDetector(
+                                child: imagePaths.isNotEmpty
+                                    ? Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Image.asset(
+                                          'images/items/${imagePaths[selectedIndex]}',
+                                          fit: BoxFit.contain,
+                                        ),
+                                      )
+                                    : null,
+                              ),
+                              const SizedBox(width: 16),
+                              // 아이템 정보
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      itemNames.isNotEmpty ? itemNames[selectedIndex] : '',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'NaverNanumSquareRound',
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '가격: ${itemPrice.isNotEmpty ? itemPrice[selectedIndex] : '0'}',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey[600],
+                                            fontFamily: 'NaverNanumSquareRound',
+                                          ),
+                                        ),
+                                        const SizedBox(width: 2),
+                                        // 골드 이미지를 살짝 위로 올리기 위해 Transform 사용
+                                        Transform.translate(
+                                          offset: const Offset(0, -1),
+                                          child: Image.asset(
+                                            'images/GUI/gold.png',
+                                            width: 16,
+                                            height: 16,
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      itemLore.isNotEmpty ? itemLore[selectedIndex] : '',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[500],
+                                        fontFamily: 'NaverNanumSquareRound',
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      '배고픔: +${itemFeed.isNotEmpty ? itemFeed[selectedIndex] : '0'} , 목마름: +${itemThirst.isNotEmpty ? itemThirst[selectedIndex] : '0'}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[500],
+                                        fontFamily: 'NaverNanumSquareRound',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // 구매/판매 버튼
+                              Column(
+                                children: [
+                                  GestureDetector(
                                     onTap: () {
                                       shopModel.showQuantityDialog(
                                         context,
@@ -470,34 +499,24 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                         _handleSellItem,
                                       );
                                     },
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        Image.asset(
-                                          'images/GUI/buy_button_GUI.png',
-                                          width: double.infinity,
-                                          height: 32,
-                                          fit: BoxFit.contain,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Text(
+                                        '구매',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'NaverNanumSquareRound',
                                         ),
-                                        Text(
-                                          '구매',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: MediaQuery.of(context).size.width * 0.035,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'NaverNanumSquareRound',
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                // 버튼 사이 간격
-                                SizedBox(width: buttonGap),
-                                // 판매 버튼
-                                Expanded(
-                                  flex: 1,
-                                  child: GestureDetector(
+                                  const SizedBox(height: 8),
+                                  GestureDetector(
                                     onTap: () {
                                       shopModel.showQuantityDialog(
                                         context,
@@ -507,309 +526,280 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                         _handleSellItem,
                                       );
                                     },
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        Image.asset(
-                                          'images/GUI/sell_button_GUI.png',
-                                          width: double.infinity,
-                                          height: 32,
-                                          fit: BoxFit.contain,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Text(
+                                        '판매',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'NaverNanumSquareRound',
                                         ),
-                                        Text(
-                                          '판매',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: MediaQuery.of(context).size.width * 0.035,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'NaverNanumSquareRound',
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // 카테고리 선택 버튼
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.orange[300]!, width: 2),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => _handleCategoryChange(1),
+                              child: Container(
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: category == 1 ? Colors.blue : Colors.blue[100]!,
+                                  border: Border.all(
+                                    color: category == 1 ? Colors.blue[700]! : Colors.blue[300]!,
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '재료',
+                                    style: TextStyle(
+                                      color: category == 1 ? Colors.white : Colors.black,
+                                      fontWeight: category == 1 ? FontWeight.bold : FontWeight.normal,
+                                      fontFamily: 'NaverNanumSquareRound',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => _handleCategoryChange(2),
+                              child: Container(
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: category == 2 ? Colors.green : Colors.green[100]!,
+                                  border: Border.all(
+                                    color: category == 2 ? Colors.green[700]! : Colors.green[300]!,
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '새알',
+                                    style: TextStyle(
+                                      color: category == 2 ? Colors.white : Colors.black,
+                                      fontWeight: category == 2 ? FontWeight.bold : FontWeight.normal,
+                                      fontFamily: 'NaverNanumSquareRound',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // 아이템 그리드
+                  Expanded(
+                    child: GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 5,
+                        mainAxisSpacing: 4,
+                        crossAxisSpacing: 4,
+                        childAspectRatio: 1.0,
+                      ),
+                      itemCount: imagePaths.isEmpty ? 30 : imagePaths.length,
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedIndex = index;
+                            });
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: selectedIndex == index 
+                                    ? Colors.orange 
+                                    : Colors.grey[300]!,
+                                width: selectedIndex == index ? 2 : 1,
+                              ),
+                              image: imagePaths.isNotEmpty
+                                  ? const DecorationImage(
+                                      image: AssetImage('images/background/shop_item_background.png'),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                            ),
+                            child: imagePaths.isEmpty
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                      color: Color.fromARGB(
+                                        255,
+                                        (index * 37) % 255,
+                                        (index * 73) % 255,
+                                        (index * 127) % 255,
+                                      ),
+                                    ),
+                                  )
+                                : Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image.asset(
+                                      'images/items/${imagePaths[index]}',
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Container(
+                    height: 70,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              await Get.off(() => const BookPage());
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  child: Image.asset(
+                                    'images/GUI/background_GUI.png',
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                FractionallySizedBox(
+                                  widthFactor: 0.90,
+                                  heightFactor: 0.90,
+                                  child: Image.asset(
+                                    'images/GUI/book_GUI.png',
+                                    fit: BoxFit.contain,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.4,
-                      height: MediaQuery.of(context).size.height / 5,
-                      decoration: const BoxDecoration(
-                        color: Color.fromARGB(255, 64, 62, 201),
-                      ),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.012),
-                            child: Center(
-                              child: Text(
-                                itemNames[selectedIndex],
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: MediaQuery.of(context).size.width * 0.04,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'NaverNanumSquareRound',
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.005),
-                          Expanded(
-                            child: SingleChildScrollView(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.005), // 더 작은 비율 패딩
-                                    child: Text(
-                                      itemLore[selectedIndex],
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'NaverNanumSquareRound',
-                                        fontSize: MediaQuery.of(context).size.width * 0.03, // 더 작은 비율 폰트
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: MediaQuery.of(context).size.height * 0.003), // 더 작은 간격
-                                  Text(
-                                    '배고픔: +${itemFeed[selectedIndex]} , 목마름: +${itemThirst[selectedIndex]}',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: MediaQuery.of(context).size.width * 0.025, // 더 작은 비율 폰트
-                                      fontFamily: 'NaverNanumSquareRound',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => _handleCategoryChange(1),
-                        child: Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color:
-                                category == 1 ? Colors.blue : Colors.blue[100]!,
-                            border: Border.all(
-                              color: category == 1
-                                  ? Colors.blue[700]!
-                                  : Colors.blue[300]!,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Center(
-                            child: Text(
-                              '재료',
-                              style: TextStyle(
-                                color:
-                                    category == 1 ? Colors.white : Colors.black,
-                                fontWeight: category == 1
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                fontFamily: 'NaverNanumSquareRound',
-                              ),
-                            ),
-                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => _handleCategoryChange(2),
-                        child: Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: category == 2
-                                ? Colors.green
-                                : Colors.green[100]!,
-                            border: Border.all(
-                              color: category == 2
-                                  ? Colors.green[700]!
-                                  : Colors.green[300]!,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Center(
-                            child: Text(
-                              '새알',
-                              style: TextStyle(
-                                color:
-                                    category == 2 ? Colors.white : Colors.black,
-                                fontWeight: category == 2
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                fontFamily: 'NaverNanumSquareRound',
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 5,
-                      mainAxisSpacing: 3,
-                      childAspectRatio: 1.0,
-                    ),
-                    itemCount: imagePaths.isEmpty ? 30 : imagePaths.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedIndex = index;
-                          });
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            image: imagePaths.isNotEmpty
-                                ? const DecorationImage(
-                                    image: AssetImage(
-                                        'images/background/shop_item_background.png'),
-                                    fit: BoxFit.cover,
-                                  )
-                                : null,
-                          ),
-                          child: imagePaths.isEmpty
-                              ? Container(
-                                  decoration: BoxDecoration(
-                                    color: Color.fromARGB(
-                                      255,
-                                      (index * 37) % 255,
-                                      (index * 73) % 255,
-                                      (index * 127) % 255,
-                                    ),
-                                  ),
-                                )
-                              : Padding(
-                                  padding: const EdgeInsets.all(6.0),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              await Get.off(() => const AdventurePage());
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
                                   child: Image.asset(
-                                    'images/items/${imagePaths[index]}',
+                                    'images/GUI/background_GUI.png',
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                FractionallySizedBox(
+                                  widthFactor: 0.90,
+                                  heightFactor: 0.90,
+                                  child: Image.asset(
+                                    'images/GUI/adventure_GUI.png',
                                     fit: BoxFit.contain,
                                   ),
                                 ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Container(
-                  height: 70,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () async {
-                            await Get.off(() => const BookPage());
-                          },
-                          child: Container(
-                            color: Colors.blue[100],
-                            child: const Center(
-                              child: Text(
-                                '도감',
-                                style: TextStyle(
-                                  fontFamily: 'NaverNanumSquareRound',
-                                ),
-                              ),
+                              ],
                             ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () async {
-                            await Get.off(() => const AdventurePage());
-                          },
-                          child: Container(
-                            color: Colors.green[100],
-                            child: const Center(
-                              child: Text(
-                                '모험',
-                                style: TextStyle(
-                                  fontFamily: 'NaverNanumSquareRound',
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              Get.off(() => const ShopPage());
+                              await goldModel.fetchGold(); // gold 값 갱신
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  child: Image.asset(
+                                    'images/GUI/background_GUI.png',
+                                    fit: BoxFit.fill,
+                                  ),
                                 ),
-                              ),
+                                FractionallySizedBox(
+                                  widthFactor: 0.90,
+                                  heightFactor: 0.90,
+                                  child: Image.asset(
+                                    'images/GUI/shop_GUI.png',
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () async {
-                            Get.off(() => const ShopPage());
-                            await goldModel.fetchGold(); // gold 값 갱신
-                          },
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                child: Image.asset(
-                                  'images/GUI/background_GUI.png',
-                                  fit: BoxFit.fill,
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              Get.off(() => const BagPage());
+                              await goldModel.fetchGold(); // gold 값 갱신
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  child: Image.asset(
+                                    'images/GUI/background_GUI.png',
+                                    fit: BoxFit.fill,
+                                  ),
                                 ),
-                              ),
-                              Image.asset(
-                                'images/GUI/shop_GUI.png',
-                                fit: BoxFit.contain,
-                              ),
-                            ],
+                                FractionallySizedBox(
+                                  widthFactor: 0.90,
+                                  heightFactor: 0.90,
+                                  child: Image.asset(
+                                    'images/GUI/bag_GUI.png',
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () async {
-                            Get.off(() => const BagPage());
-                            await goldModel.fetchGold(); // gold 값 갱신
-                          },
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                child: Image.asset(
-                                  'images/GUI/background_GUI.png',
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
-                              Image.asset(
-                                'images/GUI/bag_GUI.png',
-                                fit: BoxFit.contain,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
     );
   }

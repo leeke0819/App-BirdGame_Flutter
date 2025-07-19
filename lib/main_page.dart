@@ -16,6 +16,7 @@ import '../gui_click_pages/shop_page.dart';
 import '../component/bird_status.dart';
 import 'dart:async';
 import '../gui_click_pages/adventure_page.dart';
+import '../gui_click_pages/crafting_page.dart';
 
 /// 타이머만을 위한 별도 위젯
 class TimerWidget extends StatefulWidget {
@@ -306,204 +307,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               fit: BoxFit.contain,
             ),
           ),
-          // 새 GIF 배치
-          Positioned(
-            top: MediaQuery.of(context).size.height / 2 - -60,
-            left: MediaQuery.of(context).size.width / 2 - 95,
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Gif(
-                      controller: controller,
-                      image: AssetImage(
-                        isFeeding
-                          ? 'images/bird_Omoknoonii_feed_behavior.gif'
-                          : 'images/bird_Omoknoonii.gif',
-                      ),
-                      width: 200,
-                      height: 200,
-                      fit: BoxFit.contain,
-                    ),
-                    const SizedBox(width: 10), // 새와 상태 표시 사이 간격
-                    BirdStatus(
-                      birdHungry: birdHungry,
-                      birdThirst: birdThirst,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10), // 새와 타이머 사이 간격
-                // 타이머 표시
-                TimerWidget(),
-                const SizedBox(height: 8), // 타이머와 새 나이 사이 간격
-                // 새의 나이 표시
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.pets,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '태어난지 : $birdAgeString',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'NaverNanumSquareRound',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (isBagVisible)
-            BagWindow(
-              imagePaths: imagePaths,
-              itemAmounts: itemAmounts,
-              itemCodes: itemCodes,
-              onFeed: (itemCode) async {
-                try {
-                  final response = await ApiBird.feed(itemCode);
-                  if (response != null) {
-                    
-                    setState(() {
-                      // API 응답에서 가능한 모든 필드명 시도
-                      birdHungry = response['birdHungry'] ?? 
-                                  response['hungry'] ?? 
-                                  birdHungry;
-                      birdThirst = response['birdThirst'] ?? 
-                                  response['thirst'] ?? 
-                                  birdThirst;
-                    });
-                    
-                    _handleFeedGif();
-                  }
-                } catch (e) {
-                  print('❌ 아이템 사용 중 오류 발생: $e');
-                }
-              },
-            ),
-          // 하단 네비게이션 바
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 70,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () async {
-                        await Get.to(() => const BookPage());
-                      },
-                      child: Container(
-                        color: Colors.blue[100],
-                        child: const Center(
-                          child: Text(
-                            '도감',
-                            style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () async {
-                        await Get.to(() => const AdventurePage());
-                      },
-                      child: Container(
-                        color: Colors.green[100],
-                        child: const Center(
-                          child: Text(
-                            '모험',
-                            style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () async {
-                        await Get.to(() => const ShopPage());
-                        await goldModel.fetchGold(); // gold 값 갱신
-                      },
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            height: double.infinity,
-                            child: Image.asset(
-                              'images/GUI/background_GUI.png',
-                              fit: BoxFit.fill,
-                            ),
-                          ),
-                          Image.asset(
-                            'images/GUI/shop_GUI.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () async {
-                        await Get.to(() => const BagPage());
-                        await goldModel.fetchGold(); // gold 값 갱신
-                      },
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            height: double.infinity,
-                            child: Image.asset(
-                              'images/GUI/background_GUI.png',
-                              fit: BoxFit.fill,
-                            ),
-                          ),
-                          Image.asset(
-                            'images/GUI/bag_GUI.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).size.height / 2 - 24, // 아이콘 높이 절반만큼 위
-            right: 16,
-            child: GestureDetector(
-              onTap: () async {
-                setState(() => isBagVisible = !isBagVisible);
-                if (isBagVisible) await _loadBagItems();
-              },
-              child: Image.asset(
-                'images/GUI/bag_GUI.png',
-                width: 48,
-                height: 48,
-              ),
-            ),
-          ),
           // 헤더를 Stack의 맨 위에 고정
           Positioned(
             top: 0,
@@ -650,6 +453,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                             ],
                           ),
                         ),
+                        const SizedBox(height: 8), // 경험치바와 타이머 사이 간격
+                        // 타이머 표시
+                        TimerWidget(),
                       ],
                     ),
                   ),
@@ -758,63 +564,400 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   // 설정 버튼
                   Expanded(
                     flex: 1,
-                    child: Align(
-                      alignment: Alignment.topRight,
-                      child: GestureDetector(
-                        onTap: () {
-                          print('설정 아이콘 클릭');
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return Dialog(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                child: Container(
-                                  height: 200,
-                                  width: 300,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.red,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 50,
-                                            vertical: 15,
-                                          ),
-                                        ),
-                                        onPressed: _handleLogout,
-                                        child: const Text(
-                                          '로그아웃',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontFamily: 'NaverNanumSquareRound',
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            print('설정 아이콘 클릭');
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
                                   ),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.09,
-                          height: MediaQuery.of(context).size.width * 0.09,
-                          decoration: const BoxDecoration(
-                            image: DecorationImage(
-                              image: AssetImage('images/setting_button.png'),
-                              fit: BoxFit.contain,
+                                  child: Container(
+                                    height: 200,
+                                    width: 300,
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 50,
+                                              vertical: 15,
+                                            ),
+                                          ),
+                                          onPressed: _handleLogout,
+                                          child: const Text(
+                                            '로그아웃',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontFamily: 'NaverNanumSquareRound',
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.09,
+                            height: MediaQuery.of(context).size.width * 0.09,
+                            decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage('images/setting_button.png'),
+                                fit: BoxFit.contain,
+                              ),
                             ),
                           ),
                         ),
+                        const SizedBox(height: 8), // 설정 버튼과 post 버튼 사이 간격
+                        // post_button.png
+                        GestureDetector(
+                          onTap: () {
+                            print('post 버튼 클릭');
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.09,
+                            height: MediaQuery.of(context).size.width * 0.09,
+                            decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage('images/post_button.png'),
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8), // post 버튼과 제작 아이콘 사이 간격
+                        // 제작/조합 아이콘
+                        GestureDetector(
+                          onTap: () {
+                            print('제작/조합 아이콘 클릭');
+                            Get.off(() => const CraftingPage());
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.09,
+                            height: MediaQuery.of(context).size.width * 0.09,
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withOpacity(0.8),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.build,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // 새 GIF 배치
+          Positioned(
+            top: MediaQuery.of(context).size.height / 2 - -60, // 이전 y좌표 유지
+            left: MediaQuery.of(context).size.width / 2 - 160, // x좌표를 더 왼쪽으로 이동
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    // 배고픔 게이지 (왼쪽)
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.restaurant, size: 20, color: Colors.white),
+                        const SizedBox(height: 4),
+                        SizedBox(
+                          height: 100,
+                          width: 20,
+                          child: RotatedBox(
+                            quarterTurns: -1,
+                            child: LinearProgressIndicator(
+                              value: birdHungry / 100,
+                              backgroundColor: Colors.grey[200],
+                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.orange),
+                              minHeight: 20,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(7),
+                          ),
+                          child: Text(
+                            '$birdHungry/100',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 5), // 배고픔 게이지와 새 사이 간격
+                    // 새 GIF
+                    Gif(
+                      controller: controller,
+                      image: AssetImage(
+                        isFeeding
+                          ? 'images/bird_Omoknoonii_feed_behavior.gif'
+                          : 'images/bird_Omoknoonii.gif',
+                      ),
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(width: 5), // 새와 목마름 게이지 사이 간격
+                    // 목마름 게이지 (오른쪽)
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.water_drop, size: 20, color: Colors.white),
+                        const SizedBox(height: 4),
+                        SizedBox(
+                          height: 100,
+                          width: 20,
+                          child: RotatedBox(
+                            quarterTurns: -1,
+                            child: LinearProgressIndicator(
+                              value: birdThirst / 100,
+                              backgroundColor: Colors.grey[200],
+                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                              minHeight: 20,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(7),
+                          ),
+                          child: Text(
+                            '$birdThirst/100',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10), // 새와 상태 표시 사이 간격
+              ],
+            ),
+          ),
+          if (isBagVisible)
+            BagWindow(
+              imagePaths: imagePaths,
+              itemAmounts: itemAmounts,
+              itemCodes: itemCodes,
+              onFeed: (itemCode) async {
+                try {
+                  final response = await ApiBird.feed(itemCode);
+                  if (response != null) {
+                    print('먹이 주기 API 응답: $response');
+                    
+                    setState(() {
+                      // API 응답에서 가능한 모든 필드명 시도
+                      birdHungry = response['birdHungry'] ?? 
+                                  response['hungry'] ?? 
+                                  birdHungry;
+                      birdThirst = response['birdThirst'] ?? 
+                                  response['thirst'] ?? 
+                                  birdThirst;
+                    });
+                    
+                    print('업데이트된 상태 - 배고픔: $birdHungry, 목마름: $birdThirst');
+                    _handleFeedGif();
+                  }
+                } catch (e) {
+                  print('❌ 아이템 사용 중 오류 발생: $e');
+                }
+              },
+            ),
+          // 새의 나이 표시 (하단 네비게이션 바 바로 위)
+          Positioned(
+            bottom: 80, // 네비게이션 바 높이(70) + 여백(10)
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.pets,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '태어난지 : $birdAgeString',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'NaverNanumSquareRound',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // 하단 네비게이션 바
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 70,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        await Get.off(() => const BookPage());
+                      },
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.asset(
+                              'images/GUI/background_GUI.png',
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          FractionallySizedBox(
+                            widthFactor: 0.90,
+                            heightFactor: 0.90,
+                            child: Image.asset(
+                              'images/GUI/book_GUI.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        await Get.to(() => const AdventurePage());
+                      },
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.asset(
+                              'images/GUI/background_GUI.png',
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          FractionallySizedBox(
+                            widthFactor: 0.90,
+                            heightFactor: 0.90,
+                            child: Image.asset(
+                              'images/GUI/adventure_GUI.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        await Get.to(() => const ShopPage());
+                        await goldModel.fetchGold(); // gold 값 갱신
+                      },
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.asset(
+                              'images/GUI/background_GUI.png',
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          FractionallySizedBox(
+                            widthFactor: 0.90,
+                            heightFactor: 0.90,
+                            child: Image.asset(
+                              'images/GUI/shop_GUI.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        await Get.to(() => const BagPage());
+                        await goldModel.fetchGold(); // gold 값 갱신
+                      },
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.asset(
+                              'images/GUI/background_GUI.png',
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          FractionallySizedBox(
+                            widthFactor: 0.90,
+                            heightFactor: 0.90,
+                            child: Image.asset(
+                              'images/GUI/bag_GUI.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).size.height / 2 - 24, // 아이콘 높이 절반만큼 위
+            right: 16,
+            child: GestureDetector(
+              onTap: () async {
+                setState(() => isBagVisible = !isBagVisible);
+                if (isBagVisible) await _loadBagItems();
+              },
+              child: Image.asset(
+                'images/GUI/bag_GUI.png',
+                width: 48,
+                height: 48,
               ),
             ),
           ),

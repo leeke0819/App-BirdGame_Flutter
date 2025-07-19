@@ -14,6 +14,8 @@ class BirdStatus extends StatelessWidget {
   });
 
   void _checkStatus(BuildContext context) {
+    print("birdHungry: $birdHungry");
+    print("birdThirst: $birdThirst");
     if (birdHungry > BIRD_MAX_HUNGER) {
       showSimpleNotification(
         const Text(

@@ -1,7 +1,9 @@
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:bird_raise_app/gui_click_pages/book_page.dart';
 import 'package:bird_raise_app/gui_click_pages/shop_page.dart';
+import 'package:bird_raise_app/main_page.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
+import 'package:bird_raise_app/gui_click_pages/adventure_games/adventure_one.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +21,11 @@ class _AdventurePageState extends State<AdventurePage> {
     final goldModel = context.watch<GoldModel>();
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Get.off(() => const MainPage()),
+        ),
         backgroundColor: Colors.white,
         title: const Text(
           '모험',
@@ -33,22 +40,27 @@ class _AdventurePageState extends State<AdventurePage> {
         color: Colors.white,
         child: Column(
           children: [
-            Container(
-              width: double.infinity,
-              height: 140,
-              margin: const EdgeInsets.only(top: 20, left: 16, right: 16, bottom: 10),
-              decoration: BoxDecoration(
-                color: Colors.blue[200],
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Center(
-                child: Text(
-                  '모험 1',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontFamily: 'NaverNanumSquareRound',
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+            GestureDetector(
+              onTap: () {
+                Get.to(() => const AdventureOne());
+              },
+              child: Container(
+                width: double.infinity,
+                height: 140,
+                margin: const EdgeInsets.only(top: 20, left: 16, right: 16, bottom: 10),
+                decoration: BoxDecoration(
+                  color: Colors.blue[200],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Center(
+                  child: Text(
+                    '모험 1',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontFamily: 'NaverNanumSquareRound',
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -117,16 +129,26 @@ class _AdventurePageState extends State<AdventurePage> {
                       onTap: () async {
                         await Get.off(() => const BookPage());
                       },
-                      child: Container(
-                        color: Colors.blue[100],
-                        child: const Center(
-                          child: Text(
-                            '도감',
-                            style: TextStyle(
-                              fontFamily: 'NaverNanumSquareRound',
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.asset(
+                              'images/GUI/background_GUI.png',
+                              fit: BoxFit.fill,
                             ),
                           ),
-                        ),
+                          FractionallySizedBox(
+                            widthFactor: 0.90,
+                            heightFactor: 0.90,
+                            child: Image.asset(
+                              'images/GUI/book_GUI.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -135,16 +157,26 @@ class _AdventurePageState extends State<AdventurePage> {
                       onTap: () async {
                         await Get.off(() => const AdventurePage());
                       },
-                      child: Container(
-                        color: Colors.green[100],
-                        child: const Center(
-                          child: Text(
-                            '모험',
-                            style: TextStyle(
-                              fontFamily: 'NaverNanumSquareRound',
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Image.asset(
+                              'images/GUI/background_GUI.png',
+                              fit: BoxFit.fill,
                             ),
                           ),
-                        ),
+                          FractionallySizedBox(
+                            widthFactor: 0.90,
+                            heightFactor: 0.90,
+                            child: Image.asset(
+                              'images/GUI/adventure_GUI.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -165,9 +197,13 @@ class _AdventurePageState extends State<AdventurePage> {
                               fit: BoxFit.fill,
                             ),
                           ),
-                          Image.asset(
-                            'images/GUI/shop_GUI.png',
-                            fit: BoxFit.contain,
+                          FractionallySizedBox(
+                            widthFactor: 0.90,
+                            heightFactor: 0.90,
+                            child: Image.asset(
+                              'images/GUI/shop_GUI.png',
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ],
                       ),
@@ -190,9 +226,13 @@ class _AdventurePageState extends State<AdventurePage> {
                               fit: BoxFit.fill,
                             ),
                           ),
-                          Image.asset(
-                            'images/GUI/bag_GUI.png',
-                            fit: BoxFit.contain,
+                          FractionallySizedBox(
+                            widthFactor: 0.90,
+                            heightFactor: 0.90,
+                            child: Image.asset(
+                              'images/GUI/bag_GUI.png',
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ],
                       ),

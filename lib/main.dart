@@ -71,6 +71,38 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController =
       TextEditingController(text: '123Time^^');
 
+  // 카카오 로그인 함수들
+  Future<OAuthToken> kakaoLogin() async {
+    try {
+      print("카카오 로그인 시도");
+      return await UserApi.instance
+          .loginWithKakaoTalk(); // ios, android 카카오톡 로그인(앱 내부 로그인) 시도
+    } catch (e) {
+      // 로그인 시도가 실패하면? 카카오 로그인(아이디, 비번 직접 입력) 실행
+      print("KakaoTalk로그인 실패 KakaoAccount 로그인 시도");
+      try {
+        return await UserApi.instance.loginWithKakaoAccount();
+      } catch (error) {
+        // 위의 예외처리에서도 실패할 경우
+        print("실패: ${error}");
+        await Future.delayed(const Duration(seconds: 1)); // 1초 딜레이 걸기
+        return await UserApi.instance.loginWithKakaoAccount(); // 카카오 로그인 한번 더 시도
+      }
+    }
+  }
+
+  Future<void> kakaoLoadUserProfile() async {
+    try {
+      print("카카오 사용자 정보 요청 시도");
+      User user = await UserApi.instance.me();
+      print('카카오 사용자 정보 요청 성공'
+          '\n닉네임: ${user.kakaoAccount?.profile?.nickname}'
+          '\n프로필사진: ${user.kakaoAccount?.profile?.profileImageUrl}');
+    } catch (error) {
+      print('사용자 정보 요청 실패 $error');
+    }
+  }
+
   Future<void> _login() async {
     final url = Uri.parse('${EnvConfig.apiUrl}/user/login');
     try {
@@ -207,6 +239,8 @@ class _LoginPageState extends State<LoginPage> {
                                   hintStyle:
                                       const TextStyle(color: Colors.grey),
                                   border: InputBorder.none,
+                                  isDense: true, // 추가
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 12), // 추가
                                   suffixIcon: GestureDetector(
                                     onTap: () {
                                       setState(() {
@@ -219,6 +253,7 @@ class _LoginPageState extends State<LoginPage> {
                                           ? Icons.visibility_off // 숨김 상태 아이콘
                                           : Icons.visibility, // 보임 상태 아이콘
                                       color: Colors.grey,
+                                      size: 24,
                                     ),
                                   ),
                                 ),
@@ -252,35 +287,40 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Get.to(() => const SocialMembers());
-                          },
-                          child: const Text(
-                            'SNS 계정으로 로그인',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey,
-                            ),
+                    GestureDetector(
+                      onTap: () async {
+                        print('카카오 로그인 버튼이 클릭되었습니다');
+                        OAuthToken token = await kakaoLogin();
+                        print(token);
+                        await kakaoLoadUserProfile();
+                      },
+                      child: Container(
+                        width: 300,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFFEE500),
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                        child: SizedBox(
+                          child: Image.asset(
+                            'images/kakao_login_medium_narrow.png',
+                            fit: BoxFit.contain,
                           ),
                         ),
-                        const SizedBox(width: 20),
-                        GestureDetector(
-                          onTap: () {
-                            Get.to(() => const NormalMembers());
-                          },
-                          child: const Text(
-                            '회원가입',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey,
-                            ),
-                          ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () {
+                        Get.to(() => const NormalMembers());
+                      },
+                      child: const Text(
+                        '회원가입',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),

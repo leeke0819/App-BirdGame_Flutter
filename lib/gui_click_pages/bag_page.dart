@@ -6,6 +6,7 @@ import 'package:bird_raise_app/api/api_shop.dart';
 import 'package:bird_raise_app/gui_click_pages/adventure_page.dart';
 import 'package:bird_raise_app/gui_click_pages/book_page.dart';
 import 'package:bird_raise_app/gui_click_pages/shop_page.dart';
+import 'package:bird_raise_app/main_page.dart';
 import 'package:bird_raise_app/model/bag_model.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
@@ -115,6 +116,11 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
     final goldModel = context.watch<GoldModel>();
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Get.off(() => const MainPage()),
+        ),
         title: const Text(
           '가방',
           style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
@@ -125,293 +131,330 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
           ? const Center(
               child: CircularProgressIndicator(),
             )
-          : Column(
-              children: [
-                // 선택된 아이템 상세 정보 표시
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: MediaQuery.of(context).size.height / 5,
-                        color: const Color.fromARGB(255, 145, 238, 207),
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+          : Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.blue[100]!,
+                    Colors.blue[200]!,
+                  ],
+                ),
+              ),
+              child: Column(
+                children: [
+                  // 선택된 아이템 상세 정보 표시
+                  Container(
+                    margin: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue[300]!, width: 2),
+                    ),
+                    child: Column(
+                      children: [
+                        // 제목
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue[300],
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(10),
+                              topRight: Radius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            '선택된 아이템',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'NaverNanumSquareRound',
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                        // 아이템 정보
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
                             children: [
-                              if (imagePaths.isNotEmpty)
-                                Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    Container(
-                                      width: 80,
-                                      height: 80,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        image: const DecorationImage(
-                                          image: AssetImage(
-                                              'images/background/shop_item_background.png'),
-                                          fit: BoxFit.fill,
+                              // 선택된 아이템 이미지
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  image: const DecorationImage(
+                                    image: AssetImage('images/background/shop_item_background.png'),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                child: imagePaths.isNotEmpty
+                                    ? Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Image.asset(
+                                          'images/items/${imagePaths[selectedIndex]}',
+                                          fit: BoxFit.contain,
                                         ),
+                                      )
+                                    : null,
+                              ),
+                              const SizedBox(width: 16),
+                              // 아이템 정보
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      itemNames.isNotEmpty ? itemNames[selectedIndex] : '',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'NaverNanumSquareRound',
                                       ),
                                     ),
-                                    Image.asset(
-                                      'images/items/${imagePaths[selectedIndex]}',
-                                      width: 70,
-                                      height: 70,
-                                      fit: BoxFit.contain,
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      '수량: ${itemAmounts.isNotEmpty ? itemAmounts[selectedIndex] : '0'}',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[600],
+                                        fontFamily: 'NaverNanumSquareRound',
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      itemLore.isNotEmpty ? itemLore[selectedIndex] : '',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[500],
+                                        fontFamily: 'NaverNanumSquareRound',
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),
-                              const SizedBox(height: 10),
-                              if (itemAmounts.isNotEmpty)
-                                Text(
-                                  '수량: ${itemAmounts[selectedIndex]}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'NaverNanumSquareRound',
-                                  ),
-                                ),
+                              ),
                             ],
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.4,
-                      height: MediaQuery.of(context).size.height / 5,
-                      color: const Color.fromARGB(255, 64, 62, 201),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 20.0),
+                  ),
+                  // 그리드 형태의 아이템 목록 또는 빈 가방 메시지
+                  Expanded(
+                    child: imagePaths.isEmpty
+                        ? const Center(
                             child: Text(
-                              itemNames.isNotEmpty
-                                  ? itemNames[selectedIndex]
-                                  : '',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                              '가방에 아이템이 없습니다 ;ㅇ;',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 18,
                                 fontFamily: 'NaverNanumSquareRound',
                               ),
                             ),
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                itemLore.isNotEmpty
-                                    ? itemLore[selectedIndex]
-                                    : '',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'NaverNanumSquareRound',
-                                ),
-                              ),
+                          )
+                        : GridView.builder(
+                            padding: const EdgeInsets.all(16),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 5,
+                              mainAxisSpacing: 4,
+                              crossAxisSpacing: 4,
+                              childAspectRatio: 1.0,
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 3),
-                // 그리드 형태의 아이템 목록 또는 빈 가방 메시지
-                Expanded(
-                  child: imagePaths.isEmpty
-                      ? const Center(
-                          child: Text(
-                            '가방에 아이템이 없습니다 ;ㅇ;',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 18,
-                              fontFamily: 'NaverNanumSquareRound',
-                            ),
-                          ),
-                        )
-                      : GridView.builder(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 5,
-                            mainAxisSpacing: 3,
-                            childAspectRatio: 1.0,
-                          ),
-                          itemCount: imagePaths.length,
-                          itemBuilder: (context, index) {
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  selectedIndex = index;
-                                });
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Stack(
-                                  children: [
-                                    // 아이템 배경
-                                    Positioned.fill(
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.asset(
-                                          'images/background/shop_item_background.png',
-                                          fit: BoxFit.cover,
+                            itemCount: imagePaths.length,
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedIndex = index;
+                                  });
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: selectedIndex == index 
+                                          ? Colors.blue 
+                                          : Colors.grey[300]!,
+                                      width: selectedIndex == index ? 2 : 1,
+                                    ),
+                                    image: const DecorationImage(
+                                      image: AssetImage('images/background/shop_item_background.png'),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Image.asset(
+                                            'images/items/${imagePaths[index]}',
+                                            fit: BoxFit.contain,
+                                          ),
                                         ),
                                       ),
-                                    ),
-
-                                    // 아이템 이미지
-                                    Center(
-                                      child: FractionallySizedBox(
-                                        widthFactor: 0.9,
-                                        heightFactor: 0.9,
-                                        child: Image.asset(
-                                          'images/items/${imagePaths[index]}',
-                                          fit: BoxFit.contain,
+                                      // 수량 표시
+                                      Positioned(
+                                        bottom: 4,
+                                        right: 4,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 4,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black54,
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            itemAmounts[index],
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'NaverNanumSquareRound',
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Positioned(
-                                      right: 4,
-                                      bottom: 4,
-                                      child: Builder(
-                                        builder: (context) {
-                                          double screenWidth =
-                                              MediaQuery.of(context).size.width;
-                                          double fontSize =
-                                              screenWidth * 0.03; // 예: 3% 비율
-                                          double horizontalPadding =
-                                              screenWidth * 0.020; // padding도 비율로!
-                                          double verticalPadding =
-                                              screenWidth * 0.010; // 세로 패딩도 비율로!
-
-                                          return Container(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: horizontalPadding,
-                                              vertical: verticalPadding,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.black54,
-                                              borderRadius: BorderRadius.circular(4),
-                                            ),
-                                            child: Text(
-                                              itemAmounts[index],
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: fontSize,
-                                                fontWeight: FontWeight.bold,
-                                                fontFamily: 'NaverNanumSquareRound',
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                ),
-                // Footer navigation bar 추가
-                const SizedBox(height: 3),
-                Container(
-                  height: 70,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () async {
-                            await Get.off(() => const BookPage());
-                          },
-                          child: Container(
-                            color: Colors.blue[100],
-                            child: const Center(
-                              child: Text(
-                                '도감',
-                                style: TextStyle(
-                                  fontFamily: 'NaverNanumSquareRound',
-                                ),
-                              ),
-                            ),
+                              );
+                            },
                           ),
-                        ),
-                      ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () async {
-                            await Get.off(() => const AdventurePage());
-                          },
-                          child: Container(
-                            color: Colors.green[100],
-                            child: const Center(
-                              child: Text(
-                                '모험',
-                                style: TextStyle(fontFamily: 'NaverNanumSquareRound'),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () async {
-                            Get.off(() => const ShopPage());
-                            await goldModel.fetchGold(); // gold 값 갱신
-                          },
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                child: Image.asset(
-                                  'images/GUI/background_GUI.png',
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
-                              Image.asset(
-                                'images/GUI/shop_GUI.png',
-                                fit: BoxFit.contain,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () async {
-                            Get.off(() => const BagPage());
-                            await goldModel.fetchGold(); // gold 값 갱신
-                          },
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                child: Image.asset(
-                                  'images/GUI/background_GUI.png',
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
-                              Image.asset(
-                                'images/GUI/bag_GUI.png',
-                                fit: BoxFit.contain,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
-                ),
-              ],
+                  // Footer navigation bar 추가
+                  const SizedBox(height: 3),
+                  Container(
+                    height: 70,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              await Get.off(() => const BookPage());
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  child: Image.asset(
+                                    'images/GUI/background_GUI.png',
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                FractionallySizedBox(
+                                  widthFactor: 0.90,
+                                  heightFactor: 0.90,
+                                  child: Image.asset(
+                                    'images/GUI/book_GUI.png',
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              await Get.off(() => const AdventurePage());
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  child: Image.asset(
+                                    'images/GUI/background_GUI.png',
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                FractionallySizedBox(
+                                  widthFactor: 0.90,
+                                  heightFactor: 0.90,
+                                  child: Image.asset(
+                                    'images/GUI/adventure_GUI.png',
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              Get.off(() => const ShopPage());
+                              await goldModel.fetchGold(); // gold 값 갱신
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  child: Image.asset(
+                                    'images/GUI/background_GUI.png',
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                FractionallySizedBox(
+                                  widthFactor: 0.90,
+                                  heightFactor: 0.90,
+                                  child: Image.asset(
+                                    'images/GUI/shop_GUI.png',
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              Get.off(() => const BagPage());
+                              await goldModel.fetchGold(); // gold 값 갱신
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  child: Image.asset(
+                                    'images/GUI/background_GUI.png',
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                FractionallySizedBox(
+                                  widthFactor: 0.90,
+                                  heightFactor: 0.90,
+                                  child: Image.asset(
+                                    'images/GUI/bag_GUI.png',
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
     );
   }

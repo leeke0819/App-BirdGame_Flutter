@@ -76,6 +76,7 @@ flutter:
   assets:
     #로그인 관련
     - images/kakao_login_medium_wide.png
+    - images/kakao_login_medium_narrow.png
     #메인 페이지 관련
     - images/background/main_page_width_background.png
     - images/background/main_page_length_background.png
@@ -112,6 +113,8 @@ flutter:
     #하단 GUI 관련
     - images/GUI/shop_GUI.png
     - images/GUI/bag_GUI.png
+    - images/GUI/book_GUI.png
+    - images/GUI/adventure_GUI.png
     - images/GUI/background_GUI.png
 
     #아이템 관련
