@@ -100,8 +100,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   int maxExp = 0;
   int minExp = 0;
   int level = 0;
-  int birdHungry = 5;  // 기본값 설정 (0-10 범위)
-  int birdThirst = 5;  // 기본값 설정 (0-10 범위)
+  int birdHungry = 5; // 기본값 설정 (0-10 범위)
+  int birdThirst = 5; // 기본값 설정 (0-10 범위)
   bool isBagVisible = false;
   bool isLoading = true;
   bool isFeeding = false;
@@ -154,12 +154,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           exp = responseData['userExp'];
           minExp = responseData['minExp'];
           maxExp = responseData['maxExp'];
-          birdHungry = responseData['birdHungry'] ?? 5;  // 새의 배고픔 상태
-          birdThirst = responseData['birdThirst'] ?? 5;  // 새의 목마름 상태
+          birdHungry = responseData['birdHungry'] ?? 5; // 새의 배고픔 상태
+          birdThirst = responseData['birdThirst'] ?? 5; // 새의 목마름 상태
           birdCreatedAt = responseData['createdAt'];
           isLoading = false;
         });
-        
       } else {
         _showError('API 호출에 실패했습니다.');
       }
@@ -168,7 +167,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       _showError('서버 연결에 실패했습니다.');
     }
   }
-
 
   Future<void> _handleLogout() async {
     try {
@@ -261,7 +259,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           birdThirst = response['thirst'] ?? birdThirst;
           birdCreatedAt = response['createdAt'];
         });
-        
+
         // 새의 나이 업데이트
         _updateBirdAge();
       }
@@ -374,7 +372,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                       ),
                                     );
                                   },
-                                  loadingBuilder: (context, child, loadingProgress) {
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
                                     if (loadingProgress == null) return child;
                                     return Container(
                                       width: 38,
@@ -434,7 +433,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               FractionallySizedBox(
                                 alignment: Alignment.centerLeft,
                                 widthFactor: ExperienceLevel.calculateProgress(
-                                  exp, level, maxExp, minExp),
+                                    exp, level, maxExp, minExp),
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(10),
@@ -463,7 +462,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   Expanded(
                     flex: 2,
                     child: Container(
-                      margin: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.02),
+                      margin: EdgeInsets.only(
+                          left: MediaQuery.of(context).size.width * 0.02),
                       decoration: const BoxDecoration(
                         image: DecorationImage(
                           image: AssetImage('images/GUI/gold_GUI.png'),
@@ -500,7 +500,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                 },
                                 child: Image.asset(
                                   'images/GUI/gold_plus_button_GUI.png',
-                                  height: MediaQuery.of(context).size.height * 0.024,
+                                  height: MediaQuery.of(context).size.height *
+                                      0.024,
                                   fit: BoxFit.contain,
                                 ),
                               ),
@@ -514,7 +515,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   Expanded(
                     flex: 2,
                     child: Container(
-                      margin: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.02),
+                      margin: EdgeInsets.only(
+                          left: MediaQuery.of(context).size.width * 0.02),
                       decoration: const BoxDecoration(
                         image: DecorationImage(
                           image: AssetImage('images/GUI/star_coin_GUI.png'),
@@ -551,7 +553,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                 },
                                 child: Image.asset(
                                   'images/GUI/star_coin_plus_button_GUI.png',
-                                  height: MediaQuery.of(context).size.height * 0.024,
+                                  height: MediaQuery.of(context).size.height *
+                                      0.024,
                                   fit: BoxFit.contain,
                                 ),
                               ),
@@ -581,7 +584,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                     height: 200,
                                     width: 300,
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         ElevatedButton(
                                           style: ElevatedButton.styleFrom(
@@ -596,7 +600,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                             '로그아웃',
                                             style: TextStyle(
                                               fontSize: 18,
-                                              fontFamily: 'NaverNanumSquareRound',
+                                              fontFamily:
+                                                  'NaverNanumSquareRound',
                                               color: Colors.white,
                                             ),
                                           ),
@@ -676,7 +681,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.restaurant, size: 20, color: Colors.white),
+                        const Icon(Icons.restaurant,
+                            size: 20, color: Colors.white),
                         const SizedBox(height: 4),
                         SizedBox(
                           height: 100,
@@ -686,14 +692,16 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                             child: LinearProgressIndicator(
                               value: birdHungry / 100,
                               backgroundColor: Colors.grey[200],
-                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.orange),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Colors.orange),
                               minHeight: 20,
                             ),
                           ),
                         ),
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(7),
@@ -711,8 +719,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       controller: controller,
                       image: AssetImage(
                         isFeeding
-                          ? 'images/bird_Omoknoonii_feed_behavior.gif'
-                          : 'images/bird_Omoknoonii.gif',
+                            ? 'images/birds/GIF/Omoknoonii/bird_Omoknoonii_feed_behavior.gif'
+                            : 'images/birds/GIF/Omoknoonii/bird_Omoknoonii.gif',
                       ),
                       width: 200,
                       height: 200,
@@ -723,7 +731,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.water_drop, size: 20, color: Colors.white),
+                        const Icon(Icons.water_drop,
+                            size: 20, color: Colors.white),
                         const SizedBox(height: 4),
                         SizedBox(
                           height: 100,
@@ -733,14 +742,16 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                             child: LinearProgressIndicator(
                               value: birdThirst / 100,
                               backgroundColor: Colors.grey[200],
-                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Colors.blue),
                               minHeight: 20,
                             ),
                           ),
                         ),
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(7),
@@ -768,17 +779,17 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   final response = await ApiBird.feed(itemCode);
                   if (response != null) {
                     print('먹이 주기 API 응답: $response');
-                    
+
                     setState(() {
                       // API 응답에서 가능한 모든 필드명 시도
-                      birdHungry = response['birdHungry'] ?? 
-                                  response['hungry'] ?? 
-                                  birdHungry;
-                      birdThirst = response['birdThirst'] ?? 
-                                  response['thirst'] ?? 
-                                  birdThirst;
+                      birdHungry = response['birdHungry'] ??
+                          response['hungry'] ??
+                          birdHungry;
+                      birdThirst = response['birdThirst'] ??
+                          response['thirst'] ??
+                          birdThirst;
                     });
-                    
+
                     print('업데이트된 상태 - 배고픔: $birdHungry, 목마름: $birdThirst');
                     _handleFeedGif();
                   }

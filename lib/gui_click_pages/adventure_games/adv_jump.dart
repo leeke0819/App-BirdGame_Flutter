@@ -20,6 +20,9 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
   double timeSinceLastObstacle = 0;
   final double obstacleSpawnInterval = 2.0;
   final Random random = Random();
+  final void Function()? onGameOver;
+
+  JumpGame({this.onGameOver});
 
   @override
   Future<void> onLoad() async {
@@ -89,7 +92,7 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
   @override
   void update(double dt) {
     super.update(dt);
-    
+
     if (!gameStarted || gameOver) return;
 
     // 점수 업데이트
@@ -112,7 +115,7 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
   void _spawnObstacle() {
     final gapHeight = 150.0;
     final gapPosition = random.nextDouble() * (size.y - gapHeight - 100) + 50;
-    
+
     // 위쪽 기둥
     final topObstacle = Obstacle(
       position: Vector2(size.x, gapPosition - 200),
@@ -139,7 +142,7 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
 
   void endGame() {
     gameOver = true;
-    
+
     // 게임오버 텍스트
     final gameOverText = TextComponent(
       text: 'Game Over!\nScore: $score\nTap to restart',
@@ -154,6 +157,9 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
       ),
     );
     add(gameOverText);
+    if (onGameOver != null) {
+      onGameOver!();
+    }
   }
 
   void restart() {
@@ -163,48 +169,66 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
     obstaclesEnabled = false;
     obstacleSpeed = 100;
     timeSinceLastObstacle = 0;
-    
+
     // 모든 장애물 제거
-    children.whereType<Obstacle>().forEach((obstacle) => obstacle.removeFromParent());
-    
+    children
+        .whereType<Obstacle>()
+        .forEach((obstacle) => obstacle.removeFromParent());
+
     // 플레이어 위치 초기화
     player.position = Vector2(100, size.y / 2);
     player.velocity = Vector2.zero();
-    
+
     // 게임오버 텍스트 제거
     children.whereType<TextComponent>().forEach((text) {
       if (text.text.contains('Game Over')) {
         text.removeFromParent();
       }
     });
-    
+
     // 점수 텍스트 초기화
     scoreText.text = 'Score: 0';
-    
+
     // 카운트다운 다시 시작
     _startCountdown();
   }
 }
 
-//TODO :: Bird에 대한 클래스로 변경, 현재는 사각형
-class Player extends RectangleComponent with CollisionCallbacks {
+class Player extends SpriteAnimationComponent with CollisionCallbacks {
   Vector2 velocity = Vector2.zero();
   final double gravity = 800;
   final double jumpForce = -600;
   bool isJumping = false;
   late JumpGame jumpGame;
 
-  Player() : super(size: Vector2(40, 40));
+  Player() : super(size: Vector2(60, 60));
 
   @override
   Future<void> onLoad() async {
     // 게임 참조 저장
     jumpGame = parent as JumpGame;
-    
-    // 플레이어 색상
-    paint = Paint()..color = Colors.blue;
-    
-    // 충돌 박스 추가
+
+    // 5개의 새 이미지를 로드하여 애니메이션 생성
+    final sprites = [
+      await Sprite.load('images/birds/PNG/Omoknoonii/fly_bird1.png',
+          images: jumpGame.images),
+      await Sprite.load('images/birds/PNG/Omoknoonii/fly_bird2.png',
+          images: jumpGame.images),
+      await Sprite.load('images/birds/PNG/Omoknoonii/fly_bird3.png',
+          images: jumpGame.images),
+      await Sprite.load('images/birds/PNG/Omoknoonii/fly_bird4.png',
+          images: jumpGame.images),
+      await Sprite.load('images/birds/PNG/Omoknoonii/fly_bird5.png',
+          images: jumpGame.images),
+    ];
+
+    // 애니메이션 생성 (0.1초마다 프레임 변경)
+    animation = SpriteAnimation.spriteList(
+      sprites,
+      stepTime: 0.1,
+    );
+
+    // 충돌 박스 추가 (사각형으로 충돌 감지)
     add(RectangleHitbox());
   }
 
@@ -217,18 +241,18 @@ class Player extends RectangleComponent with CollisionCallbacks {
   @override
   void update(double dt) {
     super.update(dt);
-    
+
     // 중력 적용
     velocity.y += gravity * dt;
     position += velocity * dt;
-    
+
     // 바닥 체크
     if (position.y > jumpGame.size.y - size.y) {
       position.y = jumpGame.size.y - size.y;
       velocity.y = 0;
       isJumping = false;
     }
-    
+
     // 천장 체크
     if (position.y < 0) {
       position.y = 0;
@@ -258,7 +282,7 @@ class Obstacle extends RectangleComponent with CollisionCallbacks {
   Future<void> onLoad() async {
     // 장애물 색상 (위쪽은 빨간색, 아래쪽은 초록색)
     paint = Paint()..color = isTop ? Colors.red : Colors.green;
-    
+
     // 충돌 박스 추가
     add(RectangleHitbox());
   }
@@ -266,10 +290,10 @@ class Obstacle extends RectangleComponent with CollisionCallbacks {
   @override
   void update(double dt) {
     super.update(dt);
-    
+
     // 왼쪽으로 이동
     position.x -= speed * dt;
-    
+
     // 화면 밖으로 나가면 제거
     if (position.x < -size.x) {
       removeFromParent();
@@ -277,13 +301,27 @@ class Obstacle extends RectangleComponent with CollisionCallbacks {
   }
 }
 
-class JumpGameWidget extends StatelessWidget {
-  const JumpGameWidget({super.key});
+class JumpGameWidget extends StatefulWidget {
+  const JumpGameWidget({super.key, required this.onGameOver});
+  final VoidCallback onGameOver;
+
+  @override
+  State<JumpGameWidget> createState() => _JumpGameWidgetState();
+}
+
+class _JumpGameWidgetState extends State<JumpGameWidget> {
+  late JumpGame _game;
+
+  @override
+  void initState() {
+    super.initState();
+    _game = JumpGame(onGameOver: widget.onGameOver);
+  }
 
   @override
   Widget build(BuildContext context) {
     return GameWidget(
-      game: JumpGame(),
+      game: _game,
       overlayBuilderMap: {
         'pause_menu': (context, game) => const PauseMenu(),
       },
@@ -322,4 +360,4 @@ class PauseMenu extends StatelessWidget {
       ),
     );
   }
-} 
+}

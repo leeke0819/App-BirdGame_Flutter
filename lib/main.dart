@@ -1,5 +1,4 @@
 import 'package:bird_raise_app/config/env_config.dart';
-import 'package:bird_raise_app/login_members/social_members.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/token/mobile_secure_token.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
@@ -86,7 +85,8 @@ class _LoginPageState extends State<LoginPage> {
         // 위의 예외처리에서도 실패할 경우
         print("실패: ${error}");
         await Future.delayed(const Duration(seconds: 1)); // 1초 딜레이 걸기
-        return await UserApi.instance.loginWithKakaoAccount(); // 카카오 로그인 한번 더 시도
+        return await UserApi.instance
+            .loginWithKakaoAccount(); // 카카오 로그인 한번 더 시도
       }
     }
   }
@@ -240,7 +240,8 @@ class _LoginPageState extends State<LoginPage> {
                                       const TextStyle(color: Colors.grey),
                                   border: InputBorder.none,
                                   isDense: true, // 추가
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 12), // 추가
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 12), // 추가
                                   suffixIcon: GestureDetector(
                                     onTap: () {
                                       setState(() {

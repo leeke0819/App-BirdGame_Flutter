@@ -90,8 +90,15 @@ flutter:
     - images/GUI/sell_button_GUI.png
 
     #새 관련
-    - images/bird_Omoknoonii.gif
-    - images/bird_Omoknoonii_feed_behavior.gif
+    - images/birds/GIF/Omoknoonii/bird_Omoknoonii.gif
+    - images/birds/GIF/Omoknoonii/bird_Omoknoonii_feed_behavior.gif
+    - images/birds/GIF/Omoknoonii/fly_bird_Omoknoonii.gif
+    - images/birds/PNG/Omoknoonii/fly_bird1.png
+    - images/birds/PNG/Omoknoonii/fly_bird2.png
+    - images/birds/PNG/Omoknoonii/fly_bird3.png
+    - images/birds/PNG/Omoknoonii/fly_bird4.png
+    - images/birds/PNG/Omoknoonii/fly_bird5.png
+
 
     #user 프로필 관련
     - images/test_profile.png
@@ -135,6 +142,9 @@ flutter:
 
     #새 알 관련
     - images/birds/bird_001.png
+
+    #게임 관련
+    - images/background/game1_background.png
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
