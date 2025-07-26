@@ -8,6 +8,7 @@ import 'package:bird_raise_app/token/mobile_secure_token.dart';
 class ApiGame {
   static Future<String?> startGame(int gameId) async {
     String? token;
+    print('startGame');
     final Uri _userUrl = Uri.parse('${EnvConfig.apiUrl}/game/start');
 
     if (kIsWeb) {
@@ -15,7 +16,7 @@ class ApiGame {
     } else {
       token = await getAccessToken();
     }
-
+    print('token: $token');
     if (token == null) {
       print('⚠️ 토큰이 없습니다.');
       return null;
@@ -30,6 +31,7 @@ class ApiGame {
         },
         body: jsonEncode({'gameId': gameId}),
       );
+      print('response: ${response.body}');
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['sessionId']?.toString();

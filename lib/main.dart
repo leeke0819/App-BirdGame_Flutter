@@ -7,6 +7,7 @@ import 'package:bird_raise_app/login_members/normal_members.dart';
 import 'package:bird_raise_app/model/bag_model.dart';
 import 'package:bird_raise_app/services/timer_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -14,10 +15,8 @@ import 'package:flutter/foundation.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart'; //웹 환경구분을 위한 import
-import 'package:flutter_dotenv/flutter_dotenv.dart'; //환경변수 등록용
 
 void main() async {
-  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
 
   // 전역 타이머 서비스 시작
@@ -36,7 +35,8 @@ void main() async {
     nativeAppKey: '20c7d3f66691c7dc19454411cd6a8751',
     javaScriptAppKey: 'd85aa4100c1fd9fe52a7414e8a8493c3',
   );
-
+  // 시스템 UI 모드 설정(하단 상태 바 숨김)
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(
     OverlaySupport.global(
       child: MultiProvider(

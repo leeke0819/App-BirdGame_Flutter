@@ -1,7 +1,6 @@
 // lib/config/env_config.dart
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class EnvConfig {
-  static String get apiUrl =>
-      dotenv.env['API_URL'] ?? 'http://localhost:8080/api/v1';
+  // 하드코딩된 API URL - 8080 포트 사용
+  static const String apiUrl = 'http://localhost:8080/api/v1';
 }

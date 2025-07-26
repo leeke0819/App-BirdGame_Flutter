@@ -19,6 +19,7 @@ class _AdventureOneState extends State<AdventureOne> {
   bool gameOver = false;
   String? sessionId;
   bool isGameOverRequested = false; // ✅ 중복 호출 방지용
+  bool isResultDialogShown = false; // 결과 팝업 표시 여부
 
   void _handleGameOver() async {
     if (isGameOverRequested) return; // ✅ 중복 호출 방지
@@ -40,8 +41,9 @@ class _AdventureOneState extends State<AdventureOne> {
         context.read<GoldModel>().updateGold(latestGold);
       }
 
-      // ✅ 결과 팝업 표시 (보상 등)
-      if (result != null) {
+      // ✅ 결과 팝업 표시 (보상 등) - 중복 방지
+      if (result != null && !isResultDialogShown) {
+        isResultDialogShown = true;
         final int reward = result['reward'];
         final int duration = result['duration'];
 
@@ -83,30 +85,22 @@ class _AdventureOneState extends State<AdventureOne> {
         centerTitle: true,
       ),
       body: gameStarted
-          ? Stack(
-              children: [
-                JumpGameWidget(onGameOver: _handleGameOver),
-                if (gameOver)
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('Game Over!',
-                            style: TextStyle(fontSize: 32, color: Colors.red)),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              gameOver = false;
-                              gameStarted = false; // 또는 재시작 로직
-                              isGameOverRequested = false; // ✅ 다시 게임 가능하게 초기화
-                            });
-                          },
-                          child: Text('Restart'),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
+          ? JumpGameWidget(
+              onGameOver: _handleGameOver,
+              onExitGame: () {
+                isGameOverRequested = false; // 초기화
+                isResultDialogShown = false; // 결과 팝업 표시 여부 초기화
+                Get.off(() => const MainPage());
+              },
+              onRestart: () async {
+                isGameOverRequested = false; // 재시작 시 초기화
+                isResultDialogShown = false; // 결과 팝업 표시 여부 초기화
+                // 새로운 세션 시작
+                sessionId = await ApiGame.startGame(1);
+                if (sessionId == null) {
+                  print('❌ 재시작 시 게임 시작 실패');
+                }
+              },
             )
           : Container(
               decoration: BoxDecoration(
