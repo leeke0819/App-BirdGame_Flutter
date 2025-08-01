@@ -47,20 +47,18 @@ class _AdventurePageState extends State<AdventurePage> {
               child: Container(
                 width: double.infinity,
                 height: 140,
-                margin: const EdgeInsets.only(top: 20, left: 16, right: 16, bottom: 10),
+                margin: const EdgeInsets.only(
+                    top: 20, left: 16, right: 16, bottom: 10),
                 decoration: BoxDecoration(
-                  color: Colors.blue[200],
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Center(
-                  child: Text(
-                    '모험 1',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontFamily: 'NaverNanumSquareRound',
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset(
+                    'images/GUI/adventure1_button_GUI.png',
+                    width: double.infinity,
+                    height: 140,
+                    fit: BoxFit.fill,
                   ),
                 ),
               ),

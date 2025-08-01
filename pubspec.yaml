@@ -46,6 +46,7 @@ dependencies:
   provider: ^6.1.5
   flutter_dotenv: ^5.2.1
   overlay_support: ^2.1.0
+  audioplayers: ^6.5.0
 
 dev_dependencies:
   flutter_test:
@@ -151,6 +152,15 @@ flutter:
 
     #게임 관련
     - images/background/game1_background.png
+    - images/wood.png
+    - images/GUI/adventure1_button_GUI.png
+
+    #모험 1 사운드
+    - assets/sounds/jump.mp3
+    - assets/sounds/adventure1_background_sound.mp3
+    
+    #조합 레시피
+    - craft.json
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

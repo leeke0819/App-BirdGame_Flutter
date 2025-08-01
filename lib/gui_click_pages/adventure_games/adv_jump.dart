@@ -1,12 +1,11 @@
 import 'package:flame/cache.dart';
 import 'package:flame/game.dart';
 import 'package:flame/components.dart';
-import 'package:flame/events.dart';
 import 'package:flame/input.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'dart:math';
 
 class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
@@ -27,12 +26,39 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
   final void Function()? onRestart;
   TextComponent? gameOverText;
 
+  // 최대 스코어 설정 (5000코인에 해당)
+  static const int maxScore = 5000;
+
+  // 오디오 플레이어 추가
+  late AudioPlayer backgroundMusicPlayer;
+  late AudioPlayer jumpSoundPlayer;
+
   JumpGame({this.onGameOver, this.onExitGame, this.onRestart});
   final images = Images(prefix: '');
 
   @override
   Future<void> onLoad() async {
     print('JumpGame onLoad');
+
+    // 오디오 플레이어 초기화
+    backgroundMusicPlayer = AudioPlayer();
+    jumpSoundPlayer = AudioPlayer();
+
+    // 점프 사운드 볼륨 설정 (20% 볼륨)
+    jumpSoundPlayer.setVolume(0.2);
+
+    // 백그라운드 음악 시작 (루프 재생)
+    try {
+      await backgroundMusicPlayer
+          .play(AssetSource('sounds/adventure1_background_sound.mp3'));
+      await backgroundMusicPlayer.setReleaseMode(ReleaseMode.loop);
+      // 볼륨을 0.3으로 설정 (30% 볼륨)
+      await backgroundMusicPlayer.setVolume(0.3);
+      print('백그라운드 음악 시작 성공');
+    } catch (e) {
+      print('백그라운드 음악 시작 실패: $e');
+    }
+
     try {
       print('이미지 프리로드 시작...');
       await images.loadAll([
@@ -41,6 +67,7 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
         'images/birds/PNG/Omoknoonii/fly_bird3.png',
         'images/birds/PNG/Omoknoonii/fly_bird4.png',
         'images/birds/PNG/Omoknoonii/fly_bird5.png',
+        'images/wood.png', // 나무 이미지도 함께 프리로드
       ]);
       print('이미지 프리로드 성공');
     } catch (e) {
@@ -53,6 +80,13 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
         } catch (e) {
           print('개별 이미지 $i 로딩 실패: $e');
         }
+      }
+      // 나무 이미지 개별 로딩 시도
+      try {
+        await images.load('images/wood.png');
+        print('나무 이미지 개별 로딩 성공');
+      } catch (e) {
+        print('나무 이미지 개별 로딩 실패: $e');
       }
     }
 
@@ -126,6 +160,13 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
     score++;
     scoreText.text = 'Score: $score';
 
+    // 최대 스코어 도달 시 게임 종료
+    if (score >= maxScore) {
+      print('최대 스코어 도달: $score');
+      endGame();
+      return;
+    }
+
     // 장애물이 활성화된 후에만 생성
     if (obstaclesEnabled) {
       timeSinceLastObstacle += dt;
@@ -141,40 +182,45 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
 
   void _spawnObstacle() {
     final gapHeight = 300.0; // 기둥 위아래 간격
-    final minGapPosition = 100.0; // 최소 간격 위치
-    final maxGapPosition = size.y - gapHeight - 100.0; // 최대 간격 위치
-    
-    // 간격 위치를 더 안전한 범위로 제한
-    final gapPosition = random.nextDouble() * (maxGapPosition - minGapPosition) + minGapPosition;
+    final minGapPosition = 150.0; // 최소 간격 위치 (더 안전한 범위)
+    final maxGapPosition = size.y - gapHeight - 150.0; // 최대 간격 위치 (더 안전한 범위)
 
-    // 위쪽 기둥 - 위쪽 끝까지 확실히 연결
-    final topObstacleHeight = gapPosition;
+    // 간격 위치를 더 안전한 범위로 제한
+    final gapPosition =
+        random.nextDouble() * (maxGapPosition - minGapPosition) +
+            minGapPosition;
+
+    // 위쪽 기둥 - 화면 위쪽 끝까지 확실히 연결
+    final topObstacleHeight =
+        gapPosition.clamp(100.0, 400.0).toDouble(); // 높이 제한
     final topObstacle = Obstacle(
-      position: Vector2(size.x, 0), // 위쪽 끝(0)에서 시작
-      size: Vector2(50, topObstacleHeight),
+      position: Vector2(size.x, 0), // 화면 위쪽 끝에서 시작
+      size: Vector2(80, topObstacleHeight), // 제한된 높이 설정
       isTop: true,
     );
     add(topObstacle);
 
-    // 아래쪽 기둥 - 아래쪽 끝까지 확실히 연결
+    // 아래쪽 기둥 - 화면 아래쪽 끝까지 확실히 연결
     final bottomObstacleY = gapPosition + gapHeight;
-    final bottomObstacleHeight = size.y - bottomObstacleY;
+    final bottomObstacleHeight =
+        (size.y - bottomObstacleY).clamp(100.0, 400.0).toDouble(); // 높이 제한
     final bottomObstacle = Obstacle(
       position: Vector2(size.x, bottomObstacleY),
-      size: Vector2(50, bottomObstacleHeight),
+      size: Vector2(80, bottomObstacleHeight), // 제한된 높이 설정
       isTop: false,
     );
     add(bottomObstacle);
   }
 
-
-
-
-
-
   @override
   void onTap() {
     if (gameStarted && !gameOver) {
+      // 점프 사운드 재생
+      try {
+        jumpSoundPlayer.play(AssetSource('sounds/jump.mp3'));
+      } catch (e) {
+        print('점프 사운드 재생 실패: $e');
+      }
       player.jump();
     } else if (gameOver) {
       // 게임오버 상태에서 탭하면 재시작
@@ -185,21 +231,32 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
   void endGame() {
     // 이미 게임오버 상태라면 중복 호출 방지
     if (gameOver) return;
-    
+
     gameOver = true;
+
+    // 백그라운드 음악 중지
+    try {
+      backgroundMusicPlayer.stop();
+    } catch (e) {
+      print('백그라운드 음악 중지 실패: $e');
+    }
 
     // 기존 Game Over 텍스트 제거
     gameOverText?.removeFromParent();
 
     // 새 Game Over 텍스트 생성
+    String gameOverMessage = score >= maxScore
+        ? '축하합니다!\n최대 스코어 달성!\nScore: $score'
+        : 'Game Over!\nScore: $score';
+
     gameOverText = TextComponent(
-      text: 'Game Over!\nScore: $score',
+      text: gameOverMessage,
       position: Vector2(size.x / 2, size.y / 2 - 50), // 위로 올림
       anchor: Anchor.center,
       textRenderer: TextPaint(
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 32,
-          color: Colors.red,
+          color: score >= maxScore ? Colors.green : Colors.red,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -222,6 +279,17 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
     obstacleSpeed = 100;
     timeSinceLastObstacle = 0;
 
+    // 백그라운드 음악 다시 시작
+    try {
+      backgroundMusicPlayer
+          .play(AssetSource('sounds/adventure1_background_sound.mp3'));
+      backgroundMusicPlayer.setReleaseMode(ReleaseMode.loop);
+      // 볼륨을 0.3으로 설정 (30% 볼륨)
+      backgroundMusicPlayer.setVolume(0.3);
+    } catch (e) {
+      print('백그라운드 음악 재시작 실패: $e');
+    }
+
     // 모든 장애물 제거
     children
         .whereType<Obstacle>()
@@ -231,7 +299,7 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
     player.position = Vector2(100, size.y / 2);
     player.velocity = Vector2.zero();
     player.hasCollided = false; // 충돌 상태 초기화
-    
+
     // 플레이어 충돌 박스 다시 추가
     player.add(RectangleHitbox());
 
@@ -245,18 +313,48 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
     // 점수 텍스트 초기화
     scoreText.text = 'Score: 0';
 
+    // 카운트다운 텍스트 다시 추가
+    countdownText = TextComponent(
+      text: '3',
+      position: Vector2(size.x / 2, size.y / 2),
+      anchor: Anchor.center,
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          fontSize: 72,
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+          shadows: [
+            Shadow(
+              offset: Offset(2, 2),
+              blurRadius: 4,
+              color: Colors.white,
+            ),
+          ],
+        ),
+      ),
+    );
+    add(countdownText);
+
     // 카운트다운 다시 시작
     _startCountdown();
-    
+
     // 재시작 콜백 호출
     onRestart?.call();
+  }
+
+  @override
+  void onRemove() {
+    // 오디오 플레이어 정리
+    backgroundMusicPlayer.dispose();
+    jumpSoundPlayer.dispose();
+    super.onRemove();
   }
 }
 
 class Player extends SpriteAnimationComponent with CollisionCallbacks {
   Vector2 velocity = Vector2.zero();
   final double gravity = 800;
-  final double jumpForce = -600;
+  final double jumpForce = -550; // 점프 높이를 낮춤 (-600에서 -530으로)
   bool isJumping = false;
   bool hasCollided = false; // 충돌 감지 상태 추가
   late JumpGame jumpGame;
@@ -271,16 +369,16 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks {
     try {
       // 먼저 하나의 이미지만 로드해서 테스트
       print('이미지 로딩 시작...');
-      
+
       final testSprite = await Sprite.load(
         'images/birds/PNG/Omoknoonii/fly_bird1.png',
         images: jumpGame.images,
       );
       print('테스트 이미지 로딩 성공');
-      
+
       // 성공하면 나머지 이미지들도 로드
       final sprites = <Sprite>[testSprite];
-      
+
       for (int i = 2; i <= 5; i++) {
         try {
           final sprite = await Sprite.load(
@@ -302,10 +400,9 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks {
         stepTime: 0.1,
       );
       print('애니메이션 생성 성공: ${sprites.length}개 프레임');
-      
+
       // 이미지 크기 정보 출력
       print('Player 크기: ${size.x} x ${size.y}');
-      
     } catch (e) {
       print('이미지 로딩 오류: $e');
       // 이미지 로딩 실패 시 기본 사각형으로 대체
@@ -353,25 +450,26 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks {
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     // 이미 충돌했거나 게임이 끝났으면 무시
     if (hasCollided || jumpGame.gameOver) return;
-    
+
     if (other is Obstacle) {
       // 충돌 상태 설정
       hasCollided = true;
-      
+
       // 충돌 감지 완전 비활성화 - 모든 충돌 박스 제거
       removeAll(children.whereType<RectangleHitbox>());
-      
+
       // 게임 종료
       jumpGame.endGame();
-      
+
       return;
     }
   }
 }
 
-class Obstacle extends RectangleComponent with CollisionCallbacks {
+class Obstacle extends SpriteComponent with CollisionCallbacks {
   final bool isTop;
   final double speed = 200;
+  late JumpGame jumpGame;
 
   Obstacle({
     required Vector2 position,
@@ -381,8 +479,34 @@ class Obstacle extends RectangleComponent with CollisionCallbacks {
 
   @override
   Future<void> onLoad() async {
-    // 장애물 색상 (위쪽은 빨간색, 아래쪽은 초록색)
-    paint = Paint()..color = isTop ? Colors.red : Colors.green;
+    // 게임 참조 저장
+    jumpGame = parent as JumpGame;
+
+    try {
+      // 나무 이미지 로드 (이미 프리로드되어 있어서 빠름)
+      sprite = await Sprite.load('images/wood.png', images: jumpGame.images);
+
+      // 이미지가 화면에 맞게 잘리도록 설정
+      if (isTop) {
+        // 위쪽 장애물 - 위쪽이 잘리도록
+        anchor = Anchor.topCenter;
+        // 이미지가 화면 위쪽 끝에 완전히 붙도록
+        position.y = 0;
+        // 긴 이미지를 적절히 잘라서 사용
+        size = Vector2(80, size.y.clamp(100, 400)); // 최소 100, 최대 400으로 제한
+      } else {
+        // 아래쪽 장애물 - 아래쪽이 잘리도록
+        anchor = Anchor.bottomCenter;
+        // 이미지가 화면 아래쪽 끝에 완전히 붙도록
+        position.y = jumpGame.size.y;
+        // 긴 이미지를 적절히 잘라서 사용
+        size = Vector2(80, size.y.clamp(100, 400)); // 최소 100, 최대 400으로 제한
+      }
+    } catch (e) {
+      print('나무 이미지 로딩 실패: $e');
+      // 이미지 로딩 실패 시 기본 색상 사용
+      paint = Paint()..color = isTop ? Colors.red : Colors.green;
+    }
 
     // 충돌 박스 추가
     add(RectangleHitbox());
@@ -403,7 +527,8 @@ class Obstacle extends RectangleComponent with CollisionCallbacks {
 }
 
 class JumpGameWidget extends StatefulWidget {
-  const JumpGameWidget({super.key, required this.onGameOver, this.onExitGame, this.onRestart});
+  const JumpGameWidget(
+      {super.key, required this.onGameOver, this.onExitGame, this.onRestart});
   final VoidCallback onGameOver;
   final VoidCallback? onExitGame;
   final VoidCallback? onRestart;
@@ -448,10 +573,12 @@ class ScrollingBackground extends PositionComponent {
   Future<void> onLoad() async {
     // 게임 참조 저장
     jumpGame = parent as JumpGame;
-    
+
     try {
       // 배경 이미지 로드 (기본 하늘색으로 대체)
-      backgroundSprite = await Sprite.load('images/background/game1_background.png', images: jumpGame.images);
+      backgroundSprite = await Sprite.load(
+          'images/background/game1_background.png',
+          images: jumpGame.images);
     } catch (e) {
       print('배경 이미지 로딩 실패: $e');
       // 이미지 로딩 실패 시 기본 색상 사용
@@ -485,12 +612,14 @@ class ScrollingBackground extends PositionComponent {
 
     // 첫 번째 배경이 화면 밖으로 나가면 오른쪽으로 이동
     if (background1.position.x <= -jumpGame.size.x) {
-      background1.position.x = background2.position.x + jumpGame.size.x - 2; // 2픽셀 겹치게
+      background1.position.x =
+          background2.position.x + jumpGame.size.x - 2; // 2픽셀 겹치게
     }
 
     // 두 번째 배경이 화면 밖으로 나가면 오른쪽으로 이동
     if (background2.position.x <= -jumpGame.size.x) {
-      background2.position.x = background1.position.x + jumpGame.size.x - 2; // 2픽셀 겹치게
+      background2.position.x =
+          background1.position.x + jumpGame.size.x - 2; // 2픽셀 겹치게
     }
   }
 }

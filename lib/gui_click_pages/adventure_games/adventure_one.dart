@@ -73,10 +73,10 @@ class _AdventureOneState extends State<AdventureOne> {
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.off(() => const MainPage()),
+          onPressed: () => Get.back(),
         ),
         title: const Text(
-          '모험 1',
+          '비행 연습',
           style: TextStyle(
             fontFamily: 'NaverNanumSquareRound',
             fontWeight: FontWeight.bold,
@@ -90,7 +90,7 @@ class _AdventureOneState extends State<AdventureOne> {
               onExitGame: () {
                 isGameOverRequested = false; // 초기화
                 isResultDialogShown = false; // 결과 팝업 표시 여부 초기화
-                Get.off(() => const MainPage());
+                Get.back();
               },
               onRestart: () async {
                 isGameOverRequested = false; // 재시작 시 초기화
@@ -119,7 +119,7 @@ class _AdventureOneState extends State<AdventureOne> {
                   children: [
                     // 게임 제목
                     const Text(
-                      '점프 게임',
+                      '비행 연습',
                       style: TextStyle(
                         fontSize: 48,
                         fontWeight: FontWeight.bold,
@@ -163,9 +163,9 @@ class _AdventureOneState extends State<AdventureOne> {
                           ),
                           SizedBox(height: 15),
                           Text(
-                            '• 화면을 탭하여 점프하세요\n'
+                            '• 화면을 탭하여 날아오르세요\n'
                             '• 장애물을 피해 최대한 오래 생존하세요\n'
-                            '• 생존 시간에 따라 점수가 증가합니다',
+                            '• 생존 시간에 따라 골드를 획득할 수 있습니다',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.black87,

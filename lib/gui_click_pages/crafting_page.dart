@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'package:bird_raise_app/api/api_bag.dart';
 import 'package:bird_raise_app/api/api_bird.dart';
+import 'package:bird_raise_app/api/api_crafting.dart';
 import 'package:bird_raise_app/gui_click_pages/adventure_page.dart';
 import 'package:bird_raise_app/gui_click_pages/book_page.dart';
 import 'package:bird_raise_app/gui_click_pages/shop_page.dart';
@@ -11,7 +11,7 @@ import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:bird_raise_app/token/mobile_secure_token.dart';
 import 'package:provider/provider.dart';
 
@@ -22,7 +22,8 @@ class CraftingPage extends StatefulWidget {
   State<CraftingPage> createState() => _CraftingPageState();
 }
 
-class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMixin {
+class _CraftingPageState extends State<CraftingPage>
+    with TickerProviderStateMixin {
   List<String> imagePaths = [];
   List<String> itemNames = [];
   List<String> itemLore = [];
@@ -33,8 +34,13 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
 
   // 조합 창 관련 변수들
   List<String> craftingSlots = List.filled(3, ''); // 3x1 조합 창
+  List<String> craftingSlotCodes = List.filled(3, ''); // 아이템 코드 저장
   String resultItem = ''; // 조합 결과 아이템
+  String resultItemCode = ''; // 결과 아이템 코드
   bool canCraft = false; // 조합 가능 여부
+
+  // 조합 레시피 데이터
+  Map<String, List<String>> craftingRecipes = {};
 
   @override
   void initState() {
@@ -51,6 +57,9 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
     });
 
     try {
+      // 조합 레시피 로드
+      await _loadCraftingRecipes();
+
       final items = await fetchBagData(); // List<Map<String, String>>
 
       setState(() {
@@ -79,11 +88,24 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
     }
   }
 
+  // craft.json 파일 로드
+  Future<void> _loadCraftingRecipes() async {
+    try {
+      craftingRecipes = await ApiCrafting.loadCraftingRecipes();
+    } catch (e) {
+      print('조합 레시피 로드 실패: $e');
+      print('에러 상세 정보: ${e.toString()}');
+    }
+  }
+
   // 조합 창에 아이템 추가
   void addToCraftingSlot(int slotIndex) {
     if (selectedIndex < imagePaths.length) {
       setState(() {
         craftingSlots[slotIndex] = imagePaths[selectedIndex];
+        craftingSlotCodes[slotIndex] = itemCode[selectedIndex];
+        print(
+            '아이템 추가: ${imagePaths[selectedIndex]} -> ${itemCode[selectedIndex]}');
         checkCraftingRecipe();
       });
     }
@@ -93,43 +115,173 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
   void removeFromCraftingSlot(int slotIndex) {
     setState(() {
       craftingSlots[slotIndex] = '';
+      craftingSlotCodes[slotIndex] = '';
       checkCraftingRecipe();
     });
   }
 
   // 조합 레시피 확인
-  void checkCraftingRecipe() {
-    // 여기에 실제 조합 레시피 로직을 구현
-    // 예시: 모든 슬롯이 채워져 있으면 조합 가능
-    bool allSlotsFilled = craftingSlots.every((slot) => slot.isNotEmpty);
-    
+  Future<void> checkCraftingRecipe() async {
+    Map<String, dynamic> result = await ApiCrafting.checkCraftingRecipe(
+        craftingSlotCodes, craftingRecipes);
+
     setState(() {
-      canCraft = allSlotsFilled;
-      if (canCraft) {
-        resultItem = 'images/items/apple.png'; // 예시 결과 아이템
-      } else {
-        resultItem = '';
-      }
+      canCraft = result['canCraft'];
+      resultItemCode = result['resultItemCode'];
+      resultItem = result['resultItem'];
     });
   }
 
+  // 결과 아이템 이미지 경로 매핑
+  Future<String> _getResultItemImagePath(String itemCode) async {
+    return await ApiCrafting.getResultItemImagePath(itemCode);
+  }
+
   // 조합 실행
-  void executeCrafting() {
+  Future<void> executeCrafting() async {
     if (canCraft && resultItem.isNotEmpty) {
       // 조합 로직 구현
-      print('조합 실행: $resultItem');
-      
+      print('조합 실행: $resultItemCode');
+
+      // 조합 완료 후 가방 데이터 새로고침
+      await _refreshBagData();
+
       // 조합 창 초기화
       setState(() {
         craftingSlots = List.filled(3, '');
+        craftingSlotCodes = List.filled(3, '');
         resultItem = '';
+        resultItemCode = '';
         canCraft = false;
       });
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('조합이 완료되었습니다!',
-              style: TextStyle(fontFamily: 'NaverNanumSquareRound')),
+        SnackBar(
+          content: Text('$resultItemCode 조합이 완료되었습니다!',
+              style: const TextStyle(fontFamily: 'NaverNanumSquareRound')),
+        ),
+      );
+    }
+  }
+
+  // 조합 재료 소모
+  void _consumeCraftingMaterials() {
+    // 사용된 아이템들의 수량을 차감
+    for (int i = 0; i < craftingSlotCodes.length; i++) {
+      if (craftingSlotCodes[i].isNotEmpty) {
+        // 해당 아이템의 인덱스 찾기
+        int itemIndex = itemCode.indexOf(craftingSlotCodes[i]);
+        if (itemIndex != -1) {
+          // 현재 수량 가져오기
+          int currentAmount = int.tryParse(itemAmounts[itemIndex]) ?? 0;
+          if (currentAmount > 0) {
+            // 수량 차감
+            int newAmount = currentAmount - 1;
+            setState(() {
+              itemAmounts[itemIndex] = newAmount.toString();
+            });
+
+            // 수량이 0이 되면 아이템 제거
+            if (newAmount <= 0) {
+              setState(() {
+                imagePaths.removeAt(itemIndex);
+                itemNames.removeAt(itemIndex);
+                itemLore.removeAt(itemIndex);
+                itemAmounts.removeAt(itemIndex);
+                itemCode.removeAt(itemIndex);
+
+                // 선택된 인덱스 조정
+                if (selectedIndex >= itemIndex && selectedIndex > 0) {
+                  selectedIndex--;
+                }
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 조합 결과 아이템을 가방에 추가
+  Future<void> _addCraftedItemToBag() async {
+    if (resultItemCode.isNotEmpty) {
+      // 조합 결과 아이템 정보
+      String resultImagePath = await _getResultItemImagePath(resultItemCode);
+      String resultItemName = await _getResultItemName(resultItemCode);
+      String resultItemDescription =
+          await _getResultItemDescription(resultItemCode);
+
+      // 가방에 추가
+      setState(() {
+        imagePaths.add(resultImagePath.replaceFirst('images/items/', ''));
+        itemNames.add(resultItemName);
+        itemLore.add(resultItemDescription);
+        itemAmounts.add('1');
+        itemCode.add(resultItemCode);
+      });
+    }
+  }
+
+  // 결과 아이템 이름 매핑
+  Future<String> _getResultItemName(String itemCode) async {
+    return await ApiCrafting.getResultItemName(itemCode);
+  }
+
+  // 결과 아이템 설명 매핑
+  Future<String> _getResultItemDescription(String itemCode) async {
+    return await ApiCrafting.getResultItemDescription(itemCode);
+  }
+
+  // 가방 데이터 새로고침
+  Future<void> _refreshBagData() async {
+    try {
+      final items = await fetchBagData();
+      setState(() {
+        imagePaths = items.map((item) => item['imagePath'] ?? '').toList();
+        itemNames = items.map((item) => item['itemName'] ?? '').toList();
+        itemLore = items.map((item) => item['itemDescription'] ?? '').toList();
+        itemAmounts = items.map((item) => item['amount'] ?? '').toList();
+        itemCode = items.map((item) => item['itemCode'] ?? '').toList();
+      });
+    } catch (e) {
+      print('가방 데이터 새로고침 실패: $e');
+    }
+  }
+
+  // API를 사용한 조합 실행
+  Future<void> _executeCraftingWithApi() async {
+    try {
+      print('조합 API 호출: $resultItemCode');
+      await ApiCrafting.craft(resultItemCode);
+      if (kDebugMode) {
+        print('API 조합 결과 완료');
+      }
+
+      // 조합 완료 후 가방 데이터 새로고침
+      await _refreshBagData();
+
+      // 조합 창 초기화
+      setState(() {
+        craftingSlots = List.filled(3, '');
+        craftingSlotCodes = List.filled(3, '');
+        resultItem = '';
+        resultItemCode = '';
+        canCraft = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$resultItemCode 조합이 완료되었습니다!',
+              style: const TextStyle(fontFamily: 'NaverNanumSquareRound')),
+        ),
+      );
+    } catch (e) {
+      print('조합 API 호출 실패: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('조합에 실패했습니다. 다시 시도해주세요.',
+              style: const TextStyle(fontFamily: 'NaverNanumSquareRound')),
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -220,7 +372,8 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(8),
                                       image: const DecorationImage(
-                                        image: AssetImage('images/background/shop_item_background.png'),
+                                        image: AssetImage(
+                                            'images/background/shop_item_background.png'),
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -236,10 +389,13 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
                                   // 아이템 정보
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          itemNames.isNotEmpty ? itemNames[selectedIndex] : '',
+                                          itemNames.isNotEmpty
+                                              ? itemNames[selectedIndex]
+                                              : '',
                                           style: const TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
@@ -257,7 +413,9 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          itemLore.isNotEmpty ? itemLore[selectedIndex] : '',
+                                          itemLore.isNotEmpty
+                                              ? itemLore[selectedIndex]
+                                              : '',
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: Colors.grey[500],
@@ -276,7 +434,8 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
                           Expanded(
                             child: GridView.builder(
                               padding: const EdgeInsets.all(8),
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 5,
                                 mainAxisSpacing: 4,
                                 crossAxisSpacing: 4,
@@ -294,13 +453,14 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: selectedIndex == index 
-                                            ? Colors.blue 
+                                        color: selectedIndex == index
+                                            ? Colors.blue
                                             : Colors.grey[300]!,
                                         width: selectedIndex == index ? 2 : 1,
                                       ),
                                       image: const DecorationImage(
-                                        image: AssetImage('images/background/shop_item_background.png'),
+                                        image: AssetImage(
+                                            'images/background/shop_item_background.png'),
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -326,7 +486,8 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
                                             ),
                                             decoration: BoxDecoration(
                                               color: Colors.black54,
-                                              borderRadius: BorderRadius.circular(4),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
                                             ),
                                             child: Text(
                                               itemAmounts[index],
@@ -334,7 +495,8 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
                                                 color: Colors.white,
                                                 fontSize: 10,
                                                 fontWeight: FontWeight.bold,
-                                                fontFamily: 'NaverNanumSquareRound',
+                                                fontFamily:
+                                                    'NaverNanumSquareRound',
                                               ),
                                             ),
                                           ),
@@ -396,19 +558,25 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
                                       decoration: BoxDecoration(
                                         color: Colors.grey[200],
                                         borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: Colors.brown[400]!, width: 2),
+                                        border: Border.all(
+                                            color: Colors.brown[400]!,
+                                            width: 2),
                                       ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
                                         children: List.generate(3, (index) {
                                           return Expanded(
                                             child: Container(
                                               margin: const EdgeInsets.all(4),
                                               child: GestureDetector(
                                                 onTap: () {
-                                                  if (craftingSlots[index].isNotEmpty) {
-                                                    removeFromCraftingSlot(index);
-                                                  } else if (imagePaths.isNotEmpty) {
+                                                  if (craftingSlots[index]
+                                                      .isNotEmpty) {
+                                                    removeFromCraftingSlot(
+                                                        index);
+                                                  } else if (imagePaths
+                                                      .isNotEmpty) {
                                                     addToCraftingSlot(index);
                                                   }
                                                 },
@@ -416,37 +584,57 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
                                                   height: 60,
                                                   decoration: BoxDecoration(
                                                     color: Colors.white,
-                                                    borderRadius: BorderRadius.circular(4),
-                                                    border: Border.all(color: Colors.grey[400]!),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            4),
+                                                    border: Border.all(
+                                                        color:
+                                                            Colors.grey[400]!),
                                                   ),
-                                                  child: craftingSlots[index].isNotEmpty
+                                                  child: craftingSlots[index]
+                                                          .isNotEmpty
                                                       ? Stack(
                                                           children: [
                                                             Center(
                                                               child: Padding(
-                                                                padding: const EdgeInsets.all(4.0),
-                                                                child: Image.asset(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(
+                                                                        4.0),
+                                                                child:
+                                                                    Image.asset(
                                                                   'images/items/${craftingSlots[index]}',
-                                                                  fit: BoxFit.contain,
+                                                                  fit: BoxFit
+                                                                      .contain,
                                                                 ),
                                                               ),
                                                             ),
                                                             Positioned(
                                                               top: 2,
                                                               right: 2,
-                                                              child: GestureDetector(
-                                                                onTap: () => removeFromCraftingSlot(index),
-                                                                child: Container(
+                                                              child:
+                                                                  GestureDetector(
+                                                                onTap: () =>
+                                                                    removeFromCraftingSlot(
+                                                                        index),
+                                                                child:
+                                                                    Container(
                                                                   width: 16,
                                                                   height: 16,
-                                                                  decoration: BoxDecoration(
-                                                                    color: Colors.red,
-                                                                    borderRadius: BorderRadius.circular(8),
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .red,
+                                                                    borderRadius:
+                                                                        BorderRadius
+                                                                            .circular(8),
                                                                   ),
-                                                                  child: const Icon(
+                                                                  child:
+                                                                      const Icon(
                                                                     Icons.close,
                                                                     size: 12,
-                                                                    color: Colors.white,
+                                                                    color: Colors
+                                                                        .white,
                                                                   ),
                                                                 ),
                                                               ),
@@ -488,7 +676,9 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
                                       decoration: BoxDecoration(
                                         color: Colors.grey[200],
                                         borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: Colors.brown[400]!, width: 2),
+                                        border: Border.all(
+                                            color: Colors.brown[400]!,
+                                            width: 2),
                                       ),
                                       child: Center(
                                         child: resultItem.isNotEmpty
@@ -496,14 +686,17 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
                                                 width: 60,
                                                 height: 60,
                                                 decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
                                                   image: const DecorationImage(
-                                                    image: AssetImage('images/background/shop_item_background.png'),
+                                                    image: AssetImage(
+                                                        'images/background/shop_item_background.png'),
                                                     fit: BoxFit.cover,
                                                   ),
                                                 ),
                                                 child: Padding(
-                                                  padding: const EdgeInsets.all(8.0),
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
                                                   child: Image.asset(
                                                     resultItem,
                                                     fit: BoxFit.contain,
@@ -526,22 +719,29 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(16),
-                            child: ElevatedButton(
-                              onPressed: canCraft ? executeCrafting : null,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: canCraft ? Colors.green : Colors.grey,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
+                            child: GestureDetector(
+                              onTap: canCraft
+                                  ? () {
+                                      _executeCraftingWithApi();
+                                    }
+                                  : null,
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: canCraft ? Colors.green : Colors.grey,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                              ),
-                              child: Text(
-                                canCraft ? '조합하기' : '조합 불가',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'NaverNanumSquareRound',
-                                  color: Colors.white,
+                                child: Center(
+                                  child: Text(
+                                    canCraft ? '조합하기' : '조합 불가',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'NaverNanumSquareRound',
+                                      color: Colors.white,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -584,33 +784,33 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
                           ),
                         ),
                         Expanded(
-                        child: GestureDetector(
-                          onTap: () async {
-                            await Get.off(() => const AdventurePage());
-                          },
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                child: Image.asset(
-                                  'images/GUI/background_GUI.png',
-                                  fit: BoxFit.fill,
+                          child: GestureDetector(
+                            onTap: () async {
+                              await Get.off(() => const AdventurePage());
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  child: Image.asset(
+                                    'images/GUI/background_GUI.png',
+                                    fit: BoxFit.fill,
+                                  ),
                                 ),
-                              ),
-                              FractionallySizedBox(
-                                widthFactor: 0.90,
-                                heightFactor: 0.90,
-                                child: Image.asset(
-                                  'images/GUI/adventure_GUI.png',
-                                  fit: BoxFit.contain,
+                                FractionallySizedBox(
+                                  widthFactor: 0.90,
+                                  heightFactor: 0.90,
+                                  child: Image.asset(
+                                    'images/GUI/adventure_GUI.png',
+                                    fit: BoxFit.contain,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
                         Expanded(
                           child: GestureDetector(
                             onTap: () async {
@@ -677,4 +877,4 @@ class _CraftingPageState extends State<CraftingPage> with TickerProviderStateMix
             ),
     );
   }
-} 
+}

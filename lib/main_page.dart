@@ -13,7 +13,6 @@ import 'package:get/get.dart';
 import 'package:gif/gif.dart';
 import 'package:provider/provider.dart';
 import '../gui_click_pages/shop_page.dart';
-import '../component/bird_status.dart';
 import 'dart:async';
 import '../gui_click_pages/adventure_page.dart';
 import '../gui_click_pages/crafting_page.dart';
@@ -192,6 +191,72 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         backgroundColor: Colors.redAccent.withOpacity(0.9),
         duration: const Duration(seconds: 2),
       ),
+    );
+  }
+
+  void _showCopyrightInfo() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.music_note, color: Colors.blue, size: 24),
+                    SizedBox(width: 8),
+                    Text(
+                      '🎵 사용한 사운드 효과',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'NaverNanumSquareRound',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  '• "국악 효과음 #536"\n'
+                  '  저작자: 주식회사 아이티앤\n'
+                  '  출처: https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=13380369&menuNo=200020\n'
+                  '  라이선스: CC BY (저작자 표시)\n\n'
+                  '• 타이라 고모리 무료 음원\n'
+                  '  출처: https://taira-komori.jpn.org/freesoundkr.html',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFamily: 'NaverNanumSquareRound',
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        '닫기',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'NaverNanumSquareRound',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -581,8 +646,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   child: Container(
-                                    height: 200,
+                                    height: 250,
                                     width: 300,
+                                    padding: const EdgeInsets.all(20),
                                     child: Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
@@ -600,6 +666,29 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                             '로그아웃',
                                             style: TextStyle(
                                               fontSize: 18,
+                                              fontFamily:
+                                                  'NaverNanumSquareRound',
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 20),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.blue,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 30,
+                                              vertical: 10,
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            _showCopyrightInfo();
+                                          },
+                                          child: const Text(
+                                            '저작물 정보',
+                                            style: TextStyle(
+                                              fontSize: 14,
                                               fontFamily:
                                                   'NaverNanumSquareRound',
                                               color: Colors.white,
