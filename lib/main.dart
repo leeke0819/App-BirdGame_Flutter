@@ -1,5 +1,6 @@
 import 'package:bird_raise_app/config/env_config.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
+import 'package:bird_raise_app/model/new_item_model.dart';
 import 'package:bird_raise_app/token/mobile_secure_token.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:bird_raise_app/main_page.dart';
@@ -43,6 +44,7 @@ void main() async {
         providers: [
           ChangeNotifierProvider(create: (_) => GoldModel()),
           ChangeNotifierProvider(create: (_) => BagModel()),
+          ChangeNotifierProvider(create: (_) => NewItemModel()),
         ],
         child: GetMaterialApp(
           debugShowCheckedModeBanner: false,
@@ -123,11 +125,11 @@ class _LoginPageState extends State<LoginPage> {
         //환경구분 필요
         if (kIsWeb) {
           print("웹 환경에서 동작하는 코드");
-          saveChromeAccessToken(responseData['accessToken']);
+          saveChromeAccessToken(responseData['accessToken'], responseData['refreshToken']);
           print(getChromeAccessToken());
         } else {
           print("모바일 환경에서 동작하는 코드"); //얘가 먼저 실행
-          await saveAccessToken(responseData['accessToken']); //3초정도 걸린다 가정.
+          await saveAccessToken(responseData['accessToken'], responseData['refreshToken']); //3초정도 걸린다 가정.
           print(getAccessToken()); //1초짜리 print문ㅂ
         }
 

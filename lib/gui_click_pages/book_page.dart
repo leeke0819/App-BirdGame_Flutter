@@ -188,7 +188,7 @@ class _BookPageState extends State<BookPage> {
                             final itemDescription = item['itemDescription'].toString();          
                             final isObtained = isItemObtained(item);
 
-                            return GestureDetector(
+                                                        return GestureDetector(
                               onTap: () {
                                 showDialog(
                                   context: context,
@@ -294,6 +294,7 @@ class _BookPageState extends State<BookPage> {
                                           ),
                                         ),
                                       ),
+
                                   ],
                                 ),
                               ),

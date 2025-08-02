@@ -9,6 +9,7 @@ import 'package:bird_raise_app/gui_click_pages/shop_page.dart';
 import 'package:bird_raise_app/main_page.dart';
 import 'package:bird_raise_app/model/bag_model.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
+import 'package:bird_raise_app/model/new_item_model.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -42,6 +43,8 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeData();
       _fetchUserInfo();
+      // 새 아이템 목록 로드
+      context.read<NewItemModel>().loadNewItems();
     });
   }
 
@@ -114,6 +117,7 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final goldModel = context.watch<GoldModel>();
+    final newItemModel = context.watch<NewItemModel>();
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -273,6 +277,11 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                                   setState(() {
                                     selectedIndex = index;
                                   });
+                                  // 아이템을 클릭했을 때 새 아이템 표시 제거
+                                  final currentItemCode = itemCode[index];
+                                  if (newItemModel.isNewItem(currentItemCode)) {
+                                    newItemModel.removeNewItem(currentItemCode);
+                                  }
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -323,6 +332,29 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                                           ),
                                         ),
                                       ),
+                                      // 새 아이템 표시 (모서리 둥근 빨간 사각형에 노란색 NEW)
+                                      if (newItemModel.isNewItem(itemCode[index]))
+                                        Positioned(
+                                          top: 4,
+                                          left: 4,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              borderRadius: BorderRadius.circular(6),
+                                              border: Border.all(color: Colors.white, width: 1),
+                                            ),
+                                            child: const Text(
+                                              'NEW',
+                                              style: TextStyle(
+                                                color: Colors.yellow,
+                                                fontSize: 8,
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily: 'NaverNanumSquareRound',
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                     ],
                                   ),
                                 ),
@@ -438,13 +470,41 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                                     fit: BoxFit.fill,
                                   ),
                                 ),
-                                FractionallySizedBox(
-                                  widthFactor: 0.90,
-                                  heightFactor: 0.90,
-                                  child: Image.asset(
-                                    'images/GUI/bag_GUI.png',
-                                    fit: BoxFit.contain,
-                                  ),
+                                Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    FractionallySizedBox(
+                                      widthFactor: 0.90,
+                                      heightFactor: 0.90,
+                                      child: Image.asset(
+                                        'images/GUI/bag_GUI.png',
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                    // 새 아이템이 있을 때 표시 (bag_GUI.png 기준으로 위치)
+                                    if (newItemModel.newItems.isNotEmpty)
+                                      Positioned(
+                                        top: 4,
+                                        left: 4,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: Colors.white, width: 1),
+                                          ),
+                                          child: const Text(
+                                            'NEW',
+                                            style: TextStyle(
+                                              color: Colors.yellow,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'NaverNanumSquareRound',
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ],
                             ),

@@ -313,6 +313,9 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
     // 점수 텍스트 초기화
     scoreText.text = 'Score: 0';
 
+    // 기존 카운트다운 텍스트 제거
+    countdownText.removeFromParent();
+
     // 카운트다운 텍스트 다시 추가
     countdownText = TextComponent(
       text: '3',
@@ -427,29 +430,36 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks {
     velocity.y += gravity * dt;
     position += velocity * dt;
 
-    // 바닥 체크 - 바닥에 닿으면 게임오버
+    // 바닥 체크 - 바닥에 닿으면 게임오버 또는 튕겨져 나옴
     if (position.y > jumpGame.size.y - size.y) {
       // 이미 충돌했거나 게임이 끝났으면 무시
       if (!hasCollided && !jumpGame.gameOver) {
-        hasCollided = true;
-        // 충돌 감지 완전 비활성화 - 모든 충돌 박스 제거
-        removeAll(children.whereType<RectangleHitbox>());
-        jumpGame.endGame();
+        if (jumpGame.obstaclesEnabled) {
+          // 게임 진행 중이면 게임오버
+          hasCollided = true;
+          // 충돌 감지 완전 비활성화 - 모든 충돌 박스 제거
+          removeAll(children.whereType<RectangleHitbox>());
+          jumpGame.endGame();
+        } else {
+          // 카운트다운 중이면 튕겨져 나옴
+          position.y = jumpGame.size.y - size.y;
+          velocity.y = jumpForce * 0.7; // 점프력의 70%로 튕겨져 나옴
+        }
       }
       return;
     }
 
-    // 천장 체크
+    // 천장 체크 - 천장에 닿으면 튕겨져 나옴
     if (position.y < 0) {
       position.y = 0;
-      velocity.y = 0;
+      velocity.y = -jumpForce * 0.5; // 점프력의 50%로 아래로 튕겨져 나옴
     }
   }
 
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
-    // 이미 충돌했거나 게임이 끝났으면 무시
-    if (hasCollided || jumpGame.gameOver) return;
+    // 이미 충돌했거나 게임이 끝났거나 카운트다운 중이면 무시
+    if (hasCollided || jumpGame.gameOver || !jumpGame.obstaclesEnabled) return;
 
     if (other is Obstacle) {
       // 충돌 상태 설정

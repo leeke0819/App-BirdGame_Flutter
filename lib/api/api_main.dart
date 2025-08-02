@@ -35,7 +35,16 @@ class ApiMain {
         final responseData = jsonDecode(utf8.decode(response.bodyBytes));
         print('서버 응답 데이터: $responseData');
         return responseData;
-      } else {
+      }else if(response.statusCode == 401){
+        print('❌ 토큰 만료');
+        final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+        if (responseData is Map<String, dynamic> && responseData['status'] == 401 && responseData['error'] == 'ExpiredJwtException') {
+          print('❌ 만료된 JWT 토큰: ${responseData['message']}');
+          //TODO:: 토큰 재발급 로직 함수 호출
+          return responseData;
+        }
+      }
+       else {
         print('❌ 사용자 정보 호출 실패: ${response.statusCode}');
         print('응답 내용: ${utf8.decode(response.bodyBytes)}');
         return null;

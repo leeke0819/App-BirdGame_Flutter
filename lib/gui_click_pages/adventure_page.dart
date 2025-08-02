@@ -3,6 +3,7 @@ import 'package:bird_raise_app/gui_click_pages/book_page.dart';
 import 'package:bird_raise_app/gui_click_pages/shop_page.dart';
 import 'package:bird_raise_app/main_page.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
+import 'package:bird_raise_app/model/new_item_model.dart';
 import 'package:bird_raise_app/gui_click_pages/adventure_games/adventure_one.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,6 +20,7 @@ class _AdventurePageState extends State<AdventurePage> {
   @override
   Widget build(BuildContext context) {
     final goldModel = context.watch<GoldModel>();
+    final newItemModel = context.watch<NewItemModel>();
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -207,35 +209,63 @@ class _AdventurePageState extends State<AdventurePage> {
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () async {
-                        Get.off(() => const BagPage());
-                        await goldModel.fetchGold();
-                      },
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            height: double.infinity,
-                            child: Image.asset(
-                              'images/GUI/background_GUI.png',
-                              fit: BoxFit.fill,
+                                          Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              Get.off(() => const BagPage());
+                              await goldModel.fetchGold();
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  child: Image.asset(
+                                    'images/GUI/background_GUI.png',
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    FractionallySizedBox(
+                                      widthFactor: 0.90,
+                                      heightFactor: 0.90,
+                                      child: Image.asset(
+                                        'images/GUI/bag_GUI.png',
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                    // 새 아이템이 있을 때 표시 (bag_GUI.png 기준으로 위치)
+                                    if (newItemModel.newItems.isNotEmpty)
+                                      Positioned(
+                                        top: 4,
+                                        left: 4,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: Colors.white, width: 1),
+                                          ),
+                                          child: const Text(
+                                            'NEW',
+                                            style: TextStyle(
+                                              color: Colors.yellow,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'NaverNanumSquareRound',
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
-                          FractionallySizedBox(
-                            widthFactor: 0.90,
-                            heightFactor: 0.90,
-                            child: Image.asset(
-                              'images/GUI/bag_GUI.png',
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                        ),
                 ],
               ),
             ),

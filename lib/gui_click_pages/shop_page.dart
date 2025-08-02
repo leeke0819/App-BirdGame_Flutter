@@ -11,10 +11,12 @@ import 'package:get/get.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:http/http.dart' as http;
 import 'package:bird_raise_app/api/api_shop.dart';
+import 'package:bird_raise_app/api/api_bag.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:bird_raise_app/token/mobile_secure_token.dart';
 import 'package:provider/provider.dart';
 import 'package:bird_raise_app/model/shop_model.dart';
+import 'package:bird_raise_app/model/new_item_model.dart';
 
 
 class ShopPage extends StatefulWidget {
@@ -168,6 +170,40 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   Future<void> _handleBuyItem(String itemCode, int quantity) async {
     int result = await buyItem(itemCode, context, quantity);
     if (result == 1) {
+      // 구매 성공 후 잠시 기다린 다음 가방 데이터 확인
+      await Future.delayed(Duration(milliseconds: 500));
+      
+      try {
+        final bagItems = await fetchBagData();
+        print('가방 데이터 확인: $bagItems');
+        print('구매한 아이템 코드: $itemCode');
+        
+        // 가방에서 해당 아이템의 수량 확인
+        var existingItems = bagItems.where((item) => item['itemCode'] == itemCode).toList();
+        
+        if (existingItems.isNotEmpty) {
+          var existingItem = existingItems.first;
+          int currentAmount = (existingItem['amount'] as int?) ?? 0;
+          print('가방에 있는 아이템 수량: $currentAmount');
+          
+          // 수량이 1개 이하일 때만 NEW 표시 (새로 구매한 것으로 간주)
+          if (currentAmount <= 1) {
+            print('수량이 1개 이하이므로 NEW 표시 추가: $itemCode');
+            context.read<NewItemModel>().addNewItem(itemCode);
+          } else {
+            print('수량이 2개 이상이므로 NEW 표시하지 않음: $itemCode');
+          }
+        } else {
+          print('가방에 없는 아이템이므로 NEW 표시 추가: $itemCode');
+          context.read<NewItemModel>().addNewItem(itemCode);
+        }
+      } catch (e) {
+        print('가방 데이터 확인 실패: $e');
+        // 확인 실패 시 안전하게 NEW 표시
+        print('확인 실패로 인해 NEW 표시 추가: $itemCode');
+        context.read<NewItemModel>().addNewItem(itemCode);
+      }
+      
       shopModel.showCenterToast(
         "구매 완료!",
         bgColor: const Color(0xFF4CAF50),
@@ -211,6 +247,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final goldModel = context.watch<GoldModel>();
+    final newItemModel = context.watch<NewItemModel>();
     final gold = goldModel.gold;
     return Scaffold(
       appBar: AppBar(
@@ -783,13 +820,41 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                     fit: BoxFit.fill,
                                   ),
                                 ),
-                                FractionallySizedBox(
-                                  widthFactor: 0.90,
-                                  heightFactor: 0.90,
-                                  child: Image.asset(
-                                    'images/GUI/bag_GUI.png',
-                                    fit: BoxFit.contain,
-                                  ),
+                                Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    FractionallySizedBox(
+                                      widthFactor: 0.90,
+                                      heightFactor: 0.90,
+                                      child: Image.asset(
+                                        'images/GUI/bag_GUI.png',
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                    // 새 아이템이 있을 때 표시 (bag_GUI.png 기준으로 위치)
+                                    if (newItemModel.newItems.isNotEmpty)
+                                      Positioned(
+                                        top: 4,
+                                        left: 4,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: Colors.white, width: 1),
+                                          ),
+                                          child: const Text(
+                                            'NEW',
+                                            style: TextStyle(
+                                              color: Colors.yellow,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'NaverNanumSquareRound',
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ],
                             ),

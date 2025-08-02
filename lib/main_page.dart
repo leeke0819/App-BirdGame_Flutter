@@ -7,6 +7,7 @@ import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:bird_raise_app/gui_click_pages/book_page.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/model/experience_level.dart';
+import 'package:bird_raise_app/model/new_item_model.dart';
 import 'package:bird_raise_app/services/timer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -124,6 +125,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       _initializeData();
       context.read<GoldModel>().fetchGold();
       _loadBagItems();
+      // 새 아이템 목록 로드
+      context.read<NewItemModel>().loadNewItems();
+      
+      // 디버깅용: 앱 시작 시 새 아이템 데이터 초기화 (필요시 주석 해제)
+      // context.read<NewItemModel>().clearAllNewItemsFromStorage();
     });
 
     // gif 루프
@@ -337,12 +343,14 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   void dispose() {
     _goldController.dispose();
     _nicknameController.dispose();
+    controller.dispose(); // GifController dispose 추가
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final goldModel = context.watch<GoldModel>();
+    final newItemModel = context.watch<NewItemModel>();
     final gold = goldModel.gold;
     final formattedGold = formatKoreanNumber(gold);
 
@@ -1030,13 +1038,41 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               fit: BoxFit.fill,
                             ),
                           ),
-                          FractionallySizedBox(
-                            widthFactor: 0.90,
-                            heightFactor: 0.90,
-                            child: Image.asset(
-                              'images/GUI/bag_GUI.png',
-                              fit: BoxFit.contain,
-                            ),
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              FractionallySizedBox(
+                                widthFactor: 0.90,
+                                heightFactor: 0.90,
+                                child: Image.asset(
+                                  'images/GUI/bag_GUI.png',
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                              // 새 아이템이 있을 때 표시 (bag_GUI.png 기준으로 위치)
+                              if (newItemModel.newItems.isNotEmpty)
+                                Positioned(
+                                  top: 4,
+                                  left: 4,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: Colors.white, width: 1),
+                                    ),
+                                    child: const Text(
+                                      'NEW',
+                                      style: TextStyle(
+                                        color: Colors.yellow,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'NaverNanumSquareRound',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ],
                       ),

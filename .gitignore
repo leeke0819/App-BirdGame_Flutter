@@ -1,3 +1,9 @@
+#BUILD FILES
+/build/
+*.jks
+*.keystore
+*.properties
+
 # Miscellaneous
 *.class
 *.log
