@@ -1,4 +1,4 @@
-package com.example.bird_game_app
+package com.birdgame.toshil
 
 import io.flutter.embedding.android.FlutterActivity
 

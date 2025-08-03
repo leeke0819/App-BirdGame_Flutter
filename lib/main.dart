@@ -137,14 +137,22 @@ class _LoginPageState extends State<LoginPage> {
         Get.offAll(() => const MainPage());
       } else {
         // 로그인 실패
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('로그인에 실패했습니다.')),
+        Get.snackbar(
+          '로그인 실패',
+          '로그인에 실패했습니다.',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
         );
       }
     } catch (e) {
       print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('서버 연결에 실패했습니다.')),
+      Get.snackbar(
+        '연결 실패',
+        '서버 연결에 실패했습니다.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
     }
   }
