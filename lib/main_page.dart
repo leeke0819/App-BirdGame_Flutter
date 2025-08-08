@@ -17,6 +17,7 @@ import '../gui_click_pages/shop_page.dart';
 import 'dart:async';
 import '../gui_click_pages/adventure_page.dart';
 import '../gui_click_pages/crafting_page.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 /// 타이머만을 위한 별도 위젯
 class TimerWidget extends StatefulWidget {
@@ -93,6 +94,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   final TextEditingController _goldController = TextEditingController();
   final TextEditingController _nicknameController = TextEditingController();
   late final GifController controller;
+  late AudioPlayer backgroundMusicPlayer;
   String gold = '0';
   int starCoin = 0;
   String nickname = "유저1";
@@ -115,10 +117,17 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   String? birdCreatedAt;
   String birdAgeString = '0분';
 
+  // BGM 상태 추적
+  bool isBGMPlaying = false;
+  bool isInitialized = false; // 초기화 여부 추적
+
   @override
   void initState() {
     super.initState();
     controller = GifController(vsync: this);
+
+    // BGM 플레이어 초기화
+    backgroundMusicPlayer = AudioPlayer();
 
     // 비동기 메서드 실행
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -127,7 +136,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       _loadBagItems();
       // 새 아이템 목록 로드
       context.read<NewItemModel>().loadNewItems();
-      
+
       // 디버깅용: 앱 시작 시 새 아이템 데이터 초기화 (필요시 주석 해제)
       // context.read<NewItemModel>().clearAllNewItemsFromStorage();
     });
@@ -143,6 +152,58 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         timer.cancel();
       }
     });
+  }
+
+  // BGM 초기화 및 재생
+  Future<void> _initializeBGM() async {
+    if (isInitialized) return; // 이미 초기화되었다면 중복 실행 방지
+
+    try {
+      await backgroundMusicPlayer.play(AssetSource('sounds/main_page_BGM.mp3'));
+      await backgroundMusicPlayer.setReleaseMode(ReleaseMode.loop);
+      await backgroundMusicPlayer.setVolume(0.3); // 30% 볼륨으로 설정
+      setState(() {
+        isBGMPlaying = true;
+        isInitialized = true;
+      });
+      print('메인 페이지 BGM 시작 성공');
+    } catch (e) {
+      print('메인 페이지 BGM 시작 실패: $e');
+    }
+  }
+
+  // BGM 중지
+  Future<void> _stopBGM() async {
+    try {
+      await backgroundMusicPlayer.stop();
+      setState(() {
+        isBGMPlaying = false;
+      });
+      print('메인 페이지 BGM 중지 성공');
+    } catch (e) {
+      print('메인 페이지 BGM 중지 실패: $e');
+      // 실패하더라도 상태는 업데이트
+      setState(() {
+        isBGMPlaying = false;
+      });
+    }
+  }
+
+  // BGM 재생
+  Future<void> _resumeBGM() async {
+    if (isBGMPlaying) return; // 이미 재생 중이면 중복 실행 방지
+
+    try {
+      await backgroundMusicPlayer.play(AssetSource('sounds/main_page_BGM.mp3'));
+      await backgroundMusicPlayer.setReleaseMode(ReleaseMode.loop);
+      await backgroundMusicPlayer.setVolume(0.3);
+      setState(() {
+        isBGMPlaying = true;
+      });
+      print('메인 페이지 BGM 재생 성공');
+    } catch (e) {
+      print('메인 페이지 BGM 재생 실패: $e');
+    }
   }
 
   Future<void> _initializeData() async {
@@ -230,6 +291,10 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                 ),
                 const SizedBox(height: 20),
                 const Text(
+                  '• "국악 배경음악 #131"\n'
+                  '  저작자: 주식회사 아이티앤\n'
+                  '  출처: https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=13379714&menuNo=200020\n'
+                  '  라이선스: CC BY (저작자 표시)\n\n'
                   '• "국악 효과음 #536"\n'
                   '  저작자: 주식회사 아이티앤\n'
                   '  출처: https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=13380369&menuNo=200020\n'
@@ -344,6 +409,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     _goldController.dispose();
     _nicknameController.dispose();
     controller.dispose(); // GifController dispose 추가
+    backgroundMusicPlayer.dispose(); // BGM 플레이어 dispose 추가
     super.dispose();
   }
 
@@ -353,6 +419,18 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     final newItemModel = context.watch<NewItemModel>();
     final gold = goldModel.gold;
     final formattedGold = formatKoreanNumber(gold);
+
+    // 처음 로드될 때만 BGM 초기화
+    if (!isInitialized) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _initializeBGM();
+      });
+    } else if (!isBGMPlaying) {
+      // 메인 페이지로 돌아왔을 때 BGM이 중지된 상태라면 재생
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _resumeBGM();
+      });
+    }
 
     return Scaffold(
       body: Stack(
@@ -741,8 +819,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                         const SizedBox(height: 8), // post 버튼과 제작 아이콘 사이 간격
                         // 제작/조합 아이콘
                         GestureDetector(
-                          onTap: () {
+                          onTap: () async {
                             print('제작/조합 아이콘 클릭');
+                            await _stopBGM();
+                            await Future.delayed(
+                                const Duration(milliseconds: 100)); // BGM 중지 대기
                             Get.off(() => const CraftingPage());
                           },
                           child: Container(
@@ -939,6 +1020,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   Expanded(
                     child: GestureDetector(
                       onTap: () async {
+                        await _stopBGM();
+                        await Future.delayed(
+                            const Duration(milliseconds: 100)); // BGM 중지 대기
                         await Get.off(() => const BookPage());
                       },
                       child: Stack(
@@ -967,6 +1051,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   Expanded(
                     child: GestureDetector(
                       onTap: () async {
+                        await _stopBGM();
+                        await Future.delayed(
+                            const Duration(milliseconds: 100)); // BGM 중지 대기
                         await Get.to(() => const AdventurePage());
                       },
                       child: Stack(
@@ -995,6 +1082,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   Expanded(
                     child: GestureDetector(
                       onTap: () async {
+                        await _stopBGM();
+                        await Future.delayed(
+                            const Duration(milliseconds: 100)); // BGM 중지 대기
                         await Get.to(() => const ShopPage());
                         await goldModel.fetchGold(); // gold 값 갱신
                       },
@@ -1024,6 +1114,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   Expanded(
                     child: GestureDetector(
                       onTap: () async {
+                        await _stopBGM();
+                        await Future.delayed(
+                            const Duration(milliseconds: 100)); // BGM 중지 대기
                         await Get.to(() => const BagPage());
                         await goldModel.fetchGold(); // gold 값 갱신
                       },
@@ -1055,11 +1148,13 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                   top: 4,
                                   left: 4,
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: Colors.red,
                                       borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: Colors.white, width: 1),
+                                      border: Border.all(
+                                          color: Colors.white, width: 1),
                                     ),
                                     child: const Text(
                                       'NEW',

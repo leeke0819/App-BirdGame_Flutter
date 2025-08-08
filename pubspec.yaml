@@ -156,6 +156,9 @@ flutter:
     - images/wood.png
     - images/GUI/adventure1_button_GUI.png
 
+    #각 페이지 배경음악
+    - assets/sounds/main_page_BGM.mp3
+
     #모험 1 사운드
     - assets/sounds/jump.mp3
     - assets/sounds/adventure1_background_sound.mp3
