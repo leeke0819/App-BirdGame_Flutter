@@ -1085,7 +1085,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                         await _stopBGM();
                         await Future.delayed(
                             const Duration(milliseconds: 100)); // BGM 중지 대기
-                        await Get.to(() => const ShopPage());
+                        await Get.off(() => const ShopPage());
                         await goldModel.fetchGold(); // gold 값 갱신
                       },
                       child: Stack(

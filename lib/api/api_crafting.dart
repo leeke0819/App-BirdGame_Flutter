@@ -18,8 +18,11 @@ class ApiCrafting {
       token = await getAccessToken();
     }
 
+    // 동적으로 URL 생성
+    final Uri craftUrl = Uri.parse('${EnvConfig.apiUrl}/craft?itemCode=$itemCode');
+
     final response = await http.post(
-      _baseUrl,
+      craftUrl,
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json; charset=utf-8',
@@ -112,6 +115,8 @@ class ApiCrafting {
       'item_011': 'rasp_berry.png',
       'item_012': 'cran_berry.png',
       'item_013': 'water_bottle.png',
+      'item_020': 'mix_berry_ball.png',
+      'item_023': 'fruits_kkochi.png'
     };
 
     String imageFileName = itemImageMapping[itemCode] ?? 'apple.png';
@@ -140,6 +145,8 @@ class ApiCrafting {
       'item_011': '라즈베리',
       'item_012': '크랜베리',
       'item_013': '물병',
+      'item_020': '믹스베리볼',
+      'item_023': '과일 꼬치'
     };
     return itemNameMapping[itemCode] ?? '알 수 없는 아이템';
   }
@@ -166,6 +173,8 @@ class ApiCrafting {
       'item_011': '잘 익은 라즈베리입니다.',
       'item_012': '잘 익은 크랜베리입니다.',
       'item_013': '물이 담겨있는 물병입니다.',
+      'item_020': '베리들이 섞여 있는 믹스베리볼입니다.',
+      'item_023': '과일을 빼먹을 수 있는 과일 꼬치입니다.'
     };
     return itemDescriptionMapping[itemCode] ?? '조합으로 만든 아이템입니다.';
   }

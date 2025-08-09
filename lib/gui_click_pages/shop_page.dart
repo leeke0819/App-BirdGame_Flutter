@@ -183,7 +183,15 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
         
         if (existingItems.isNotEmpty) {
           var existingItem = existingItems.first;
-          int currentAmount = (existingItem['amount'] as int?) ?? 0;
+          // amount가 String으로 반환되므로 안전하게 변환
+          int currentAmount = 0;
+          if (existingItem['amount'] != null) {
+            if (existingItem['amount'] is String) {
+              currentAmount = int.tryParse(existingItem['amount'] as String) ?? 0;
+            } else if (existingItem['amount'] is int) {
+              currentAmount = existingItem['amount'] as int;
+            }
+          }
           print('가방에 있는 아이템 수량: $currentAmount');
           
           // 수량이 1개 이하일 때만 NEW 표시 (새로 구매한 것으로 간주)

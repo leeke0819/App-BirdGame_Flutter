@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:bird_raise_app/token/mobile_secure_token.dart';
 import 'package:provider/provider.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 class CraftingPage extends StatefulWidget {
   const CraftingPage({super.key});
@@ -101,7 +102,10 @@ class _CraftingPageState extends State<CraftingPage>
 
   // 조합 창에 아이템 추가
   void addToCraftingSlot(int slotIndex) {
-    if (selectedIndex < imagePaths.length) {
+    if (selectedIndex < imagePaths.length && 
+        slotIndex >= 0 && 
+        slotIndex < craftingSlots.length && 
+        slotIndex < craftingSlotCodes.length) {
       setState(() {
         craftingSlots[slotIndex] = imagePaths[selectedIndex];
         craftingSlotCodes[slotIndex] = itemCode[selectedIndex];
@@ -114,11 +118,15 @@ class _CraftingPageState extends State<CraftingPage>
 
   // 조합 창에서 아이템 제거
   void removeFromCraftingSlot(int slotIndex) {
-    setState(() {
-      craftingSlots[slotIndex] = '';
-      craftingSlotCodes[slotIndex] = '';
-      checkCraftingRecipe();
-    });
+    if (slotIndex >= 0 && 
+        slotIndex < craftingSlots.length && 
+        slotIndex < craftingSlotCodes.length) {
+      setState(() {
+        craftingSlots[slotIndex] = '';
+        craftingSlotCodes[slotIndex] = '';
+        checkCraftingRecipe();
+      });
+    }
   }
 
   // 조합 레시피 확인
@@ -149,18 +157,27 @@ class _CraftingPageState extends State<CraftingPage>
 
       // 조합 창 초기화
       setState(() {
+        // 안전하게 리스트 초기화
         craftingSlots = List.filled(3, '');
         craftingSlotCodes = List.filled(3, '');
+        
         resultItem = '';
         resultItemCode = '';
         canCraft = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$resultItemCode 조합이 완료되었습니다!',
-              style: const TextStyle(fontFamily: 'NaverNanumSquareRound')),
-        ),
+      // UI 강제 업데이트를 위한 추가 setState
+      if (mounted) {
+        setState(() {
+          // UI를 강제로 다시 그리기 위한 빈 setState
+        });
+      }
+
+      // 초록색 네모박스 스타일의 중앙 알림 표시
+      showCenterToast(
+        '조합이 완료되었습니다.',
+        bgColor: const Color(0xFF4CAF50),
+        textColor: Colors.white,
       );
     }
   }
@@ -237,53 +254,122 @@ class _CraftingPageState extends State<CraftingPage>
   Future<void> _refreshBagData() async {
     try {
       final items = await fetchBagData();
-      setState(() {
-        imagePaths = items.map((item) => item['imagePath'] ?? '').toList();
-        itemNames = items.map((item) => item['itemName'] ?? '').toList();
-        itemLore = items.map((item) => item['itemDescription'] ?? '').toList();
-        itemAmounts = items.map((item) => item['amount'] ?? '').toList();
-        itemCode = items.map((item) => item['itemCode'] ?? '').toList();
-      });
+      if (mounted) {
+        setState(() {
+          imagePaths = items.map((item) => item['imagePath'] ?? '').toList();
+          itemNames = items.map((item) => item['itemName'] ?? '').toList();
+          itemLore = items.map((item) => item['itemDescription'] ?? '').toList();
+          itemAmounts = items.map((item) => item['amount'] ?? '').toList();
+          itemCode = items.map((item) => item['itemCode'] ?? '').toList();
+          
+          // selectedIndex가 범위를 벗어나지 않도록 조정
+          if (selectedIndex >= imagePaths.length && imagePaths.isNotEmpty) {
+            selectedIndex = imagePaths.length - 1;
+          } else if (imagePaths.isEmpty) {
+            selectedIndex = 0;
+          }
+        });
+      }
     } catch (e) {
       print('가방 데이터 새로고침 실패: $e');
     }
+  }
+
+  // 중앙 토스트 메시지 표시
+  void showCenterToast(String message, {Color bgColor = Colors.black, Color textColor = Colors.white}) {
+    if (!mounted) return;
+    
+    showOverlay(
+      (context, t) {
+        // 안전하게 화면 높이 가져오기
+        double screenHeight = 600; // 기본값
+        try {
+          if (context.mounted) {
+            screenHeight = MediaQuery.of(context).size.height;
+          }
+        } catch (e) {
+          print('MediaQuery 오류: $e');
+        }
+        
+        return Positioned(
+          top: (screenHeight / 2) - 20,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: Opacity(
+              opacity: t,
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(8),
+                color: bgColor,
+                child: Container(
+                  constraints: const BoxConstraints(
+                    maxWidth: 300,
+                    minWidth: 200,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  child: Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 14,
+                      fontFamily: 'NaverNanumSquareRound',
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      duration: Duration(milliseconds: 1200),
+    );
   }
 
   // API를 사용한 조합 실행
   Future<void> _executeCraftingWithApi() async {
     try {
       print('조합 API 호출: $resultItemCode');
+      final String craftedItemCode = resultItemCode; // 조합 창 초기화 전에 저장
       await ApiCrafting.craft(resultItemCode);
       if (kDebugMode) {
         print('API 조합 결과 완료');
       }
 
-      // 조합 완료 후 가방 데이터 새로고침
-      await _refreshBagData();
-
       // 조합 창 초기화
       setState(() {
+        // 안전하게 리스트 초기화
         craftingSlots = List.filled(3, '');
         craftingSlotCodes = List.filled(3, '');
+        
         resultItem = '';
         resultItemCode = '';
         canCraft = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$resultItemCode 조합이 완료되었습니다!',
-              style: const TextStyle(fontFamily: 'NaverNanumSquareRound')),
-        ),
+      // 조합 완료 후 즉시 가방 데이터 새로고침
+      await _refreshBagData();
+      
+      // UI 강제 업데이트를 위한 추가 setState
+      if (mounted) {
+        setState(() {
+          // UI를 강제로 다시 그리기 위한 빈 setState
+        });
+      }
+
+      // 초록색 네모박스 스타일의 중앙 알림 표시
+      showCenterToast(
+        '조합이 완료되었습니다.',
+        bgColor: const Color(0xFF4CAF50),
+        textColor: Colors.white,
       );
     } catch (e) {
       print('조합 API 호출 실패: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('조합에 실패했습니다. 다시 시도해주세요.',
-              style: const TextStyle(fontFamily: 'NaverNanumSquareRound')),
-          backgroundColor: Colors.red,
-        ),
+      showCenterToast(
+        '조합에 실패했습니다. 다시 시도해주세요.',
+        bgColor: const Color(0xFFE53935),
+        textColor: Colors.white,
       );
     }
   }
