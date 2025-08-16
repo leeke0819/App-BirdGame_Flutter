@@ -1,3 +1,4 @@
+import 'package:bird_raise_app/api/api_auth.dart';
 import 'package:bird_raise_app/config/env_config.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
 import 'package:bird_raise_app/model/new_item_model.dart';
@@ -177,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Align(
               alignment: const Alignment(0.0, 0.2),
               child: Transform.translate(
-                offset: const Offset(-10, -90),
+                offset: const Offset(0, -90),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -300,10 +301,7 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 20),
                     GestureDetector(
                       onTap: () async {
-                        print('카카오 로그인 버튼이 클릭되었습니다');
-                        OAuthToken token = await kakaoLogin();
-                        print(token);
-                        await kakaoLoadUserProfile();
+                        ApiAuth.requestAuthCode();
                       },
                       child: Container(
                         width: 300,

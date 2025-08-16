@@ -867,12 +867,15 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                           width: 20,
                           child: RotatedBox(
                             quarterTurns: -1,
-                            child: LinearProgressIndicator(
-                              value: birdHungry / 100,
-                              backgroundColor: Colors.grey[200],
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                  Colors.orange),
-                              minHeight: 20,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10), // radius 10 적용
+                              child: LinearProgressIndicator(
+                                value: birdHungry / 100,
+                                backgroundColor: Colors.grey[200],
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                    Colors.orange),
+                                minHeight: 20,
+                              ),
                             ),
                           ),
                         ),
@@ -917,12 +920,15 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                           width: 20,
                           child: RotatedBox(
                             quarterTurns: -1,
-                            child: LinearProgressIndicator(
-                              value: birdThirst / 100,
-                              backgroundColor: Colors.grey[200],
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                  Colors.blue),
-                              minHeight: 20,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10), // radius 10 적용
+                              child: LinearProgressIndicator(
+                                value: birdThirst / 100,
+                                backgroundColor: Colors.grey[200],
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                    Colors.blue),
+                                minHeight: 20,
+                              ),
                             ),
                           ),
                         ),

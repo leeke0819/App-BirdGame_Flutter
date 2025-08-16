@@ -251,7 +251,7 @@ class JumpGame extends FlameGame with TapDetector, HasCollisionDetection {
 
     gameOverText = TextComponent(
       text: gameOverMessage,
-      position: Vector2(size.x / 2, size.y / 2 - 50), // 위로 올림
+      position: Vector2(size.x / 2, size.y / 2 - 100), // -50에서 -150으로 변경하여 더 위로 이동
       anchor: Anchor.center,
       textRenderer: TextPaint(
         style: TextStyle(
