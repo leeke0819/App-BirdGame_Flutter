@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:bird_raise_app/config/env_config.dart';
 import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
@@ -17,7 +18,7 @@ import 'package:bird_raise_app/token/mobile_secure_token.dart';
 import 'package:provider/provider.dart';
 import 'package:bird_raise_app/model/shop_model.dart';
 import 'package:bird_raise_app/model/new_item_model.dart';
-
+import 'package:audioplayers/audioplayers.dart';
 
 class ShopPage extends StatefulWidget {
   const ShopPage({super.key});
@@ -27,6 +28,8 @@ class ShopPage extends StatefulWidget {
 }
 
 class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
+  late AudioPlayer buttonClickPlayer;
+  late AudioPlayer errorSoundPlayer;
   String imagepath = 'images/items/apple.png';
 
   List<String> imagePaths = [];
@@ -47,6 +50,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     shopModel = ShopModel();
+    buttonClickPlayer = AudioPlayer();
+    errorSoundPlayer = AudioPlayer();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeData();
@@ -57,6 +62,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
   @override
   void dispose() {
     shopModel.dispose();
+    buttonClickPlayer.dispose();
+    errorSoundPlayer.dispose();
     super.dispose();
   }
 
@@ -112,6 +119,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
       } else {
         print('API 호출 실패: ${response.statusCode}');
         if (mounted) {
+          _playErrorSound();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
@@ -125,6 +133,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
     } catch (e) {
       print('Error: $e');
       if (mounted) {
+        _playErrorSound();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -151,6 +160,34 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
     }
   }
 
+  // 버튼 클릭 효과음 재생 (1초만 재생)
+  Future<void> _playButtonClick() async {
+    try {
+      await buttonClickPlayer.play(AssetSource('sounds/button_click.wav'));
+      await buttonClickPlayer.setVolume(0.5);
+
+      // 1초 후에 오디오 중지
+      Timer(const Duration(seconds: 1), () {
+        if (buttonClickPlayer.state == PlayerState.playing) {
+          buttonClickPlayer.stop();
+        }
+      });
+    } catch (e) {
+      print('버튼 클릭 효과음 재생 실패: $e');
+    }
+  }
+
+  // 에러 효과음 재생
+  Future<void> _playErrorSound() async {
+    try {
+      await errorSoundPlayer
+          .play(AssetSource('sounds/error_or_ fail_sound.wav'));
+      await errorSoundPlayer.setVolume(0.5);
+    } catch (e) {
+      print('에러 효과음 재생 실패: $e');
+    }
+  }
+
   String formatKoreanNumber(int number) {
     if (number >= 100000000) {
       return (number / 100000000).toStringAsFixed(1) + '억';
@@ -172,28 +209,30 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
     if (result == 1) {
       // 구매 성공 후 잠시 기다린 다음 가방 데이터 확인
       await Future.delayed(Duration(milliseconds: 500));
-      
+
       try {
         final bagItems = await fetchBagData();
         print('가방 데이터 확인: $bagItems');
         print('구매한 아이템 코드: $itemCode');
-        
+
         // 가방에서 해당 아이템의 수량 확인
-        var existingItems = bagItems.where((item) => item['itemCode'] == itemCode).toList();
-        
+        var existingItems =
+            bagItems.where((item) => item['itemCode'] == itemCode).toList();
+
         if (existingItems.isNotEmpty) {
           var existingItem = existingItems.first;
           // amount가 String으로 반환되므로 안전하게 변환
           int currentAmount = 0;
           if (existingItem['amount'] != null) {
             if (existingItem['amount'] is String) {
-              currentAmount = int.tryParse(existingItem['amount'] as String) ?? 0;
+              currentAmount =
+                  int.tryParse(existingItem['amount'] as String) ?? 0;
             } else if (existingItem['amount'] is int) {
               currentAmount = existingItem['amount'] as int;
             }
           }
           print('가방에 있는 아이템 수량: $currentAmount');
-          
+
           // 수량이 1개 이하일 때만 NEW 표시 (새로 구매한 것으로 간주)
           if (currentAmount <= 1) {
             print('수량이 1개 이하이므로 NEW 표시 추가: $itemCode');
@@ -211,7 +250,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
         print('확인 실패로 인해 NEW 표시 추가: $itemCode');
         context.read<NewItemModel>().addNewItem(itemCode);
       }
-      
+
       shopModel.showCenterToast(
         "구매 완료!",
         bgColor: const Color(0xFF4CAF50),
@@ -262,7 +301,10 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.off(() => const MainPage()),
+          onPressed: () async {
+            await _playButtonClick();
+            Get.off(() => const MainPage());
+          },
         ),
         centerTitle: true,
         title: Row(
@@ -309,7 +351,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                 ),
                                 const SizedBox(width: 6),
                                 GestureDetector(
-                                  onTap: () {
+                                  onTap: () async {
+                                    await _playButtonClick();
                                     print('골드 충전 버튼 클릭');
                                   },
                                   child: Image.asset(
@@ -349,7 +392,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                             child: Container(
                               width: 200,
                               height: 100,
-                              padding: const EdgeInsets.symmetric(horizontal: 0),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 0),
                               child: Row(
                                 children: [
                                   const SizedBox(width: 8),
@@ -456,7 +500,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
                                   image: const DecorationImage(
-                                    image: AssetImage('images/background/shop_item_background.png'),
+                                    image: AssetImage(
+                                        'images/background/shop_item_background.png'),
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -477,7 +522,9 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      itemNames.isNotEmpty ? itemNames[selectedIndex] : '',
+                                      itemNames.isNotEmpty
+                                          ? itemNames[selectedIndex]
+                                          : '',
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
@@ -510,7 +557,9 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      itemLore.isNotEmpty ? itemLore[selectedIndex] : '',
+                                      itemLore.isNotEmpty
+                                          ? itemLore[selectedIndex]
+                                          : '',
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.grey[500],
@@ -535,7 +584,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                               Column(
                                 children: [
                                   GestureDetector(
-                                    onTap: () {
+                                    onTap: () async {
+                                      await _playButtonClick();
                                       shopModel.showQuantityDialog(
                                         context,
                                         itemCode[selectedIndex],
@@ -545,7 +595,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                       );
                                     },
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 8),
                                       decoration: BoxDecoration(
                                         color: Colors.green,
                                         borderRadius: BorderRadius.circular(8),
@@ -562,7 +613,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                   ),
                                   const SizedBox(height: 8),
                                   GestureDetector(
-                                    onTap: () {
+                                    onTap: () async {
+                                      await _playButtonClick();
                                       shopModel.showQuantityDialog(
                                         context,
                                         itemCode[selectedIndex],
@@ -572,7 +624,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                       );
                                     },
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 8),
                                       decoration: BoxDecoration(
                                         color: Colors.red,
                                         borderRadius: BorderRadius.circular(8),
@@ -609,13 +662,20 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                         children: [
                           Expanded(
                             child: GestureDetector(
-                              onTap: () => _handleCategoryChange(1),
+                              onTap: () async {
+                                await _playButtonClick();
+                                _handleCategoryChange(1);
+                              },
                               child: Container(
                                 height: 50,
                                 decoration: BoxDecoration(
-                                  color: category == 1 ? Colors.blue : Colors.blue[100]!,
+                                  color: category == 1
+                                      ? Colors.blue
+                                      : Colors.blue[100]!,
                                   border: Border.all(
-                                    color: category == 1 ? Colors.blue[700]! : Colors.blue[300]!,
+                                    color: category == 1
+                                        ? Colors.blue[700]!
+                                        : Colors.blue[300]!,
                                     width: 2,
                                   ),
                                   borderRadius: BorderRadius.circular(8),
@@ -624,8 +684,12 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                   child: Text(
                                     '재료',
                                     style: TextStyle(
-                                      color: category == 1 ? Colors.white : Colors.black,
-                                      fontWeight: category == 1 ? FontWeight.bold : FontWeight.normal,
+                                      color: category == 1
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontWeight: category == 1
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
                                       fontFamily: 'NaverNanumSquareRound',
                                     ),
                                   ),
@@ -636,13 +700,20 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                           const SizedBox(width: 8),
                           Expanded(
                             child: GestureDetector(
-                              onTap: () => _handleCategoryChange(2),
+                              onTap: () async {
+                              await _playButtonClick();
+                              _handleCategoryChange(2);
+                            },
                               child: Container(
                                 height: 50,
                                 decoration: BoxDecoration(
-                                  color: category == 2 ? Colors.green : Colors.green[100]!,
+                                  color: category == 2
+                                      ? Colors.green
+                                      : Colors.green[100]!,
                                   border: Border.all(
-                                    color: category == 2 ? Colors.green[700]! : Colors.green[300]!,
+                                    color: category == 2
+                                        ? Colors.green[700]!
+                                        : Colors.green[300]!,
                                     width: 2,
                                   ),
                                   borderRadius: BorderRadius.circular(8),
@@ -651,8 +722,12 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                   child: Text(
                                     '새알',
                                     style: TextStyle(
-                                      color: category == 2 ? Colors.white : Colors.black,
-                                      fontWeight: category == 2 ? FontWeight.bold : FontWeight.normal,
+                                      color: category == 2
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontWeight: category == 2
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
                                       fontFamily: 'NaverNanumSquareRound',
                                     ),
                                   ),
@@ -668,7 +743,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                   Expanded(
                     child: GridView.builder(
                       padding: const EdgeInsets.all(16),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 5,
                         mainAxisSpacing: 4,
                         crossAxisSpacing: 4,
@@ -677,7 +753,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                       itemCount: imagePaths.isEmpty ? 30 : imagePaths.length,
                       itemBuilder: (context, index) {
                         return GestureDetector(
-                          onTap: () {
+                          onTap: () async {
+                            await _playButtonClick();
                             setState(() {
                               selectedIndex = index;
                             });
@@ -686,14 +763,15 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: selectedIndex == index 
-                                    ? Colors.orange 
+                                color: selectedIndex == index
+                                    ? Colors.orange
                                     : Colors.grey[300]!,
                                 width: selectedIndex == index ? 2 : 1,
                               ),
                               image: imagePaths.isNotEmpty
                                   ? const DecorationImage(
-                                      image: AssetImage('images/background/shop_item_background.png'),
+                                      image: AssetImage(
+                                          'images/background/shop_item_background.png'),
                                       fit: BoxFit.cover,
                                     )
                                   : null,
@@ -729,6 +807,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                         Expanded(
                           child: GestureDetector(
                             onTap: () async {
+                              await _playButtonClick();
                               await Get.off(() => const BookPage());
                             },
                             child: Stack(
@@ -757,6 +836,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                         Expanded(
                           child: GestureDetector(
                             onTap: () async {
+                              await _playButtonClick();
                               await Get.off(() => const AdventurePage());
                             },
                             child: Stack(
@@ -785,6 +865,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                         Expanded(
                           child: GestureDetector(
                             onTap: () async {
+                              await _playButtonClick();
                               Get.off(() => const ShopPage());
                               await goldModel.fetchGold(); // gold 값 갱신
                             },
@@ -814,6 +895,7 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                         Expanded(
                           child: GestureDetector(
                             onTap: () async {
+                              await _playButtonClick();
                               Get.off(() => const BagPage());
                               await goldModel.fetchGold(); // gold 값 갱신
                             },
@@ -845,11 +927,14 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                         top: 4,
                                         left: 4,
                                         child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 6, vertical: 2),
                                           decoration: BoxDecoration(
                                             color: Colors.red,
-                                            borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(color: Colors.white, width: 1),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            border: Border.all(
+                                                color: Colors.white, width: 1),
                                           ),
                                           child: const Text(
                                             'NEW',
@@ -857,7 +942,8 @@ class _ShopPage extends State<ShopPage> with TickerProviderStateMixin {
                                               color: Colors.yellow,
                                               fontSize: 10,
                                               fontWeight: FontWeight.bold,
-                                              fontFamily: 'NaverNanumSquareRound',
+                                              fontFamily:
+                                                  'NaverNanumSquareRound',
                                             ),
                                           ),
                                         ),

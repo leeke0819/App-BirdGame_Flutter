@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:bird_raise_app/api/api_bag.dart';
 import 'package:bird_raise_app/api/api_bird.dart';
@@ -17,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:bird_raise_app/token/mobile_secure_token.dart';
 import 'package:provider/provider.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class BagPage extends StatefulWidget {
   const BagPage({super.key});
@@ -26,6 +28,8 @@ class BagPage extends StatefulWidget {
 }
 
 class _BagPage extends State<BagPage> with TickerProviderStateMixin {
+  late AudioPlayer buttonClickPlayer;
+  late AudioPlayer errorSoundPlayer;
   String imagepath = 'images/items/apple.png';
   List<String> imagePaths = [];
   List<String> itemNames = [];
@@ -40,6 +44,9 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    buttonClickPlayer = AudioPlayer();
+    errorSoundPlayer = AudioPlayer();
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeData();
       _fetchUserInfo();
@@ -70,6 +77,7 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
     } catch (e) {
       print('가방 데이터 로딩 실패: $e');
       if (mounted) {
+        _playErrorSound();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('가방 아이템을 불러오지 못했습니다.',
@@ -80,6 +88,33 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  // 버튼 클릭 효과음 재생 (1초만 재생)
+  Future<void> _playButtonClick() async {
+    try {
+      await buttonClickPlayer.play(AssetSource('sounds/button_click.wav'));
+      await buttonClickPlayer.setVolume(0.5);
+      
+      // 1초 후에 오디오 중지
+      Timer(const Duration(seconds: 1), () {
+        if (buttonClickPlayer.state == PlayerState.playing) {
+          buttonClickPlayer.stop();
+        }
+      });
+    } catch (e) {
+      print('버튼 클릭 효과음 재생 실패: $e');
+    }
+  }
+
+  // 에러 효과음 재생
+  Future<void> _playErrorSound() async {
+    try {
+      await errorSoundPlayer.play(AssetSource('sounds/error_or_ fail_sound.wav'));
+      await errorSoundPlayer.setVolume(0.5);
+    } catch (e) {
+      print('에러 효과음 재생 실패: $e');
     }
   }
 
@@ -115,6 +150,12 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
   }
 
   @override
+  void dispose() {
+    buttonClickPlayer.dispose();
+    errorSoundPlayer.dispose();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
     final goldModel = context.watch<GoldModel>();
     final newItemModel = context.watch<NewItemModel>();
@@ -123,7 +164,10 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.off(() => const MainPage()),
+          onPressed: () async {
+            await _playButtonClick();
+            Get.off(() => const MainPage());
+          },
         ),
         title: const Text(
           '가방',
@@ -273,7 +317,8 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                             itemCount: imagePaths.length,
                             itemBuilder: (context, index) {
                               return GestureDetector(
-                                onTap: () {
+                                onTap: () async {
+                                  await _playButtonClick();
                                   setState(() {
                                     selectedIndex = index;
                                   });
@@ -427,6 +472,7 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                         Expanded(
                           child: GestureDetector(
                             onTap: () async {
+                              await _playButtonClick();
                               Get.off(() => const ShopPage());
                               await goldModel.fetchGold(); // gold 값 갱신
                             },
@@ -456,6 +502,7 @@ class _BagPage extends State<BagPage> with TickerProviderStateMixin {
                         Expanded(
                           child: GestureDetector(
                             onTap: () async {
+                              await _playButtonClick();
                               Get.off(() => const BagPage());
                               await goldModel.fetchGold(); // gold 값 갱신
                             },

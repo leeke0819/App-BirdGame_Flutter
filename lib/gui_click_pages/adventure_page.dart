@@ -8,6 +8,8 @@ import 'package:bird_raise_app/gui_click_pages/adventure_games/adventure_one.dar
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'dart:async';
 
 class AdventurePage extends StatefulWidget {
   const AdventurePage({super.key});
@@ -17,6 +19,50 @@ class AdventurePage extends StatefulWidget {
 }
 
 class _AdventurePageState extends State<AdventurePage> {
+  late AudioPlayer buttonClickPlayer;
+  late AudioPlayer errorSoundPlayer;
+
+  @override
+  void initState() {
+    super.initState();
+    buttonClickPlayer = AudioPlayer();
+    errorSoundPlayer = AudioPlayer();
+  }
+
+  // 버튼 클릭 효과음 재생 (1초만 재생)
+  Future<void> _playButtonClick() async {
+    try {
+      await buttonClickPlayer.play(AssetSource('sounds/button_click.wav'));
+      await buttonClickPlayer.setVolume(0.5);
+      
+      // 1초 후에 오디오 중지
+      Timer(const Duration(seconds: 1), () {
+        if (buttonClickPlayer.state == PlayerState.playing) {
+          buttonClickPlayer.stop();
+        }
+      });
+    } catch (e) {
+      print('버튼 클릭 효과음 재생 실패: $e');
+    }
+  }
+
+  // 에러 효과음 재생
+  Future<void> _playErrorSound() async {
+    try {
+      await errorSoundPlayer.play(AssetSource('sounds/error_or_ fail_sound.wav'));
+      await errorSoundPlayer.setVolume(0.5);
+    } catch (e) {
+      print('에러 효과음 재생 실패: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    buttonClickPlayer.dispose();
+    errorSoundPlayer.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final goldModel = context.watch<GoldModel>();
@@ -26,7 +72,10 @@ class _AdventurePageState extends State<AdventurePage> {
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.off(() => const MainPage()),
+          onPressed: () async {
+            await _playButtonClick();
+            Get.off(() => const MainPage());
+          },
         ),
         backgroundColor: Colors.white,
         title: const Text(
@@ -43,7 +92,8 @@ class _AdventurePageState extends State<AdventurePage> {
         child: Column(
           children: [
             GestureDetector(
-              onTap: () {
+              onTap: () async {
+                await _playButtonClick();
                 Get.to(() => const AdventureOne());
               },
               child: Container(
@@ -74,14 +124,29 @@ class _AdventurePageState extends State<AdventurePage> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Center(
-                child: Text(
-                  '모험 2',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontFamily: 'NaverNanumSquareRound',
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '모험 2',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontFamily: 'NaverNanumSquareRound',
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '출시 준비 중',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'NaverNanumSquareRound',
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -94,14 +159,30 @@ class _AdventurePageState extends State<AdventurePage> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Center(
-                child: Text(
-                  '모험 3',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontFamily: 'NaverNanumSquareRound',
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '모험 3',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontFamily: 'NaverNanumSquareRound',
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    SizedBox(height: 8),
+                    Text(
+                      '출시 준비 중',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'NaverNanumSquareRound',
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

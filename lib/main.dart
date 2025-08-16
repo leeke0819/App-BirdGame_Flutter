@@ -125,11 +125,13 @@ class _LoginPageState extends State<LoginPage> {
         //환경구분 필요
         if (kIsWeb) {
           print("웹 환경에서 동작하는 코드");
-          saveChromeAccessToken(responseData['accessToken'], responseData['refreshToken']);
+          saveChromeAccessToken(
+              responseData['accessToken'], responseData['refreshToken']);
           print(getChromeAccessToken());
         } else {
           print("모바일 환경에서 동작하는 코드"); //얘가 먼저 실행
-          await saveAccessToken(responseData['accessToken'], responseData['refreshToken']); //3초정도 걸린다 가정.
+          await saveAccessToken(responseData['accessToken'],
+              responseData['refreshToken']); //3초정도 걸린다 가정.
           print(getAccessToken()); //1초짜리 print문ㅂ
         }
 
@@ -177,7 +179,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Align(
               alignment: const Alignment(0.0, 0.2),
               child: Transform.translate(
-                offset: const Offset(-10, -90),
+                offset: const Offset(0, -90),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

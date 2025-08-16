@@ -2,6 +2,7 @@ import 'package:bird_raise_app/api/api_bag.dart';
 import 'package:bird_raise_app/api/api_bird.dart';
 import 'package:bird_raise_app/api/api_crafting.dart';
 import 'package:bird_raise_app/gui_click_pages/adventure_page.dart';
+import 'package:bird_raise_app/gui_click_pages/bag_page.dart';
 import 'package:bird_raise_app/gui_click_pages/book_page.dart';
 import 'package:bird_raise_app/gui_click_pages/shop_page.dart';
 import 'package:bird_raise_app/main_page.dart';
@@ -16,6 +17,8 @@ import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:bird_raise_app/token/mobile_secure_token.dart';
 import 'package:provider/provider.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'dart:async';
 
 class CraftingPage extends StatefulWidget {
   const CraftingPage({super.key});
@@ -26,6 +29,8 @@ class CraftingPage extends StatefulWidget {
 
 class _CraftingPageState extends State<CraftingPage>
     with TickerProviderStateMixin {
+  late AudioPlayer buttonClickPlayer;
+  late AudioPlayer errorSoundPlayer;
   List<String> imagePaths = [];
   List<String> itemNames = [];
   List<String> itemLore = [];
@@ -47,6 +52,9 @@ class _CraftingPageState extends State<CraftingPage>
   @override
   void initState() {
     super.initState();
+    buttonClickPlayer = AudioPlayer();
+    errorSoundPlayer = AudioPlayer();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeData();
     });
@@ -77,6 +85,7 @@ class _CraftingPageState extends State<CraftingPage>
     } catch (e) {
       print('가방 데이터 로딩 실패: $e');
       if (mounted) {
+        _playErrorSound();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('가방 아이템을 불러오지 못했습니다.',
@@ -100,11 +109,39 @@ class _CraftingPageState extends State<CraftingPage>
     }
   }
 
+  // 버튼 클릭 효과음 재생 (1초만 재생)
+  Future<void> _playButtonClick() async {
+    try {
+      await buttonClickPlayer.play(AssetSource('sounds/button_click.wav'));
+      await buttonClickPlayer.setVolume(0.5);
+
+      // 1초 후에 오디오 중지
+      Timer(const Duration(seconds: 1), () {
+        if (buttonClickPlayer.state == PlayerState.playing) {
+          buttonClickPlayer.stop();
+        }
+      });
+    } catch (e) {
+      print('버튼 클릭 효과음 재생 실패: $e');
+    }
+  }
+
+  // 에러 효과음 재생
+  Future<void> _playErrorSound() async {
+    try {
+      await errorSoundPlayer
+          .play(AssetSource('sounds/error_or_ fail_sound.wav'));
+      await errorSoundPlayer.setVolume(0.5);
+    } catch (e) {
+      print('에러 효과음 재생 실패: $e');
+    }
+  }
+
   // 조합 창에 아이템 추가
   void addToCraftingSlot(int slotIndex) {
-    if (selectedIndex < imagePaths.length && 
-        slotIndex >= 0 && 
-        slotIndex < craftingSlots.length && 
+    if (selectedIndex < imagePaths.length &&
+        slotIndex >= 0 &&
+        slotIndex < craftingSlots.length &&
         slotIndex < craftingSlotCodes.length) {
       setState(() {
         craftingSlots[slotIndex] = imagePaths[selectedIndex];
@@ -118,8 +155,8 @@ class _CraftingPageState extends State<CraftingPage>
 
   // 조합 창에서 아이템 제거
   void removeFromCraftingSlot(int slotIndex) {
-    if (slotIndex >= 0 && 
-        slotIndex < craftingSlots.length && 
+    if (slotIndex >= 0 &&
+        slotIndex < craftingSlots.length &&
         slotIndex < craftingSlotCodes.length) {
       setState(() {
         craftingSlots[slotIndex] = '';
@@ -160,7 +197,7 @@ class _CraftingPageState extends State<CraftingPage>
         // 안전하게 리스트 초기화
         craftingSlots = List.filled(3, '');
         craftingSlotCodes = List.filled(3, '');
-        
+
         resultItem = '';
         resultItemCode = '';
         canCraft = false;
@@ -258,10 +295,11 @@ class _CraftingPageState extends State<CraftingPage>
         setState(() {
           imagePaths = items.map((item) => item['imagePath'] ?? '').toList();
           itemNames = items.map((item) => item['itemName'] ?? '').toList();
-          itemLore = items.map((item) => item['itemDescription'] ?? '').toList();
+          itemLore =
+              items.map((item) => item['itemDescription'] ?? '').toList();
           itemAmounts = items.map((item) => item['amount'] ?? '').toList();
           itemCode = items.map((item) => item['itemCode'] ?? '').toList();
-          
+
           // selectedIndex가 범위를 벗어나지 않도록 조정
           if (selectedIndex >= imagePaths.length && imagePaths.isNotEmpty) {
             selectedIndex = imagePaths.length - 1;
@@ -272,13 +310,15 @@ class _CraftingPageState extends State<CraftingPage>
       }
     } catch (e) {
       print('가방 데이터 새로고침 실패: $e');
+      _playErrorSound();
     }
   }
 
   // 중앙 토스트 메시지 표시
-  void showCenterToast(String message, {Color bgColor = Colors.black, Color textColor = Colors.white}) {
+  void showCenterToast(String message,
+      {Color bgColor = Colors.black, Color textColor = Colors.white}) {
     if (!mounted) return;
-    
+
     showOverlay(
       (context, t) {
         // 안전하게 화면 높이 가져오기
@@ -290,7 +330,7 @@ class _CraftingPageState extends State<CraftingPage>
         } catch (e) {
           print('MediaQuery 오류: $e');
         }
-        
+
         return Positioned(
           top: (screenHeight / 2) - 20,
           left: 0,
@@ -307,7 +347,8 @@ class _CraftingPageState extends State<CraftingPage>
                     maxWidth: 300,
                     minWidth: 200,
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                   child: Text(
                     message,
                     textAlign: TextAlign.center,
@@ -342,7 +383,7 @@ class _CraftingPageState extends State<CraftingPage>
         // 안전하게 리스트 초기화
         craftingSlots = List.filled(3, '');
         craftingSlotCodes = List.filled(3, '');
-        
+
         resultItem = '';
         resultItemCode = '';
         canCraft = false;
@@ -350,7 +391,7 @@ class _CraftingPageState extends State<CraftingPage>
 
       // 조합 완료 후 즉시 가방 데이터 새로고침
       await _refreshBagData();
-      
+
       // UI 강제 업데이트를 위한 추가 setState
       if (mounted) {
         setState(() {
@@ -366,12 +407,20 @@ class _CraftingPageState extends State<CraftingPage>
       );
     } catch (e) {
       print('조합 API 호출 실패: $e');
+      _playErrorSound();
       showCenterToast(
         '조합에 실패했습니다. 다시 시도해주세요.',
         bgColor: const Color(0xFFE53935),
         textColor: Colors.white,
       );
     }
+  }
+
+  @override
+  void dispose() {
+    buttonClickPlayer.dispose();
+    errorSoundPlayer.dispose();
+    super.dispose();
   }
 
   @override
@@ -383,7 +432,10 @@ class _CraftingPageState extends State<CraftingPage>
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.off(() => const MainPage()),
+          onPressed: () async {
+            await _playButtonClick();
+            Get.off(() => const MainPage());
+          },
         ),
         backgroundColor: Colors.brown[200],
         title: const Text(
@@ -532,7 +584,8 @@ class _CraftingPageState extends State<CraftingPage>
                               itemCount: imagePaths.length,
                               itemBuilder: (context, index) {
                                 return GestureDetector(
-                                  onTap: () {
+                                  onTap: () async {
+                                    await _playButtonClick();
                                     setState(() {
                                       selectedIndex = index;
                                     });
@@ -658,7 +711,8 @@ class _CraftingPageState extends State<CraftingPage>
                                             child: Container(
                                               margin: const EdgeInsets.all(4),
                                               child: GestureDetector(
-                                                onTap: () {
+                                                onTap: () async {
+                                                  await _playButtonClick();
                                                   if (craftingSlots[index]
                                                       .isNotEmpty) {
                                                     removeFromCraftingSlot(
@@ -702,9 +756,10 @@ class _CraftingPageState extends State<CraftingPage>
                                                               right: 2,
                                                               child:
                                                                   GestureDetector(
-                                                                onTap: () =>
-                                                                    removeFromCraftingSlot(
-                                                                        index),
+                                                                onTap: () async {
+                                                                  await _playButtonClick();
+                                                                  removeFromCraftingSlot(index);
+                                                                },
                                                                 child:
                                                                     Container(
                                                                   width: 16,
@@ -809,7 +864,8 @@ class _CraftingPageState extends State<CraftingPage>
                             padding: const EdgeInsets.all(16),
                             child: GestureDetector(
                               onTap: canCraft
-                                  ? () {
+                                  ? () async {
+                                      await _playButtonClick();
                                       _executeCraftingWithApi();
                                     }
                                   : null,
@@ -846,6 +902,7 @@ class _CraftingPageState extends State<CraftingPage>
                         Expanded(
                           child: GestureDetector(
                             onTap: () async {
+                              await _playButtonClick();
                               await Get.off(() => const BookPage());
                             },
                             child: Stack(
@@ -874,6 +931,7 @@ class _CraftingPageState extends State<CraftingPage>
                         Expanded(
                           child: GestureDetector(
                             onTap: () async {
+                              await _playButtonClick();
                               await Get.off(() => const AdventurePage());
                             },
                             child: Stack(
@@ -902,6 +960,7 @@ class _CraftingPageState extends State<CraftingPage>
                         Expanded(
                           child: GestureDetector(
                             onTap: () async {
+                              await _playButtonClick();
                               Get.off(() => const ShopPage());
                               await goldModel.fetchGold();
                             },
@@ -931,7 +990,8 @@ class _CraftingPageState extends State<CraftingPage>
                         Expanded(
                           child: GestureDetector(
                             onTap: () async {
-                              Get.off(() => const MainPage());
+                              await _playButtonClick();
+                              Get.off(() => const BagPage());
                               await goldModel.fetchGold();
                             },
                             child: Stack(
@@ -962,11 +1022,14 @@ class _CraftingPageState extends State<CraftingPage>
                                         top: 4,
                                         left: 4,
                                         child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 6, vertical: 2),
                                           decoration: BoxDecoration(
                                             color: Colors.red,
-                                            borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(color: Colors.white, width: 1),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            border: Border.all(
+                                                color: Colors.white, width: 1),
                                           ),
                                           child: const Text(
                                             'NEW',
@@ -974,7 +1037,8 @@ class _CraftingPageState extends State<CraftingPage>
                                               color: Colors.yellow,
                                               fontSize: 10,
                                               fontWeight: FontWeight.bold,
-                                              fontFamily: 'NaverNanumSquareRound',
+                                              fontFamily:
+                                                  'NaverNanumSquareRound',
                                             ),
                                           ),
                                         ),

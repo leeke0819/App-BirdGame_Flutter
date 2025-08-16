@@ -14,12 +14,41 @@ class AdventureOne extends StatefulWidget {
   State<AdventureOne> createState() => _AdventureOneState();
 }
 
-class _AdventureOneState extends State<AdventureOne> {
+class _AdventureOneState extends State<AdventureOne>
+    with WidgetsBindingObserver {
   bool gameStarted = false;
   bool gameOver = false;
   String? sessionId;
   bool isGameOverRequested = false; // ✅ 중복 호출 방지용
   bool isResultDialogShown = false; // 결과 팝업 표시 여부
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    print('🔄 앱 생명주기 변경: $state');
+
+    // 앱이 포그라운드로 돌아올 때 포커스 강제 활성화
+    if (state == AppLifecycleState.resumed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          FocusScope.of(context).requestFocus(FocusNode());
+          print('✅ 앱 복귀 시 포커스 활성화됨');
+        }
+      });
+    }
+  }
 
   void _handleGameOver() async {
     if (isGameOverRequested) return; // ✅ 중복 호출 방지
@@ -179,17 +208,64 @@ class _AdventureOneState extends State<AdventureOne> {
                     ),
                     const SizedBox(height: 50),
                     // 게임 시작 버튼
-                    GestureDetector(
+                    InkWell(
                       onTap: () async {
+                        print('🎮 게임 시작 버튼 터치됨');
+
+                        // 포커스 확인 및 강제 활성화
+                        if (!mounted) {
+                          print('❌ 위젯이 마운트되지 않음');
+                          return;
+                        }
+
+                        // 현재 컨텍스트가 활성 상태인지 확인
+                        final currentContext = context;
+                        if (currentContext.mounted) {
+                          // 포커스 강제 활성화
+                          FocusScope.of(currentContext)
+                              .requestFocus(FocusNode());
+                          print('✅ 포커스 활성화됨');
+                        }
+
+                        // 앱이 포그라운드에 있는지 확인
+                        final appState = WidgetsBinding.instance.lifecycleState;
+                        print('📱 현재 앱 상태: $appState');
+
+                        // 포커스 강제 활성화 (여러 방법 시도)
+                        try {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          FocusManager.instance.primaryFocus?.unfocus();
+                          FocusManager.instance.primaryFocus?.requestFocus();
+                          print('✅ 포커스 강제 활성화 완료');
+                        } catch (e) {
+                          print('⚠️ 포커스 활성화 중 오류: $e');
+                        }
+
+                        print('🚀 API 호출 시작...');
                         sessionId = await ApiGame.startGame(1);
-                        if (sessionId != null) {
+
+                        if (sessionId != null && mounted) {
+                          print('✅ API 성공, sessionId: $sessionId');
+
+                          // 즉시 상태 업데이트 시도
+                          setState(() {
+                            gameStarted = true;
+                          });
+                          print('✅ setState 즉시 실행됨');
+
+                          // 백업으로 PostFrameCallback 사용
+                          if (!mounted) return;
                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                            setState(() {
-                              gameStarted = true;
-                            });
+                            if (mounted) {
+                              setState(() {
+                                gameStarted = true;
+                              });
+                              print('✅ PostFrameCallback setState 실행됨');
+                            }
                           });
                         } else {
-                          print('❌ 게임 시작 실패');
+                          print(
+                              '❌ 게임 시작 실패 - sessionId: $sessionId, mounted: $mounted');
                         }
                       },
                       child: Container(

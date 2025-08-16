@@ -7,6 +7,8 @@ import 'package:bird_raise_app/gui_click_pages/adventure_page.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:bird_raise_app/model/gold_model.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'dart:async';
 
 class BookPage extends StatefulWidget {
   const BookPage({super.key});
@@ -16,6 +18,8 @@ class BookPage extends StatefulWidget {
 }
 
 class _BookPageState extends State<BookPage> {
+  late AudioPlayer buttonClickPlayer;
+  late AudioPlayer errorSoundPlayer;
   List<dynamic>? shopData;
   bool isLoading = true;
   int category = 1; // 기본 카테고리
@@ -23,6 +27,8 @@ class _BookPageState extends State<BookPage> {
   @override
   void initState() {
     super.initState();
+    buttonClickPlayer = AudioPlayer();
+    errorSoundPlayer = AudioPlayer();
     fetchData();
   }
 
@@ -52,6 +58,40 @@ class _BookPageState extends State<BookPage> {
     return item['isDisplay'] == true;
   }
 
+  // 버튼 클릭 효과음 재생 (1초만 재생)
+  Future<void> _playButtonClick() async {
+    try {
+      await buttonClickPlayer.play(AssetSource('sounds/button_click.wav'));
+      await buttonClickPlayer.setVolume(0.5);
+      
+      // 1초 후에 오디오 중지
+      Timer(const Duration(seconds: 1), () {
+        if (buttonClickPlayer.state == PlayerState.playing) {
+          buttonClickPlayer.stop();
+        }
+      });
+    } catch (e) {
+      print('버튼 클릭 효과음 재생 실패: $e');
+    }
+  }
+
+  // 에러 효과음 재생
+  Future<void> _playErrorSound() async {
+    try {
+      await errorSoundPlayer.play(AssetSource('sounds/error_or_ fail_sound.wav'));
+      await errorSoundPlayer.setVolume(0.5);
+    } catch (e) {
+      print('에러 효과음 재생 실패: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    buttonClickPlayer.dispose();
+    errorSoundPlayer.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final goldModel = context.watch<GoldModel>();
@@ -60,7 +100,10 @@ class _BookPageState extends State<BookPage> {
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.off(() => const MainPage()),
+          onPressed: () async {
+            await _playButtonClick();
+            Get.off(() => const MainPage());
+          },
         ),
         title: const Text(
           '도감',
@@ -189,7 +232,8 @@ class _BookPageState extends State<BookPage> {
                             final isObtained = isItemObtained(item);
 
                                                         return GestureDetector(
-                              onTap: () {
+                              onTap: () async {
+                                await _playButtonClick();
                                 showDialog(
                                   context: context,
                                   builder: (context) => AlertDialog(
@@ -243,7 +287,10 @@ class _BookPageState extends State<BookPage> {
                                     ),
                                     actions: [
                                       TextButton(
-                                        onPressed: () => Navigator.of(context).pop(),
+                                        onPressed: () async {
+                                          await _playButtonClick();
+                                          Navigator.of(context).pop();
+                                        },
                                         child: const Text('닫기'),
                                       ),
                                     ],
