@@ -14,21 +14,19 @@ class NormalMembers extends StatefulWidget {
 
 class _NormalMembersState extends State<NormalMembers> {
   bool _obscurePassword = true; // 비밀번호 숨김 상태 변수
-  final TextEditingController _passwordController =
-      TextEditingController(); // 비밀번호 란 값
+  final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
-      TextEditingController(); // 비밀번호 확인 란 값
+      TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _nicknameController = TextEditingController();
   String? _errorMessage; // 비밀번호 확인 메시지
 
   void _validatePasswords() {
-    // 비밀번호 일치하지 않으면 에러 메시지 표시
     setState(() {
       if (_passwordController.text != _confirmPasswordController.text) {
         _errorMessage = "비밀번호가 일치하지 않습니다.";
       } else {
-        _errorMessage = null; // 에러 메시지 초기화
+        _errorMessage = null;
       }
     });
   }
@@ -66,16 +64,12 @@ class _NormalMembersState extends State<NormalMembers> {
             ),
           ),
         );
-        // 로그인 성공 시 메인 페이지로 이동
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const LoginPage()),
         );
       } else {
-        print("회원가입 실패");
-        print(response.statusCode);
-        print(response.body);
-        final errorMessage = utf8.decode(response.bodyBytes); // 한글 깨짐 방지
+        final errorMessage = utf8.decode(response.bodyBytes);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -100,15 +94,15 @@ class _NormalMembersState extends State<NormalMembers> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          surfaceTintColor: Colors.transparent,
-        ),
-        body: SingleChildScrollView(
-            child: Padding(
-          padding: EdgeInsets.only(
-              top: MediaQuery.of(context).size.height * 0.12), // 화면 높이의 12%
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding:
+              EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.12),
           child: Align(
             alignment: const Alignment(0, -0.3),
             child: Column(
@@ -220,8 +214,8 @@ class _NormalMembersState extends State<NormalMembers> {
                                 },
                                 child: Icon(
                                   _obscurePassword
-                                      ? Icons.visibility_off // 숨김 상태 아이콘
-                                      : Icons.visibility, // 보임 상태 아이콘
+                                      ? Icons.visibility_off // 숨김 상태
+                                      : Icons.visibility, // 보임 상태
                                   color: Colors.grey,
                                 ),
                               ),
@@ -230,8 +224,7 @@ class _NormalMembersState extends State<NormalMembers> {
                               fontSize: 16,
                               fontFamily: 'NaverNanumSquareRound',
                             ),
-                            onChanged: (_) =>
-                                _validatePasswords(), // 비밀번호 변경 시 확인
+                            onChanged: (_) => _validatePasswords(),
                           ),
                         ),
                       ],
@@ -280,15 +273,14 @@ class _NormalMembersState extends State<NormalMembers> {
                               fontSize: 16,
                               fontFamily: 'NaverNanumSquareRound',
                             ),
-                            onChanged: (_) =>
-                                _validatePasswords(), // 확인 필드 변경 시 검증
+                            onChanged: (_) => _validatePasswords(),
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                if (_errorMessage != null) // 에러 메시지가 있을 경우 표시
+                if (_errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
@@ -377,6 +369,8 @@ class _NormalMembersState extends State<NormalMembers> {
               ],
             ),
           ),
-        )));
+        ),
+      ),
+    );
   }
 }

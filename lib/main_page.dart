@@ -793,6 +793,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               children: [
                 Row(
                   children: [
+                    // 🍖 배고픔 게이지
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -804,32 +805,43 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                           width: 20,
                           child: RotatedBox(
                             quarterTurns: -1,
-                            child: ClipRRect(
-                              borderRadius:
-                                  BorderRadius.circular(10), // radius 10 적용
-                              child: LinearProgressIndicator(
-                                value: birdHungry / 100,
-                                backgroundColor: Colors.grey[200],
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                    Colors.orange),
-                                minHeight: 20,
-                              ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: LinearProgressIndicator(
+                                    value: birdHungry / 100,
+                                    backgroundColor: Colors.grey[200],
+                                    valueColor:
+                                        const AlwaysStoppedAnimation<Color>(
+                                            Colors.orange),
+                                    minHeight: 20,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(7),
+                                  ),
+                                  child: Text(
+                                    '$birdHungry/100',
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(7)),
-                          child: Text('$birdHungry/100',
-                              style: const TextStyle(fontSize: 12)),
-                        ),
                       ],
                     ),
+
                     const SizedBox(width: 5),
+
+                    // 🐦 새 GIF
                     Gif(
                       controller: _gifController,
                       image: AssetImage(
@@ -841,7 +853,10 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       height: 200,
                       fit: BoxFit.contain,
                     ),
+
                     const SizedBox(width: 5),
+
+                    // 💧 목마름 게이지
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -853,28 +868,36 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                           width: 20,
                           child: RotatedBox(
                             quarterTurns: -1,
-                            child: ClipRRect(
-                              borderRadius:
-                                  BorderRadius.circular(10), // radius 10 적용
-                              child: LinearProgressIndicator(
-                                value: birdThirst / 100,
-                                backgroundColor: Colors.grey[200],
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                    Colors.blue),
-                                minHeight: 20,
-                              ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: LinearProgressIndicator(
+                                    value: birdThirst / 100,
+                                    backgroundColor: Colors.grey[200],
+                                    valueColor:
+                                        const AlwaysStoppedAnimation<Color>(
+                                            Colors.blue),
+                                    minHeight: 20,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(7),
+                                  ),
+                                  child: Text(
+                                    '$birdThirst/100',
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(7)),
-                          child: Text('$birdThirst/100',
-                              style: const TextStyle(fontSize: 12)),
                         ),
                       ],
                     ),
