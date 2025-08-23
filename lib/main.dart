@@ -302,9 +302,9 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 20),
                     GestureDetector(
-                      // onTap: () async {
-                      //   ApiAuth.requestAuthCode();
-                      // },
+                      onTap: () async {
+                        ApiAuth.requestAuthCode();
+                      },
                       child: Container(
                         width: 300,
                         height: 50,

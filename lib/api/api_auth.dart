@@ -1,12 +1,12 @@
 //TODO:: REISSUE TOKEN Refresh -> Access
-
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:bird_raise_app/config/env_config.dart';
 
 class ApiAuth {
-  static const String _baseUrl = 'http://localhost:8080';
-  static const String _authUrl = '$_baseUrl/api/auth';
+  static final String _authUrl = '${EnvConfig.apiUrl.replaceAll('/api/v1', '')}/api/auth';
 
   static Future<Map<String, dynamic>> reissueToken(String refreshToken) async {
     try {
@@ -71,6 +71,30 @@ class ApiAuth {
         throw Exception('서버 응답 형식이 올바르지 않습니다.');
       }
       rethrow;
+    }
+  }
+  static Future<void> requestAuthCode() async {
+    const clientId   = '66ad8198326419ad17257cb78d4631da';
+    final redirectUri = '${EnvConfig.apiUrl}/user/kakao/callback';
+    const scope       = 'account_email,profile_nickname,profile_image';
+    const state       = 'xyz123'; // CSRF 방지용 랜덤 문자열
+
+    final url = Uri.https(
+      'kauth.kakao.com',
+      '/oauth/authorize',
+      {
+        'response_type': 'code',
+        'client_id': clientId,
+        'redirect_uri': redirectUri,
+        'scope': scope,
+        'state': state,
+      },
+    );
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      throw Exception('카카오 로그인 페이지를 열 수 없습니다.');
     }
   }
 
