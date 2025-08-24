@@ -47,5 +47,17 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<!-- 카카오 로그인 콜백을 위한 커스텀 URL 스킴 -->
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLName</key>
+				<string>kakao-login</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>myapp</string>
+				</array>
+			</dict>
+		</array>
 	</dict>
 </plist>

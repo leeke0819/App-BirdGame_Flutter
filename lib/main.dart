@@ -6,6 +6,7 @@ import 'package:bird_raise_app/token/mobile_secure_token.dart';
 import 'package:bird_raise_app/token/chrome_token.dart';
 import 'package:bird_raise_app/main_page.dart';
 import 'package:bird_raise_app/login_members/normal_members.dart';
+
 import 'package:bird_raise_app/model/bag_model.dart';
 import 'package:bird_raise_app/services/timer_service.dart';
 import 'package:flutter/material.dart';
@@ -18,8 +19,12 @@ import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart'; //웹 환경구분을 위한 import
 
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+
 
   // 전역 타이머 서비스 시작
   TimerService().startTimer();
@@ -93,6 +98,8 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
   }
+
+
 
   Future<void> kakaoLoadUserProfile() async {
     try {
@@ -303,6 +310,7 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 20),
                     GestureDetector(
                       onTap: () async {
+                        // 기존 방식: 외부 브라우저에서 카카오 로그인
                         ApiAuth.requestAuthCode();
                       },
                       child: Container(

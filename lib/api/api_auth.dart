@@ -73,6 +73,8 @@ class ApiAuth {
       rethrow;
     }
   }
+
+  /// 기존 방식: 외부 브라우저에서 카카오 로그인
   static Future<void> requestAuthCode() async {
     const clientId   = '66ad8198326419ad17257cb78d4631da';
     final redirectUri = '${EnvConfig.apiUrl}/user/kakao/callback';
@@ -95,6 +97,66 @@ class ApiAuth {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
       throw Exception('카카오 로그인 페이지를 열 수 없습니다.');
+    }
+  }
+
+  /// 새로운 방식: WebView에서 redirect_uri를 가로채는 카카오 로그인
+  static String getKakaoAuthUrl() {
+    const clientId = '66ad8198326419ad17257cb78d4631da';
+    // Flutter 앱 내부로 redirect_uri 설정
+    const redirectUri = 'myapp://kakao/callback';
+    const scope = 'account_email,profile_nickname,profile_image';
+    const state = 'xyz123'; // CSRF 방지용 랜덤 문자열
+
+    final url = Uri.https(
+      'kauth.kakao.com',
+      '/oauth/authorize',
+      {
+        'response_type': 'code',
+        'client_id': clientId,
+        'redirect_uri': redirectUri,
+        'scope': scope,
+        'state': state,
+      },
+    );
+
+    return url.toString();
+  }
+
+  /// 인증 코드를 Spring 서버로 전송하여 토큰 받기
+  static Future<Map<String, dynamic>> exchangeCodeForToken(String authCode) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${EnvConfig.apiUrl}/user/kakao/callback'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'code': authCode}),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        
+        // Spring에서 받은 토큰 정보 검증
+        if (responseData.containsKey('accessToken') && 
+            responseData.containsKey('refreshToken') &&
+            responseData.containsKey('tokenExpiresIn') &&
+            responseData.containsKey('refreshTokenExpiresIn')) {
+          
+          return responseData;
+        } else {
+          throw Exception('카카오 로그인 응답 형식이 올바르지 않습니다');
+        }
+      } else if (response.statusCode == 400) {
+        throw Exception('잘못된 인증 코드입니다.');
+      } else if (response.statusCode == 401) {
+        throw Exception('카카오 인증에 실패했습니다.');
+      } else {
+        throw Exception('카카오 로그인 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is FormatException) {
+        throw Exception('서버 응답 형식이 올바르지 않습니다.');
+      }
+      rethrow;
     }
   }
 
