@@ -1,8 +1,9 @@
 //TODO:: REISSUE TOKEN Refresh -> Access
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:bird_raise_app/config/env_config.dart';
-import 'package:flutter/foundation.dart';
 
 class ApiAuth {
   static final String _authUrl = '${EnvConfig.apiUrl.replaceAll('/api/v1', '')}/api/auth';
@@ -73,7 +74,33 @@ class ApiAuth {
     }
   }
 
-  /// WebView에서 사용할 카카오 인증 URL 생성
+  /// 기존 방식: 외부 브라우저에서 카카오 로그인
+  static Future<void> requestAuthCode() async {
+    const clientId   = '66ad8198326419ad17257cb78d4631da';
+    final redirectUri = '${EnvConfig.apiUrl}/user/kakao/callback';
+    const scope       = 'account_email,profile_nickname,profile_image';
+    const state       = 'xyz123'; // CSRF 방지용 랜덤 문자열
+
+    final url = Uri.https(
+      'kauth.kakao.com',
+      '/oauth/authorize',
+      {
+        'response_type': 'code',
+        'client_id': clientId,
+        'redirect_uri': redirectUri,
+        'scope': scope,
+        'state': state,
+      },
+    );
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      throw Exception('카카오 로그인 페이지를 열 수 없습니다.');
+    }
+  }
+
+  /// 새로운 방식: WebView에서 redirect_uri를 가로채는 카카오 로그인
   static String getKakaoAuthUrl() {
     const clientId = '66ad8198326419ad17257cb78d4631da';
     // Flutter 앱 내부로 redirect_uri 설정
@@ -96,19 +123,6 @@ class ApiAuth {
     return url.toString();
   }
 
-  /// Web/Windows에서 브라우저로 카카오 로그인 열기
-  static Future<void> openKakaoLoginInBrowser() async {
-    if (kIsWeb) {
-      // Web에서는 새 창으로 열기 (dart:html 사용)
-      final url = getKakaoAuthUrl();
-      // Web에서는 window.open을 직접 사용할 수 없으므로 다른 방식 사용
-      throw Exception('Web에서는 WebView 방식을 사용해주세요.');
-    } else {
-      // 모바일에서는 WebView 사용
-      throw Exception('모바일에서는 WebView 방식을 사용해주세요.');
-    }
-  }
-
   /// 인증 코드를 Spring 서버로 전송하여 토큰 받기
   static Future<Map<String, dynamic>> exchangeCodeForToken(String authCode) async {
     try {
@@ -123,7 +137,9 @@ class ApiAuth {
         
         // Spring에서 받은 토큰 정보 검증
         if (responseData.containsKey('accessToken') && 
-            responseData.containsKey('refreshToken')) {
+            responseData.containsKey('refreshToken') &&
+            responseData.containsKey('tokenExpiresIn') &&
+            responseData.containsKey('refreshTokenExpiresIn')) {
           
           return responseData;
         } else {
@@ -169,4 +185,4 @@ class ApiAuth {
       rethrow;
     }
   }
-}
+} 

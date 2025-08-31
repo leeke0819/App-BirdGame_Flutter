@@ -805,35 +805,30 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                           width: 20,
                           child: RotatedBox(
                             quarterTurns: -1,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: LinearProgressIndicator(
-                                    value: birdHungry / 100,
-                                    backgroundColor: Colors.grey[200],
-                                    valueColor:
-                                        const AlwaysStoppedAnimation<Color>(
-                                            Colors.orange),
-                                    minHeight: 20,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(7),
-                                  ),
-                                  child: Text(
-                                    '$birdHungry/100',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                              ],
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: LinearProgressIndicator(
+                                value: birdHungry / 100,
+                                backgroundColor: Colors.grey[200],
+                                valueColor:
+                                    const AlwaysStoppedAnimation<Color>(
+                                        Colors.orange),
+                                minHeight: 20,
+                              ),
                             ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(7),
+                          ),
+                          child: Text(
+                            '$birdHungry/100',
+                            style: const TextStyle(fontSize: 12),
                           ),
                         ),
                       ],
@@ -868,35 +863,30 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                           width: 20,
                           child: RotatedBox(
                             quarterTurns: -1,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: LinearProgressIndicator(
-                                    value: birdThirst / 100,
-                                    backgroundColor: Colors.grey[200],
-                                    valueColor:
-                                        const AlwaysStoppedAnimation<Color>(
-                                            Colors.blue),
-                                    minHeight: 20,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(7),
-                                  ),
-                                  child: Text(
-                                    '$birdThirst/100',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                              ],
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: LinearProgressIndicator(
+                                value: birdThirst / 100,
+                                backgroundColor: Colors.grey[200],
+                                valueColor:
+                                    const AlwaysStoppedAnimation<Color>(
+                                        Colors.blue),
+                                minHeight: 20,
+                              ),
                             ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(7),
+                          ),
+                          child: Text(
+                            '$birdThirst/100',
+                            style: const TextStyle(fontSize: 12),
                           ),
                         ),
                       ],
